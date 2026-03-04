@@ -1,0 +1,5 @@
+.planning/
+.DS_Store
+**/.DS_Store
+Thumbs.db
+.playwright-mcp/

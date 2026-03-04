@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Read(package.json)",
+      "Read(tsconfig.json)",
+      "Read(pyproject.toml)",
+      "Read(README.md)",
+      "Read(.eslintrc*)",
+      "Read(CLAUDE.md)",
+      "Read(.claude/CLAUDE.md)",
+      "Read(wrangler.toml)",
+      "Read(vite.config.*)",
+      "Read(next.config.*)",
+      "Read(composer.json)",
+      "Read(phpunit.xml*)",
+      "Read(.php-cs-fixer*)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(.dev.vars)",
+      "Read(.dev.vars.*)",
+      "Read(./secrets/**)",
+      "Read(**/node_modules/**)",
+      "Read(**/*.lock)",
+      "Read(**/dist/**)",
+      "Read(**/build/**)",
+      "Read(**/tests/fixtures/**)",
+      "Read(**/.git/**)",
+      "Read(**/coverage/**)",
+      "Read(**/.next/**)",
+      "Read(**/*.map)",
+      "Read(**/*.chunk.*)",
+      "Read(**/package-lock.json)",
+      "Read(**/wp-config.php)",
+      "Read(**/auth.json)",
+      "Read(**/.npmrc)",
+      "Read(**/.htpasswd)",
+      "Read(**/*.pem)",
+      "Read(**/credentials.json)",
+      "Read(**/.wrangler/**)",
+      "Read(**/*.sqlite*)",
+      "Read(**/*.db)",
+      "Read(**/vendor/**)",
+      "Read(**/__pycache__/**)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|clear|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rm -f /tmp/claude-remind-* 2>/dev/null; exit 0"
+          }
+        ]
+      },
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/compact-restore.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/check-code-quality.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/verify-before-stop.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/check-unfinished-tasks.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/drift-review-stop.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/track-modified-files.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "TaskCreate|TaskUpdate",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/track-tasks.sh"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/remind-project-claude.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/check-unfinished-tasks.sh"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/pre-compaction-preserve.sh"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/session-cleanup.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-code-plugins": true,
+    "claude-hud@claude-hud": true,
+    "swift-lsp@claude-plugins-official": true
+  }
+}
