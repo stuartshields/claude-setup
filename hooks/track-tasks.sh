@@ -39,9 +39,14 @@ case "$TOOL" in
 				jq --arg id "$TASK_ID" '.[$id].done = true' \
 					"$STATE" > "${STATE}.tmp" && mv "${STATE}.tmp" "$STATE"
 			else
-				# Fallback: mark first undone task matching by position
-				jq --arg id "$TASK_ID" \
-					'to_entries | map(if (.value.done == false) then .value.done = true else . end | {(.key): .value}) | first // {} | . as $update | input * $update' \
+				# Fallback: mark first unfinished task as done.
+				jq '(
+					to_entries
+					| map(select(.value.done == false))
+					| first
+					| .key
+				) as $first_undone
+				| if $first_undone then .[$first_undone].done = true else . end' \
 					"$STATE" > "${STATE}.tmp" 2>/dev/null && mv "${STATE}.tmp" "$STATE" || true
 			fi
 		fi

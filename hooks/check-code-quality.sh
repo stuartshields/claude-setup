@@ -60,9 +60,10 @@ if [ -n "$ERRORS" ]; then
 	exit 2
 fi
 
-# --- Security-sensitive file detection (non-blocking — stdout context) ---
+# --- Security-sensitive file detection (non-blocking context) ---
 BASENAME=$(basename "$FILE_PATH" 2>/dev/null | tr '[:upper:]' '[:lower:]')
 DIRPATH=$(dirname "$FILE_PATH" 2>/dev/null | tr '[:upper:]' '[:lower:]')
+NONBLOCKING_NOTES=""
 
 SECURITY_HIT=""
 # Check filename patterns
@@ -85,7 +86,7 @@ if [ -z "$SECURITY_HIT" ]; then
 fi
 
 if [ -n "$SECURITY_HIT" ]; then
-	echo "SECURITY ALERT ($SECURITY_HIT): You are editing security-sensitive code. Verify: input validation, auth checks, no hardcoded secrets, no injection vectors. Consider running the security agent after this change."
+	NONBLOCKING_NOTES="${NONBLOCKING_NOTES}SECURITY ALERT ($SECURITY_HIT): You are editing security-sensitive code. Verify: input validation, auth checks, no hardcoded secrets, no injection vectors. Consider running the security agent after this change. "
 fi
 
 # --- Dependency verification (JS/TS only, non-blocking) ---
@@ -104,11 +105,20 @@ case "$FILE_PATH" in
 				esac
 				# Check if package exists in dependencies or devDependencies
 				if ! jq -e "(.dependencies[\"$PKG\"] // .devDependencies[\"$PKG\"] // .peerDependencies[\"$PKG\"]) != null" "$PKG_JSON" >/dev/null 2>&1; then
-					echo "DEPENDENCY WARNING: Package '$PKG' imported but not found in package.json. Verify this is a real package — hallucinated package names enable dependency confusion attacks."
+					NONBLOCKING_NOTES="${NONBLOCKING_NOTES}DEPENDENCY WARNING: Package '$PKG' imported but not found in package.json. Verify this is a real package. "
 				fi
 			done
 		fi
 		;;
 esac
+
+if [ -n "$NONBLOCKING_NOTES" ]; then
+	jq -n --arg notes "$NONBLOCKING_NOTES" '{
+		hookSpecificOutput: {
+			hookEventName: "PreToolUse",
+			additionalContext: $notes
+		}
+	}'
+fi
 
 exit 0

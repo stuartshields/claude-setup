@@ -1,5 +1,6 @@
 #!/bin/bash
-# Stop hook: blocks Claude from finishing if the project build/test is broken.
+# Stop hook: warns when build/test checks fail before Claude finishes.
+# This hook is advisory and non-blocking (always exits 0).
 # Only runs when there are uncommitted changes (i.e. Claude edited something).
 
 INPUT=$(cat)
