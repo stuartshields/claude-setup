@@ -16,7 +16,7 @@ Always read the project's CLAUDE.md first.
 
 ### Phase 0: Recon
 
-1. Read CLAUDE.md, `composer.json`, plugin/theme headers, `wp-config.php`
+1. Read CLAUDE.md, `composer.json`, plugin/theme headers, `wp-config.php`, `wp-content/`, `content/`
 2. Detect **hosting platform** — read `~/.claude/agents/references/wp-hosting.md` for detection markers and platform details. Check CLAUDE.md first (authoritative), fall back to auto-detection.
 3. Identify:
    - Custom REST endpoints, form handlers, AJAX handlers, admin pages, CLI commands, webhook receivers, file upload handlers

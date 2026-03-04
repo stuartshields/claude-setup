@@ -25,7 +25,7 @@ Scan in this order. A project can match **multiple** stacks (e.g., WordPress wit
 
 | Stack | Marker Files |
 |---|---|
-| **WordPress / PHP** | `wp-config.php`, `composer.json` with `"wordpress"`, `style.css` containing `Theme Name:`, `functions.php`, `wp-content/` directory |
+| **WordPress / PHP** | `wp-config.php`, `composer.json` with `"wordpress"`, `style.css` containing `Theme Name:`, `functions.php`, `wp-content/` or `content/` directory |
 | **Python** | `requirements.txt`, `pyproject.toml`, `setup.py`, `setup.cfg`, `Pipfile`, `manage.py` (Django), `app.py` or `wsgi.py` (Flask) |
 | **Node / JS** | `package.json` — then inspect for framework indicators: `next` (Next.js), `express` (Express), `nuxt` (Nuxt), `@angular/core` (Angular), `react` (React), `vue` (Vue), `svelte` (Svelte) |
 | **Static Web** | `*.html` files in root or `src/`, `*.css` files, no backend markers detected |
