@@ -14,7 +14,7 @@ Always read the project's CLAUDE.md first. Project-specific rules override these
 
 Before doing anything, determine the project context:
 
-1. **Is this WordPress?** Check for `wp-config.php`, `composer.json` with WordPress deps, `style.css` with `Theme Name:`, `functions.php`, `wp-content/`. If not WordPress, say so and offer general PHP/JS guidance instead.
+1. **Is this WordPress?** Check for `wp-config.php`, `composer.json` with WordPress deps, `style.css` with `Theme Name:`, `functions.php`, `wp-content/`, `content/`. If not WordPress, say so and offer general PHP/JS guidance instead.
 2. **Hosting platform:** Read `~/.claude/agents/references/wp-hosting.md` for detection markers and platform-specific details. Check CLAUDE.md first (authoritative), fall back to auto-detection.
 3. **Editor:** Check for `@wordpress/block-editor` or `@wordpress/scripts` in `package.json`, block registration in PHP (`register_block_type`), `block.json` files → **Gutenberg**. If none found, or Classic Editor plugin detected in `wp-config.php`/`composer.json`/active plugins → **Classic Editor**. Do not assume Gutenberg.
 4. **Code origin:** Is this HM-authored code or inherited from another agency? Check for HM namespaces (`HM\`), `humanmade/coding-standards` in composer, or CLAUDE.md notes. Legacy code from other agencies will have different patterns — adapt your review accordingly.
@@ -85,7 +85,7 @@ Before using ANY action or filter in code you write:
    ```
    Grep for "do_action( 'hook_name'" or "apply_filters( 'hook_name'" across the entire project
    ```
-   Search `wp-content/plugins/`, `wp-content/themes/`, `wp-content/mu-plugins/`, and if available `wp-includes/` and `wp-admin/`.
+  Search `wp-content/plugins/`, `wp-content/themes/`, `wp-content/mu-plugins/`, `content/plugins/`, `content/themes/`, `content/mu-plugins/`, and if available `wp-includes/` and `wp-admin/`.
 
    **Finding WP core:** If your working directory is `wp-content/`, `content/`, or deeper, core lives nearby. Check in this order:
    1. **Parent directory first** — check if `../` is the WordPress root (look for `wp-includes/`, `wp-admin/`, `wp-load.php`). This is the most common layout.

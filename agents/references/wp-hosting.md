@@ -6,7 +6,7 @@ Check CLAUDE.md first for an explicit `Hosting:` declaration — this is the **a
 
 | Platform | Detection Markers |
 |---|---|
-| **Altis (HM Cloud)** | `altis/altis` or `altis/*` in `composer.json`, `.config/` directory with Altis YAML configs, `wp-content/mu-plugins/altis-*` |
+| **Altis (HM Cloud)** | `altis/altis` or `altis/*` in `composer.json` or `.config/` directory with Altis YAML configs |
 | **WordPress VIP** | `automattic/vip-*` in `composer.json`, `vip-config/` directory, `wpcom-vip-*` mu-plugins, `VIP_GO_APP_ENVIRONMENT` constant |
 | **WP Engine** | `mu-plugins/wpengine-common/` or `mu-plugins/wpe-wp-sign-on-plugin/`, `WPE_APIKEY` constant, `.wpe-push` config |
 | **Kinsta** | `KINSTA_CACHE_ZONE` constant, `kinsta-mu-plugins/` |

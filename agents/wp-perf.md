@@ -14,7 +14,7 @@ Always read the project's CLAUDE.md first. Adapt checks to the actual hosting en
 
 ### Phase 0: Environment & Codebase Detection
 
-1. Read CLAUDE.md, `composer.json`, `wp-config.php`, `package.json`, and hosting config
+1. Read CLAUDE.md, `composer.json`, `wp-config.php`, `package.json`, `wp-content/`, `content/`, and hosting config
 2. Detect **hosting platform** — read `~/.claude/agents/references/wp-hosting.md` for detection markers, caching stacks, and platform details. Check CLAUDE.md first (authoritative), fall back to auto-detection.
 3. Also identify:
    - **Editor:** Gutenberg or Classic Editor

@@ -50,7 +50,7 @@ Ask questions in this order. Use `AskUserQuestion` where possible for structured
 
 #### 5. Logs & Evidence
 
-- Ask for `wp-content/debug.log` contents (if `WP_DEBUG_LOG` is enabled)
+- Ask for `wp-content/debug.log` or `content/debug.log` contents (if `WP_DEBUG_LOG` is enabled)
 - Ask for server error log snippets (Apache `error_log`, Nginx `error.log`, or hosting panel logs)
 - Ask for browser console errors (if frontend issue)
 - Ask for relevant screenshots if the issue is visual
@@ -65,7 +65,7 @@ Based on the triage answers, work through the applicable fault trees below. Narr
 |---|---|
 | **White Screen (WSOD)** | Check `debug.log` for fatal error. Common: PHP memory limit, fatal in theme `functions.php`, incompatible plugin after update. Try: `define('WP_MEMORY_LIMIT', '256M')`, rename active theme folder via FTP/SSH, rename `plugins/` folder to isolate. |
 | **500 Internal Server Error** | Check server error log first. Common: corrupt `.htaccess`, PHP memory exhaustion, mod_security rule, broken `wp-config.php`. Try: rename `.htaccess` and regenerate via Settings > Permalinks, increase `memory_limit` in `php.ini`. |
-| **Plugin Conflict** | Deactivate all plugins, reactivate one at a time. If admin is inaccessible, rename `wp-content/plugins/` via FTP/SSH to force-deactivate all. Binary search: activate half, test, narrow down. |
+| **Plugin Conflict** | Deactivate all plugins, reactivate one at a time. If admin is inaccessible, rename `wp-content/plugins/` or `content/plugins/` via FTP/SSH to force-deactivate all. Binary search: activate half, test, narrow down. |
 | **Theme Issue** | Switch to a default theme (Twenty Twenty-Four). If admin is broken, rename the active theme folder to force fallback. Check `functions.php` for syntax errors. Check template file compatibility with current WP version. |
 | **Database Corruption** | Check `wp-options` for `siteurl` and `home` values. Run `wp db repair` via WP-CLI. Check for transient bloat: `wp transient delete --all`. Look for `autoload=yes` on oversized options. |
 | **Login / Admin Lockout** | Check if a security plugin is blocking access (rename its folder). Reset password via WP-CLI: `wp user update admin --user_pass=newpass`. Check `.htaccess` for IP restrictions. Check `wp-config.php` for `FORCE_SSL_ADMIN` issues. |
