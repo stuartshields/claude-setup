@@ -50,7 +50,7 @@ Read the rest of this to understand what each part does and why — so you can a
 
 ### What it does
 
-Without a CLAUDE.md, Claude starts every session from scratch. No memory of your preferences, your coding style, your project conventions. You repeat yourself constantly — "use tabs not spaces", "never use var", "always write tests first". Every. Single. Session.
+Without a CLAUDE.md, Claude loses your explicit standing instructions. Auto memory can still retain learned patterns, but it doesn't replace clear project rules like "use tabs not spaces", "never use var", "always write tests first".
 
 A CLAUDE.md file fixes this. It's a markdown file that loads automatically at the start of every session. Whatever you put in it, Claude reads it before responding to anything. Think of it as your standing instructions — the baseline expectations for how Claude behaves whenever you use it.
 
@@ -70,7 +70,7 @@ Here's the section I rely on most — the workflow rules:
 
 Without these rules, Claude will frequently write speculative code, skip tests, and add "helpful" extras you didn't ask for. With them, it behaves predictably.
 
-One pattern worth stealing: notice the `> Last verified: 2026-03-04` line in section 4. Claude's training data has a cutoff — it doesn't know what changed last week. When you state facts about tool features (loading order, settings keys, hook events), date them. Claude will treat undated claims as possibly stale and may second-guess you. A verification date tells it "this was confirmed accurate on this date, trust it."
+One pattern worth stealing: notice the `> Last verified: 2026-03-04` line in section 4. Claude Code features evolve quickly. When you state facts about tool features (loading order, settings keys, hook events), date them and link docs. That gives you a clear freshness signal and makes stale guidance obvious.
 
 <details>
 <summary>Full CLAUDE.md content</summary>
@@ -274,7 +274,7 @@ This is the most important thing to get right:
 
 **The pitfall everyone hits: `exit 1` does NOT block.** If you want to stop Claude from writing a file, you must use `exit 2`. Exit 1 just logs a non-blocking error and lets the tool call proceed. Use exit 2 to block.
 
-stdin/stdout: hooks receive a JSON object on stdin. Parse it with `jq`. Key fields are `tool_input.file_path` (the file being written) and `tool_input.command` (for Bash hooks). Whatever you write to stdout appears as context in Claude's next response. Whatever you write to stderr with exit 2 becomes the blocking error message.
+stdin/stdout: hooks receive a JSON object on stdin. Parse it with `jq`. Key fields are `tool_input.file_path` (the file being written) and `tool_input.command` (for Bash hooks). For command hooks, stderr with `exit 2` becomes the blocking error message for events that support blocking. stdout handling depends on event type and output shape (plain text vs JSON fields like `additionalContext` / `systemMessage`).
 
 ### Hook walkthrough: check-code-quality.sh
 
@@ -379,7 +379,7 @@ exit 0
 
 </details>
 
-**Note on matcher syntax:** Hook registration in `settings.json` uses a pipe (`|`) to match multiple tools — for example, `"Write|Edit"` fires the hook for both Write and Edit tool calls. This pipe OR syntax works in practice but isn't explicitly documented in official Claude Code docs as of 2026-03-04. It's inferred from usage. If you rely on it, verify against the current docs.
+**Note on matcher syntax:** Hook registration in `settings.json` uses regex matchers. A pipe (`|`) is standard regex OR, so `"Write|Edit"` matches both Write and Edit tool calls. This is documented behavior in the hooks reference matcher section.
 
 ---
 
@@ -627,7 +627,7 @@ skills/
     SKILL.md
 ```
 
-Skills live at `~/.claude/skills/` globally, or `.claude/skills/` for project-specific ones. They're lighter than agents — no frontmatter, no model selection, no tool restrictions. Just structured instructions for a repeatable process.
+Skills live at `~/.claude/skills/` globally, or `.claude/skills/` for project-specific ones. They're still lighter than agents, but they do support frontmatter controls like `model`, `allowed-tools`, invocation controls, and optional forked subagent execution via `context: fork`.
 
 ---
 
