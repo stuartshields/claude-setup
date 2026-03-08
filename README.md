@@ -4,6 +4,12 @@ Here's how I set up my Claude Code. This repo IS the configuration — the files
 
 The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `agents/` → `~/.claude/agents/`, `hooks/` → `~/.claude/hooks/`, `skills/` → `~/.claude/skills/`, `settings.json` → `~/.claude/settings.json`. None of these directories belong in a project root — they're user-global configuration.
 
+## What's Changed
+
+- **2026-03-09**: Added memory system documentation
+- **2026-03-08**: Updated loading order, hook events, agent frontmatter, skills section, and new concepts to match current official docs
+- **2026-03-04**: Initial release — rules, hooks, agents, settings, skills, GSD
+
 ---
 
 ## Table of Contents
@@ -681,6 +687,59 @@ The `` !`command` `` syntax runs shell commands before skill content is sent to 
 ### Bundled skills
 
 Claude Code ships with several built-in skills: `/simplify` (code quality review), `/batch` (parallel large-scale changes), `/debug` (troubleshoot via debug log), `/loop` (repeated prompt execution), and `/claude-api` (API reference).
+
+---
+
+## Memory
+
+Without understanding memory, you don't know how Claude retains context between sessions. You might wonder why it remembers a correction you made last week, or where those learned preferences actually live. Two systems handle this: CLAUDE.md (your explicit instructions) and auto memory (Claude's own notes).
+
+### Auto memory
+
+Claude writes notes for itself based on corrections you make and preferences it observes. If you tell Claude "always use `const` instead of `let` in this project," it remembers that for next time. This is enabled by default — you don't configure it, and it's separate from your CLAUDE.md files.
+
+The difference: CLAUDE.md is what you tell Claude. Auto memory is what Claude tells itself.
+
+### MEMORY.md
+
+The entrypoint for auto memory is `MEMORY.md`. Claude creates and maintains this file automatically. The first 200 lines load at the start of every session — this is the auto-loaded limit for MEMORY.md specifically, not for CLAUDE.md files (which load in full regardless of length).
+
+### Topic files
+
+When Claude accumulates enough notes on a subject, it creates separate `.md` files alongside MEMORY.md — things like `debugging.md`, `api-conventions.md`, or whatever topics emerge from your work. These are referenced from MEMORY.md and loaded on demand.
+
+### Storage location
+
+Auto memory lives in your Claude directory, organized by project:
+
+```
+~/.claude/projects/<project-path-encoded>/memory/
+├── MEMORY.md
+├── debugging.md
+└── api-conventions.md
+```
+
+The `<project-path-encoded>` is derived from your git repo's absolute path. For this repo, it's `-Users-stuart-Personal-project-claude-setup`. You can browse these files directly — they're plain markdown.
+
+### The /memory command
+
+Type `/memory` in Claude Code to see all loaded CLAUDE.md and rules files, toggle auto memory on or off, and open the memory folder. See the [official docs](https://code.claude.com/docs/en/memory) for the full reference.
+
+### Subagent memory
+
+Agents can maintain their own persistent memory using the `memory` frontmatter field. See the memory field in [Agents frontmatter](#frontmatter-fields) for how subagents store their own notes. Three scopes are available:
+
+| Scope | Location | Use when |
+|-------|----------|----------|
+| `user` | `~/.claude/agent-memory/<name>/` | Learnings across all projects |
+| `project` | `.claude/agent-memory/<name>/` | Project-specific, shareable via VCS |
+| `local` | `.claude/agent-memory-local/<name>/` | Project-specific, not in VCS |
+
+### CLAUDE.md vs auto memory
+
+Use CLAUDE.md for explicit instructions you want every session — "use tabs," "no console.log," "always write tests first." Let auto memory handle learned patterns and corrections — things Claude picks up from how you work. If auto memory records something wrong, edit `MEMORY.md` directly. It's your file.
+
+For the full auto memory reference: [code.claude.com/docs/en/memory](https://code.claude.com/docs/en/memory)
 
 ---
 
