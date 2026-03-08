@@ -37,7 +37,6 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 - [Skills](#skills)
 - [Memory](#memory)
 - [GSD](#gsd)
-	- [GSD hooks in settings.json](#gsd-hooks-in-settingsjson)
 - [Next Steps](#next-steps)
 
 ---
@@ -636,9 +635,6 @@ Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and set
         "hooks": [{ "type": "command", "command": "rm -f /tmp/claude-remind-* 2>/dev/null; exit 0" }]
       },
       {
-        "hooks": [{ "type": "command", "command": "node ~/.claude/hooks/gsd-check-update.js" }]
-      },
-      {
         "matcher": "compact",
         "hooks": [{ "type": "command", "command": "~/.claude/hooks/compact-restore.sh" }]
       }
@@ -659,10 +655,6 @@ Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and set
       { "hooks": [{ "type": "command", "command": "~/.claude/hooks/drift-review-stop.sh" }] }
     ],
     "PostToolUse": [
-      {
-        "matcher": "Write|Edit|Bash",
-        "hooks": [{ "type": "command", "command": "node ~/.claude/hooks/gsd-context-monitor.js" }]
-      },
       {
         "matcher": "Write|Edit",
         "hooks": [{ "type": "command", "command": "~/.claude/hooks/track-modified-files.sh" }]
@@ -696,7 +688,7 @@ Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and set
 
 </details>
 
-> **Note:** The `enabledPlugins` block lists plugins specific to this setup — remove or replace with your own. The `gsd-check-update.js` and `gsd-context-monitor.js` hooks require [GSD](https://github.com/gsd-build/get-shit-done) — see the [GSD section](#gsd) for removal instructions if you don't use it.
+> **Note:** The `enabledPlugins` block lists plugins specific to this setup — remove or replace with your own.
 
 ---
 
@@ -815,31 +807,7 @@ GSD is a workflow framework I use on top of Claude Code. It's not required for a
 
 What GSD adds: structured planning (breaking work into phases and plans), phased execution with per-task commits, and verification gates between phases. If you see references to `.planning/` directories or `/gsd:` commands in the CLAUDE.md, that's GSD. You can safely ignore or remove those sections if you don't use it.
 
-### GSD hooks in settings.json
-
-This setup's `settings.json` includes two GSD-specific hooks. They require [GSD](https://github.com/gsd-build/get-shit-done) to be installed — **remove them if you don't use GSD**, or they'll error silently on session start and after tool calls.
-
-| Hook | Event | What it does |
-|------|-------|-------------|
-| `gsd-check-update.js` | `SessionStart` | Checks for GSD updates on session start. No matcher — fires every session. |
-| `gsd-context-monitor.js` | `PostToolUse` | Tracks context window usage after Write, Edit, and Bash calls. Warns when context is getting full so GSD can checkpoint before compaction. |
-
-To remove them, delete these entries from `settings.json`:
-
-```json
-// SessionStart — remove this entire block:
-{
-  "hooks": [{ "type": "command", "command": "node ~/.claude/hooks/gsd-check-update.js" }]
-},
-
-// PostToolUse — remove this entire block:
-{
-  "matcher": "Write|Edit|Bash",
-  "hooks": [{ "type": "command", "command": "node ~/.claude/hooks/gsd-context-monitor.js" }]
-},
-```
-
-The remaining hooks (quality gates, permission notifications, file tracking, compaction) work independently of GSD.
+GSD installs its own hooks during setup (`gsd-check-update.js` for version checks, `gsd-context-monitor.js` for context window tracking). These are not included in this repo's `settings.json` — GSD manages them separately. If you install GSD and see these hooks added to your settings, that's expected.
 
 More at: [github.com/gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done)
 
