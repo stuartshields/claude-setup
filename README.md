@@ -6,7 +6,7 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 
 ## What's Changed
 
-- **2026-03-09**: Added PermissionRequest notification hook, git commit blocker hook, and memory system documentation
+- **2026-03-09**: Added notification hooks (PermissionRequest + Notification), git commit blocker hook, and memory system documentation
 - **2026-03-08**: Updated loading order, hook events, agent frontmatter, skills section, and new concepts to match current official docs
 - **2026-03-04**: Initial release — rules, hooks, agents, settings, skills, GSD
 
@@ -27,13 +27,16 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 - [Hooks](#hooks)
 	- [Exit code contract](#exit-code-contract)
 	- [Hook walkthrough: check-code-quality.sh](#hook-walkthrough-check-code-qualitysh)
+	- [Alerting: when Claude needs your attention](#alerting-when-claude-needs-your-attention)
 	- [Hook walkthrough: permission-notify.sh](#hook-walkthrough-permission-notifysh)
+	- [Hook walkthrough: notification-alert.sh](#hook-walkthrough-notification-alertsh)
 	- [Hook walkthrough: block-git-commit.sh](#hook-walkthrough-block-git-commitsh)
 - [Agents](#agents)
 	- [Rules vs agents: when to use which](#rules-vs-agents-when-to-use-which)
 - [Settings](#settings)
 	- [Permissions](#permissions)
 	- [Hook registration](#hook-registration)
+	- [Hook scoping and teams](#hook-scoping-and-teams)
 - [Skills](#skills)
 - [Memory](#memory)
 - [GSD](#gsd)
@@ -258,7 +261,7 @@ Rules tell Claude what to do. But Claude doesn't verify its own work automatical
 
 Hooks are shell scripts that run at key moments in Claude's lifecycle. Registered in [settings.json](#hook-registration), they intercept tool calls, prompt submissions, and session events. The hook decides what happens: let it through, block it, or add context.
 
-The lifecycle events this setup uses (8 of 18 available):
+The lifecycle events this setup uses (9 of 18 available):
 
 | Event | When it fires |
 |-------|--------------|
@@ -270,6 +273,7 @@ The lifecycle events this setup uses (8 of 18 available):
 | `Stop` | When Claude finishes responding (exit 2 continues the conversation) |
 | `SessionEnd` | Session terminates |
 | `PermissionRequest` | Permission dialog is about to appear — **can auto-approve/deny** |
+| `Notification` | Claude needs attention (permission, idle, auth) — **observe-only** |
 
 For the full list of 18 events, see the [official Claude Code docs](https://code.claude.com/docs/en/hooks).
 
@@ -390,9 +394,19 @@ exit 0
 
 </details>
 
+### Alerting: when Claude needs your attention
+
+Two hook events can notify you when Claude is waiting: `PermissionRequest` and `Notification`. This setup uses both — pick whichever fits your workflow, or run them together.
+
+**`PermissionRequest`** fires specifically when a permission dialog appears. It can auto-approve or deny tool calls — not just observe. Use this when you want control over which permissions get through.
+
+**`Notification`** fires on any notification type: `permission_prompt`, `idle_prompt`, `auth_success`, `elicitation_dialog`. It's observe-only — it can't block or approve anything. Use this when you just want to know Claude is waiting, regardless of why.
+
+If you run both on permission prompts, you'll get two alerts. That's intentional in this setup — `PermissionRequest` plays a simple sound, `Notification` shows a macOS banner. Remove one if the double-alert is too much.
+
 ### Hook walkthrough: permission-notify.sh
 
-The hook-as-notification pattern. This is a `PermissionRequest` hook that fires whenever Claude needs your approval — a file write, a bash command, or anything not pre-approved in your `permissions.allow` list. It plays a macOS system sound so you know to come back to the terminal.
+A `PermissionRequest` hook that plays a system sound when Claude needs your approval.
 
 ```bash
 #!/bin/bash
@@ -402,7 +416,7 @@ afplay /System/Library/Sounds/Glass.aiff &
 exit 0
 ```
 
-Exit 0 with no output means "show the normal permission dialog" — the hook just adds a sound on top. The `&` backgrounds `afplay` so the hook returns immediately without blocking Claude.
+Exit 0 with no output means "show the normal permission dialog" — the hook just adds a sound on top. The `&` backgrounds `afplay` so the hook returns immediately.
 
 `PermissionRequest` hooks can do more than notify. They receive JSON on stdin with `tool_name`, `tool_input`, and `permission_suggestions`. To auto-approve, output JSON with `hookSpecificOutput`:
 
@@ -416,6 +430,40 @@ Exit 0 with no output means "show the normal permission dialog" — the hook jus
 ```
 
 To deny instead: `"behavior": "deny"` with an optional `"message"`. You can also modify the tool input before approval using `"updatedInput"`. This setup only uses the notification pattern — auto-approve is available but intentionally left out to keep the permission system intact.
+
+### Hook walkthrough: notification-alert.sh
+
+A `Notification` hook that sends a terminal bell and macOS notification banner whenever Claude needs attention.
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TITLE=$(echo "$INPUT" | jq -r '.title // "Claude Code"' 2>/dev/null)
+MSG=$(echo "$INPUT" | jq -r '.message // "Needs your attention"' 2>/dev/null)
+
+# Terminal bell (triggers dock badge in most terminals)
+printf '\a'
+
+# macOS notification banner (visible even behind other windows)
+osascript -e "display notification \"$MSG\" with title \"$TITLE\" sound name \"Ping\"" 2>/dev/null &
+
+exit 0
+```
+
+The terminal bell (`\a`) triggers a dock bounce or tab badge in most terminal emulators — useful when you've switched to another app. The `osascript` call creates a native macOS notification banner that appears in Notification Center, visible even when the terminal is behind other windows.
+
+The hook reads `title` and `message` from stdin JSON so the banner shows context-specific text (e.g., "Permission needed" vs "Claude Code is idle"). The `Notification` event fires on four types — use a matcher to filter:
+
+```json
+"Notification": [
+  {
+    "matcher": "permission_prompt|idle_prompt",
+    "hooks": [{ "type": "command", "command": "~/.claude/hooks/notification-alert.sh" }]
+  }
+]
+```
+
+Omit the matcher (as this setup does) to fire on all notification types.
 
 ### Hook walkthrough: block-git-commit.sh
 
@@ -574,6 +622,34 @@ Hooks connect to lifecycle events in `settings.json`. Each event takes an array 
 
 The `matcher` field filters by tool name — only fires the hook when the matched tool is called. Omit `matcher` to fire on every tool call for that event. See [Hooks](#hooks) for the exit code contract and what these hooks do.
 
+### Hook scoping and teams
+
+Hooks from all settings files **merge — they don't override**. If your global `~/.claude/settings.json` registers a `PreToolUse` hook and a project's `.claude/settings.json` registers another, both run. Identical commands are deduplicated, but different hooks all fire.
+
+This matters in teams. Settings files and what they're for:
+
+| File | Scope | In git? | Who sees it |
+|------|-------|---------|-------------|
+| `~/.claude/settings.json` | Global (your machine) | No | Just you |
+| `.claude/settings.json` | Project (shared) | Yes | Everyone on the team |
+| `.claude/settings.local.json` | Project (personal) | No | Just you |
+
+**You cannot disable a specific global hook from a project file.** There's no blacklist. Your options:
+
+1. **`"disableAllHooks": true`** — nuclear option. Put it in `.claude/settings.json` or `.claude/settings.local.json` to kill all hooks for that project. Managed policy hooks (enterprise) are exempt.
+2. **Don't register personal hooks at project level.** If a hook is personal preference (like notification sounds), keep it in `~/.claude/settings.json` — not in the project's `.claude/settings.json`.
+3. **Use `/hooks` menu** — toggle all hooks on/off for the current session.
+
+**Example: the Bronson problem.** You add `notification-alert.sh` to the team's `.claude/settings.json` because you want everyone to hear when Claude needs input. Bronson hates it. But Bronson can't disable just that one hook — hooks merge, not override. His only escape is `"disableAllHooks": true` in `.claude/settings.local.json`, which kills *all* hooks including the code quality gates he actually wants.
+
+The fix: don't put notification hooks in project settings. Keep them in personal `~/.claude/settings.json`. Each teammate chooses their own alert style (or none). Reserve `.claude/settings.json` for hooks the whole team needs — quality gates, security checks, project-specific linting.
+
+```
+~/.claude/settings.json          ← Your notification hooks, personal preferences
+.claude/settings.json             ← Team hooks: quality gates, security, linting
+.claude/settings.local.json       ← Personal project overrides (gitignored)
+```
+
 Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and settings precedence: Managed policy > CLI args > Local > Project > User. Array settings like `permissions.allow` merge across scopes rather than override — project-level allow rules stack on top of global ones.
 
 <details>
@@ -676,6 +752,9 @@ Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and set
     ],
     "PermissionRequest": [
       { "hooks": [{ "type": "command", "command": "~/.claude/hooks/permission-notify.sh" }] }
+    ],
+    "Notification": [
+      { "hooks": [{ "type": "command", "command": "~/.claude/hooks/notification-alert.sh" }] }
     ]
   },
   "enabledPlugins": {
