@@ -154,7 +154,7 @@ Claude Code loads CLAUDE.md files from multiple locations. The priority order, h
 | 3 | Project | `./CLAUDE.md` or `./.claude/CLAUDE.md` | Project-specific instructions |
 | 4 | User (global) | `~/.claude/CLAUDE.md` | Your baseline — this repo |
 
-Higher priority overrides lower. If your project's `CLAUDE.md` says "use 2-space indentation" but your global says "use tabs", the project wins.
+More specific locations take precedence over broader ones. If your project's `CLAUDE.md` says "use 2-space indentation" but your global says "use tabs", the project wins.
 
 One exception: array settings like `permissions.allow` **merge** across scopes rather than override. Add an allow rule at project level and it stacks on top of your global allows.
 
@@ -248,7 +248,7 @@ Rules tell Claude what to do. But Claude doesn't verify its own work automatical
 
 Hooks are shell scripts that run at key moments in Claude's lifecycle. Registered in [settings.json](#hook-registration), they intercept tool calls, prompt submissions, and session events. The hook decides what happens: let it through, block it, or add context.
 
-The lifecycle events this setup uses (7 of 17 available):
+The lifecycle events this setup uses (7 of 18 available):
 
 | Event | When it fires |
 |-------|--------------|
@@ -260,7 +260,7 @@ The lifecycle events this setup uses (7 of 17 available):
 | `Stop` | When Claude finishes responding (exit 2 continues the conversation) |
 | `SessionEnd` | Session terminates |
 
-For the full list of 17 events, see the [official Claude Code docs](https://code.claude.com/docs/en/hooks).
+For the full list of 18 events, see the [official Claude Code docs](https://code.claude.com/docs/en/hooks).
 
 ### Exit code contract
 
@@ -268,8 +268,8 @@ This is the most important thing to get right:
 
 | Exit code | Meaning |
 |-----------|---------|
-| `0` | Success — continue normally |
-| `2` | **Block** — stderr is fed back to Claude as an error message |
+| `0` | Success — stdout is parsed for JSON output (e.g., `additionalContext`, `systemMessage`) |
+| `2` | **Block** — stderr is fed back to Claude. Effect depends on event (PreToolUse blocks the call, Stop continues the conversation) |
 | anything else | Non-blocking error — execution continues |
 
 **The pitfall everyone hits: `exit 1` does NOT block.** If you want to stop Claude from writing a file, you must use `exit 2`. Exit 1 just logs a non-blocking error and lets the tool call proceed. Use exit 2 to block.
@@ -604,7 +604,7 @@ Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and set
 
 </details>
 
-> **Note:** The `enabledPlugins` block lists plugins specific to this setup. Remove or replace these entries with your own plugins — they are personal preferences, not required for the configuration system to work.
+> **Note:** The `enabledPlugins` block lists plugins specific to this setup. Remove or replace these entries with your own plugins — they are personal preferences, not required for the configuration to work. Your `enabledPlugins` section will look different — list whatever plugins you actually use, or remove this block entirely.
 
 ---
 
