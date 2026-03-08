@@ -58,14 +58,6 @@
         ]
       },
       {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ~/.claude/hooks/gsd-check-update.js"
-          }
-        ]
-      },
-      {
         "matcher": "compact",
         "hooks": [
           {
@@ -122,15 +114,6 @@
       }
     ],
     "PostToolUse": [
-      {
-        "matcher": "Write|Edit|Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node ~/.claude/hooks/gsd-context-monitor.js"
-          }
-        ]
-      },
       {
         "matcher": "Write|Edit",
         "hooks": [
