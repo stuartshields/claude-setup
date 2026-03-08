@@ -111,7 +111,7 @@ One pattern worth stealing: notice the `> Last verified: 2026-03-04` line in sec
 - **Simplicity**: Prefer the fewest lines of code. No new dependencies without asking.
 
 ## 4. CLAUDE.MD FEATURES
-> Last verified: 2026-03-04. Official docs: https://code.claude.com/docs/en/memory
+> Last verified: 2026-03-08. Official docs: https://code.claude.com/docs/en/memory
 
 - **Loading order** (highest priority first): Managed policy > Local (`CLAUDE.local.md`) > Project (`./CLAUDE.md` or `./.claude/CLAUDE.md`) > User (`~/.claude/CLAUDE.md`)
 - **`CLAUDE.local.md`**: Project-local, gitignored. Use for personal notes that shouldn't be committed.
@@ -125,7 +125,7 @@ Rules auto-loaded from `~/.claude/rules/`:
 - **Conditional** (loaded when working with matching files): ui-ux, environment, php-wordpress
 ```
 
-*Last synced with CLAUDE.md: 2026-03-04*
+*Last synced with CLAUDE.md: 2026-03-08*
 
 </details>
 
