@@ -14,6 +14,7 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 
 ## Table of Contents
 
+- [What's Changed](#whats-changed)
 - [Quick Start](#quick-start)
 - [CLAUDE.md](#claudemd)
 	- [What it does](#what-it-does)
@@ -32,6 +33,7 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 	- [Permissions](#permissions)
 	- [Hook registration](#hook-registration)
 - [Skills](#skills)
+- [Memory](#memory)
 - [GSD](#gsd)
 - [Next Steps](#next-steps)
 
