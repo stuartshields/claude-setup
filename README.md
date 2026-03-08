@@ -395,9 +395,17 @@ Agents are markdown files with YAML frontmatter that define specialist subagents
 |-------|-------------|
 | `name` | Lowercase-with-hyphens identifier. How you reference the agent. (Required) |
 | `description` | Tells Claude when to delegate to this agent. Quality matters — a vague description means missed delegations. (Required) |
-| `tools` | Comma-separated list of allowed tools. Omit to inherit all tools. Use `disallowedTools` to remove specific tools instead. |
-| `model` | `sonnet`, `opus`, `haiku`, or `inherit`. Default: inherit (uses whatever model Claude is running). |
-| `maxTurns` | Limits agentic turns. Prevents runaway agents from looping indefinitely. |
+| `tools` | Comma-separated list of allowed tools. Omit to inherit all tools. |
+| `disallowedTools` | Tools to deny — removed from inherited or specified list. |
+| `model` | `sonnet`, `opus`, `haiku`, or `inherit`. Default: inherit. |
+| `permissionMode` | `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, or `plan`. Controls permission prompts. |
+| `maxTurns` | Limits agentic turns. Prevents runaway agents from looping. |
+| `skills` | Skills to load into the subagent's context at startup. |
+| `mcpServers` | MCP servers available to this subagent. |
+| `hooks` | Lifecycle hooks scoped to this subagent. |
+| `memory` | Persistent memory scope: `user`, `project`, or `local`. |
+| `background` | Set to `true` to always run as a background task. Default: `false`. |
+| `isolation` | Set to `worktree` to run in a temporary git worktree. |
 
 ### Example: code-reviewer.md
 
@@ -439,6 +447,18 @@ For **project-specific agents**, put them in `.claude/agents/` at the project ro
 | "No console.log" | "Rewrite this as a WordPress plugin" |
 
 Rule of thumb: if it's a style preference or a guardrail → rule. If it's a distinct task with a different set of capabilities → agent.
+
+### New in recent releases
+
+A few agent-related features worth knowing about:
+
+**Permission modes** — Agents can specify a `permissionMode` to control how tool permissions are handled. `plan` mode lets the agent analyze without modifying files. `dontAsk` auto-denies tools unless pre-approved. `bypassPermissions` skips all prompts (for safe environments). The same five modes (`default`, `acceptEdits`, `plan`, `dontAsk`, `bypassPermissions`) are also available as a global `defaultMode` setting.
+
+**Agent teams** (experimental) — Multiple Claude Code instances coordinating on work. A team lead delegates, teammates work independently with shared task lists and direct messaging. Enabled via `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or settings. Higher token usage than single sessions. See the [agent teams docs](https://code.claude.com/docs/en/agent-teams).
+
+**PostToolUseFailure** — A hook event that fires after a tool call fails (companion to `PostToolUse` which fires on success). Cannot block since the failure already happened. Useful for logging or alerting on tool failures.
+
+**Plugin hooks** — Plugins can bundle their own hooks via a `hooks/hooks.json` file. When a plugin is enabled, its hooks merge with user and project hooks. This is a plugin-specific mechanism, not a standalone alternative to `settings.json` for regular hook configuration.
 
 ---
 
@@ -627,7 +647,40 @@ skills/
     SKILL.md
 ```
 
-Skills live at `~/.claude/skills/` globally, or `.claude/skills/` for project-specific ones. They're still lighter than agents, but they do support frontmatter controls like `model`, `allowed-tools`, invocation controls, and optional forked subagent execution via `context: fork`.
+Skills live at `~/.claude/skills/` globally, or `.claude/skills/` for project-specific ones.
+
+### Skill frontmatter
+
+Skills support 10 frontmatter fields:
+
+| Field | What it does |
+|-------|-------------|
+| `name` | Display name (defaults to directory name). Lowercase, numbers, hyphens, max 64 chars. |
+| `description` | What the skill does and when to use it. |
+| `argument-hint` | Hint shown during autocomplete (e.g., `[issue-number]`). |
+| `disable-model-invocation` | Set to `true` to prevent Claude from auto-loading this skill. |
+| `user-invocable` | Set to `false` to hide from the `/` menu. |
+| `allowed-tools` | Tools Claude can use without permission when skill is active. |
+| `model` | Model to use when skill is active. |
+| `context` | Set to `fork` to run in a forked subagent context. |
+| `agent` | Which subagent to use when `context: fork` is set. |
+| `hooks` | Hooks scoped to this skill's lifecycle. |
+
+### Forked context
+
+Set `context: fork` to run the skill in a separate subagent. The skill content becomes the prompt. Use `agent` to specify which subagent type handles it — built-in agents (`Explore`, `Plan`, `general-purpose`) or custom subagents from your `agents/` directory.
+
+### String substitutions
+
+Skills support variable substitution: `$ARGUMENTS` (full argument string), `$ARGUMENTS[N]` or `$N` (Nth argument), `${CLAUDE_SESSION_ID}`, and `${CLAUDE_SKILL_DIR}`.
+
+### Dynamic context
+
+The `` !`command` `` syntax runs shell commands before skill content is sent to Claude. Use it to inject dynamic context — git status, current branch, file listings — into the skill prompt.
+
+### Bundled skills
+
+Claude Code ships with several built-in skills: `/simplify` (code quality review), `/batch` (parallel large-scale changes), `/debug` (troubleshoot via debug log), `/loop` (repeated prompt execution), and `/claude-api` (API reference).
 
 ---
 
