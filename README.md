@@ -70,7 +70,7 @@ Here's the section I rely on most — the workflow rules:
 
 Without these rules, Claude will frequently write speculative code, skip tests, and add "helpful" extras you didn't ask for. With them, it behaves predictably.
 
-One pattern worth stealing: notice the `> Last verified: 2026-03-04` line in section 4. Claude Code features evolve quickly. When you state facts about tool features (loading order, settings keys, hook events), date them and link docs. That gives you a clear freshness signal and makes stale guidance obvious.
+One pattern worth stealing: notice the `> Last verified: 2026-03-08` line in section 4. Claude Code features evolve quickly. When you state facts about tool features (loading order, settings keys, hook events), date them and link docs. That gives you a clear freshness signal and makes stale guidance obvious.
 
 <details>
 <summary>Full CLAUDE.md content</summary>
