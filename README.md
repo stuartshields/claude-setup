@@ -6,7 +6,7 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 
 ## What's Changed
 
-- **2026-03-09**: Added notification hooks (PermissionRequest + Notification), git commit blocker hook, and memory system documentation
+- **2026-03-09**: Added notification hooks (PermissionRequest + Notification), git commit blocker hook, hook scoping and teams guide, and memory system documentation
 - **2026-03-08**: Updated loading order, hook events, agent frontmatter, skills section, and new concepts to match current official docs
 - **2026-03-04**: Initial release — rules, hooks, agents, settings, skills, GSD
 
