@@ -58,6 +58,14 @@
         ]
       },
       {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/gsd-check-update.js"
+          }
+        ]
+      },
+      {
         "matcher": "compact",
         "hooks": [
           {
@@ -68,6 +76,15 @@
       }
     ],
     "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/block-git-commit.sh"
+          }
+        ]
+      },
       {
         "matcher": "Write|Edit",
         "hooks": [
@@ -105,6 +122,15 @@
       }
     ],
     "PostToolUse": [
+      {
+        "matcher": "Write|Edit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/gsd-context-monitor.js"
+          }
+        ]
+      },
       {
         "matcher": "Write|Edit",
         "hooks": [
@@ -158,6 +184,16 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/session-cleanup.sh"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/permission-notify.sh"
           }
         ]
       }

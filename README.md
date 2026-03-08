@@ -6,7 +6,7 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 
 ## What's Changed
 
-- **2026-03-09**: Added memory system documentation
+- **2026-03-09**: Added PermissionRequest notification hook, git commit blocker hook, and memory system documentation
 - **2026-03-08**: Updated loading order, hook events, agent frontmatter, skills section, and new concepts to match current official docs
 - **2026-03-04**: Initial release — rules, hooks, agents, settings, skills, GSD
 
@@ -27,6 +27,8 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 - [Hooks](#hooks)
 	- [Exit code contract](#exit-code-contract)
 	- [Hook walkthrough: check-code-quality.sh](#hook-walkthrough-check-code-qualitysh)
+	- [Hook walkthrough: permission-notify.sh](#hook-walkthrough-permission-notifysh)
+	- [Hook walkthrough: block-git-commit.sh](#hook-walkthrough-block-git-commitsh)
 - [Agents](#agents)
 	- [Rules vs agents: when to use which](#rules-vs-agents-when-to-use-which)
 - [Settings](#settings)
@@ -35,6 +37,7 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 - [Skills](#skills)
 - [Memory](#memory)
 - [GSD](#gsd)
+	- [GSD hooks in settings.json](#gsd-hooks-in-settingsjson)
 - [Next Steps](#next-steps)
 
 ---
@@ -256,7 +259,7 @@ Rules tell Claude what to do. But Claude doesn't verify its own work automatical
 
 Hooks are shell scripts that run at key moments in Claude's lifecycle. Registered in [settings.json](#hook-registration), they intercept tool calls, prompt submissions, and session events. The hook decides what happens: let it through, block it, or add context.
 
-The lifecycle events this setup uses (7 of 18 available):
+The lifecycle events this setup uses (8 of 18 available):
 
 | Event | When it fires |
 |-------|--------------|
@@ -267,6 +270,7 @@ The lifecycle events this setup uses (7 of 18 available):
 | `PreCompact` | Before context compaction |
 | `Stop` | When Claude finishes responding (exit 2 continues the conversation) |
 | `SessionEnd` | Session terminates |
+| `PermissionRequest` | Permission dialog is about to appear — **can auto-approve/deny** |
 
 For the full list of 18 events, see the [official Claude Code docs](https://code.claude.com/docs/en/hooks).
 
@@ -386,6 +390,52 @@ exit 0
 ```
 
 </details>
+
+### Hook walkthrough: permission-notify.sh
+
+The hook-as-notification pattern. This is a `PermissionRequest` hook that fires whenever Claude needs your approval — a file write, a bash command, or anything not pre-approved in your `permissions.allow` list. It plays a macOS system sound so you know to come back to the terminal.
+
+```bash
+#!/bin/bash
+# Play notification sound (non-blocking)
+afplay /System/Library/Sounds/Glass.aiff &
+
+exit 0
+```
+
+Exit 0 with no output means "show the normal permission dialog" — the hook just adds a sound on top. The `&` backgrounds `afplay` so the hook returns immediately without blocking Claude.
+
+`PermissionRequest` hooks can do more than notify. They receive JSON on stdin with `tool_name`, `tool_input`, and `permission_suggestions`. To auto-approve, output JSON with `hookSpecificOutput`:
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PermissionRequest",
+    "decision": { "behavior": "allow" }
+  }
+}
+```
+
+To deny instead: `"behavior": "deny"` with an optional `"message"`. You can also modify the tool input before approval using `"updatedInput"`. This setup only uses the notification pattern — auto-approve is available but intentionally left out to keep the permission system intact.
+
+### Hook walkthrough: block-git-commit.sh
+
+The hook-as-policy-enforcement pattern. This is a `PreToolUse` hook on the `Bash` tool that prevents Claude (and its subagents) from running `git commit` commands. All code changes are staged but never committed — you commit manually when ready.
+
+```bash
+#!/bin/bash
+command=$(jq -r '.tool_input.command // empty' 2>/dev/null)
+
+if [[ "$command" =~ git[[:space:]]+(.*[[:space:]]+)?commit ]] || \
+   [[ "$command" =~ gsd-tools[^[:space:]]*[[:space:]]+commit ]]; then
+	echo "BLOCKED: Git commits are disabled." >&2
+	exit 2
+fi
+
+exit 0
+```
+
+The regex matches `git commit`, `git -C path commit`, and `gsd-tools.cjs commit` (the GSD framework's commit wrapper). Exit 2 blocks the Bash call entirely — Claude sees the error and skips the commit step.
 
 **Note on matcher syntax:** Hook registration in `settings.json` uses regex matchers. A pipe (`|`) is standard regex OR, so `"Write|Edit"` matches both Write and Edit tool calls. This is documented behavior in the hooks reference matcher section.
 
@@ -586,11 +636,18 @@ Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and set
         "hooks": [{ "type": "command", "command": "rm -f /tmp/claude-remind-* 2>/dev/null; exit 0" }]
       },
       {
+        "hooks": [{ "type": "command", "command": "node ~/.claude/hooks/gsd-check-update.js" }]
+      },
+      {
         "matcher": "compact",
         "hooks": [{ "type": "command", "command": "~/.claude/hooks/compact-restore.sh" }]
       }
     ],
     "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "~/.claude/hooks/block-git-commit.sh" }]
+      },
       {
         "matcher": "Write|Edit",
         "hooks": [{ "type": "command", "command": "~/.claude/hooks/check-code-quality.sh" }]
@@ -602,6 +659,10 @@ Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and set
       { "hooks": [{ "type": "command", "command": "~/.claude/hooks/drift-review-stop.sh" }] }
     ],
     "PostToolUse": [
+      {
+        "matcher": "Write|Edit|Bash",
+        "hooks": [{ "type": "command", "command": "node ~/.claude/hooks/gsd-context-monitor.js" }]
+      },
       {
         "matcher": "Write|Edit",
         "hooks": [{ "type": "command", "command": "~/.claude/hooks/track-modified-files.sh" }]
@@ -620,6 +681,9 @@ Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and set
     ],
     "SessionEnd": [
       { "hooks": [{ "type": "command", "command": "~/.claude/hooks/session-cleanup.sh" }] }
+    ],
+    "PermissionRequest": [
+      { "hooks": [{ "type": "command", "command": "~/.claude/hooks/permission-notify.sh" }] }
     ]
   },
   "enabledPlugins": {
@@ -632,7 +696,7 @@ Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and set
 
 </details>
 
-> **Note:** The `enabledPlugins` block lists plugins specific to this setup. Remove or replace these entries with your own plugins — they are personal preferences, not required for the configuration to work. Your `enabledPlugins` section will look different — list whatever plugins you actually use, or remove this block entirely.
+> **Note:** The `enabledPlugins` block lists plugins specific to this setup — remove or replace with your own. The `gsd-check-update.js` and `gsd-context-monitor.js` hooks require [GSD](https://github.com/gsd-build/get-shit-done) — see the [GSD section](#gsd) for removal instructions if you don't use it.
 
 ---
 
@@ -750,6 +814,32 @@ For the full auto memory reference: [code.claude.com/docs/en/memory](https://cod
 GSD is a workflow framework I use on top of Claude Code. It's not required for any of this to work. Everything in this repo — the rules, hooks, agents, settings — functions without it.
 
 What GSD adds: structured planning (breaking work into phases and plans), phased execution with per-task commits, and verification gates between phases. If you see references to `.planning/` directories or `/gsd:` commands in the CLAUDE.md, that's GSD. You can safely ignore or remove those sections if you don't use it.
+
+### GSD hooks in settings.json
+
+This setup's `settings.json` includes two GSD-specific hooks. They require [GSD](https://github.com/gsd-build/get-shit-done) to be installed — **remove them if you don't use GSD**, or they'll error silently on session start and after tool calls.
+
+| Hook | Event | What it does |
+|------|-------|-------------|
+| `gsd-check-update.js` | `SessionStart` | Checks for GSD updates on session start. No matcher — fires every session. |
+| `gsd-context-monitor.js` | `PostToolUse` | Tracks context window usage after Write, Edit, and Bash calls. Warns when context is getting full so GSD can checkpoint before compaction. |
+
+To remove them, delete these entries from `settings.json`:
+
+```json
+// SessionStart — remove this entire block:
+{
+  "hooks": [{ "type": "command", "command": "node ~/.claude/hooks/gsd-check-update.js" }]
+},
+
+// PostToolUse — remove this entire block:
+{
+  "matcher": "Write|Edit|Bash",
+  "hooks": [{ "type": "command", "command": "node ~/.claude/hooks/gsd-context-monitor.js" }]
+},
+```
+
+The remaining hooks (quality gates, permission notifications, file tracking, compaction) work independently of GSD.
 
 More at: [github.com/gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done)
 
