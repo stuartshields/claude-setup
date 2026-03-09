@@ -2,6 +2,12 @@
 
 ## Modular-First
 - **200-Line Rule:** If a feature's implementation is likely to exceed 200 lines, propose a modular split during planning.
+
+  ```
+  Bad:  utils.js (300 lines — auth, validation, formatting)
+  Good: utils/auth.js, utils/validation.js, utils/formatting.js
+  ```
+
 - **Atomic Responsibility:** Move logic to `/hooks` or `/services`. Move types to `types/`. Extract sub-components into `/components` or `/features`.
 - **Atomic Design:** Prefer many small, focused files over one "God File." If a file does more than one thing, split it.
 

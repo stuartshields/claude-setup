@@ -2,6 +2,7 @@
 name: frontend-builder
 description: Implements a single frontend component, page, or feature with full fidelity. Reads project CLAUDE.md first, follows design system, outputs complete files. Designed for parallel execution — spawn multiple instances with isolation: worktree for independent components.
 tools: Read, Write, Edit, Bash, Grep, Glob
+isolation: worktree
 model: sonnet
 maxTurns: 30
 ---

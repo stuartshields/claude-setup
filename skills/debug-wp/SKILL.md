@@ -1,6 +1,7 @@
 ---
 name: debug-wp
 description: Starts a structured interview to diagnose WordPress issues, then proposes a ranked list of solutions.
+argument-hint: "[symptom or error message]"
 disable-model-invocation: true
 allowed-tools: Read, Grep, Glob, Bash, AskUserQuestion
 ---
@@ -13,11 +14,13 @@ Use this skill when diagnosing any WordPress problem — white screen of death, 
 
 Do NOT jump to solutions. Always complete the triage interview first.
 
+Use `$ARGUMENTS` as the initial symptom description. If empty, ask the user to describe the issue.
+
 ## Procedure
 
 ### Phase 1: Triage Interview
 
-Ask questions in this order. Use `AskUserQuestion` where possible for structured input. Stop early if the user provides enough context to confidently diagnose.
+Ask questions in this order. Use `AskUserQuestion` where possible for structured input. Stop early if the user provides enough context to confidently diagnose (including any symptom passed via `$ARGUMENTS`).
 
 #### 1. Symptom
 

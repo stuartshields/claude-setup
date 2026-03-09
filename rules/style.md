@@ -7,6 +7,17 @@
 - **No Hallucinated Code:** Never use API methods, config options, function signatures, or class names that you haven't verified exist. If unsure, check the docs (WebSearch/context7) or ask the user. "Looks right" is not verification.
 
 ## Style
+
+```javascript
+// Correct style: ES6, tabs, destructuring, async/await
+import { fetchUser } from './services/user.js';
+
+const getProfile = async (id) => {
+	const user = await fetchUser(id);
+	return { name: user.name, role: user.role };
+};
+```
+
 - **Tabs Only** for indentation.
 - **Clean Code:** No `console.log`, no trailing whitespace, no redundant try/catch blocks that hide errors.
 - **Token Efficiency:** Use the Grep tool to scan the repo before reading entire files to save context.

@@ -2,6 +2,7 @@
 name: backend-builder
 description: Implements API routes, database schemas, server logic, and backend services with full fidelity. Reads project CLAUDE.md first, follows project patterns. Designed for parallel execution — can run alongside frontend-builder agents.
 tools: Read, Write, Edit, Bash, Grep, Glob
+isolation: worktree
 model: sonnet
 maxTurns: 30
 ---
