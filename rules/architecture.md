@@ -4,7 +4,7 @@
 - **200-Line Rule:** If a feature's implementation is likely to exceed 200 lines, propose a modular split during planning.
 
   ```
-  Bad:  utils.js (300 lines — auth, validation, formatting)
+  Bad:  utils.js (300 lines - auth, validation, formatting)
   Good: utils/auth.js, utils/validation.js, utils/formatting.js
   ```
 
@@ -20,7 +20,7 @@
 - `/services`: API/External integrations.
 
 ## Monorepo Guidance
-- **Identify the active package** before reading CLAUDE.md. Check for `CLAUDE.md` at: (1) package root, (2) monorepo root, (3) both — package-level overrides root-level.
+- **Identify the active package** before reading CLAUDE.md. Check for `CLAUDE.md` at: (1) package root, (2) monorepo root, (3) both - package-level overrides root-level.
 - **Respect package boundaries.** Don't import across packages unless the dependency graph allows it.
 - **Run commands in scope.** Use the package's own build/test/lint commands, not root-level.
 - **Shared config.** Look for shared configs (tsconfig, eslint, prettier) at the root. Packages may extend or override.
