@@ -6,9 +6,24 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 
 ## What's Changed
 
-- **2026-03-09**: Added notification hooks (PermissionRequest + Notification), git commit blocker hook, and memory system documentation
-- **2026-03-08**: Updated loading order, hook events, agent frontmatter, skills section, and new concepts to match current official docs
-- **2026-03-04**: Initial release — rules, hooks, agents, settings, skills, GSD
+### 2026-03-09
+- Expanded block-git-commit hook to block destructive Bash commands (rm -rf, filesystem destruction, recursive permission changes) and data exfiltration (curl/wget POST)
+- Fixed false positive where grep/search commands containing "rm -rf" as a string were incorrectly blocked
+- Added "Beyond Default Claude" section and "Hardening" tips to README
+- Strengthened TDD rules (mock skepticism, spec-first testing, mutation checks)
+- Added persistent memory to code-reviewer and test-writer agents
+- Added code examples to rules
+- Added agent frontmatter fields (isolation, permissionMode, background)
+- Added skill argument features, SKILL.md example
+- Added /init /hooks /agents tips, hooks-guide link, stop_hook_active warning, hook types overview
+- Added notification hooks (PermissionRequest + Notification) and git commit blocker hook
+- Added memory system documentation
+
+### 2026-03-08
+- Updated loading order, hook events, agent frontmatter, skills section, and new concepts to match current official docs
+
+### 2026-03-04
+- Initial release — rules, hooks, agents, settings, skills, GSD
 
 ---
 
@@ -39,6 +54,15 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 	- [Hook scoping and teams](#hook-scoping-and-teams)
 - [Skills](#skills)
 - [Memory](#memory)
+- [Beyond Default Claude](#beyond-default-claude)
+	- [Test-Driven Development](#test-driven-development)
+	- [Deterministic Code Quality Gates](#deterministic-code-quality-gates)
+	- [Build and Test Verification on Stop](#build-and-test-verification-on-stop)
+	- [Opinionated UI/UX Design](#opinionated-uiux-design)
+	- [Manual Commit Control and Destructive Command Blocking](#manual-commit-control-and-destructive-command-blocking)
+	- [Context Preservation](#context-preservation)
+	- [Specialised Agents](#specialised-agents)
+	- [Hardening (Optional)](#hardening-optional)
 - [GSD](#gsd)
 - [Next Steps](#next-steps)
 
@@ -83,6 +107,8 @@ Here's the section I rely on most — the workflow rules:
 
 Without these rules, Claude will frequently write speculative code, skip tests, and add "helpful" extras you didn't ask for. With them, it behaves predictably.
 
+**Tip:** Run `/init` in any project to generate a starting CLAUDE.md based on your project structure.
+
 One pattern worth stealing: notice the `> Last verified: 2026-03-08` line in section 4. Claude Code features evolve quickly. When you state facts about tool features (loading order, settings keys, hook events), date them and link docs. That gives you a clear freshness signal and makes stale guidance obvious.
 
 <details>
@@ -124,7 +150,7 @@ One pattern worth stealing: notice the `> Last verified: 2026-03-08` line in sec
 - **Simplicity**: Prefer the fewest lines of code. No new dependencies without asking.
 
 ## 4. CLAUDE.MD FEATURES
-> Last verified: 2026-03-08. Official docs: https://code.claude.com/docs/en/memory
+> Last verified: 2026-03-09. Official docs: https://code.claude.com/docs/en/memory
 
 - **Loading order** (highest priority first): Managed policy > Local (`CLAUDE.local.md`) > Project (`./CLAUDE.md` or `./.claude/CLAUDE.md`) > User (`~/.claude/CLAUDE.md`)
 - **`CLAUDE.local.md`**: Project-local, gitignored. Use for personal notes that shouldn't be committed.
@@ -138,7 +164,7 @@ Rules auto-loaded from `~/.claude/rules/`:
 - **Conditional** (loaded when working with matching files): ui-ux, environment, php-wordpress
 ```
 
-*Last synced with CLAUDE.md: 2026-03-08*
+*Last synced with CLAUDE.md: 2026-03-09*
 
 </details>
 
@@ -259,7 +285,9 @@ See [Hooks](#hooks) for lifecycle automation that complements these persistent i
 
 Rules tell Claude what to do. But Claude doesn't verify its own work automatically. It won't check code quality before writing a file, or warn you before stopping with unfinished tasks. Hooks solve that.
 
-Hooks are shell scripts that run at key moments in Claude's lifecycle. Registered in [settings.json](#hook-registration), they intercept tool calls, prompt submissions, and session events. The hook decides what happens: let it through, block it, or add context.
+Hooks are shell scripts that run at key moments in Claude's lifecycle. Registered in [settings.json](#hook-registration), they intercept tool calls, prompt submissions, and session events. The hook decides what happens: let it through, block it, or add context. For step-by-step examples, see the [Hooks Guide](https://code.claude.com/docs/en/hooks-guide).
+
+**Tip:** Run `/hooks` to create and manage hooks interactively instead of editing JSON manually.
 
 The lifecycle events this setup uses (9 of 18 available):
 
@@ -289,7 +317,16 @@ This is the most important thing to get right:
 
 **The pitfall everyone hits: `exit 1` does NOT block.** If you want to stop Claude from writing a file, you must use `exit 2`. Exit 1 just logs a non-blocking error and lets the tool call proceed. Use exit 2 to block.
 
+**Another pitfall: Stop hook infinite loops.** Stop hooks that invoke Claude (e.g., prompt-type hooks) can trigger infinite loops — the Stop event fires, the hook runs Claude, Claude stops, firing Stop again. Guard against this with an environment variable check:
+
+```bash
+if [ -n "$stop_hook_active" ]; then exit 0; fi
+export stop_hook_active=1
+```
+
 stdin/stdout: hooks receive a JSON object on stdin. Parse it with `jq`. Key fields are `tool_input.file_path` (the file being written) and `tool_input.command` (for Bash hooks). For command hooks, stderr with `exit 2` becomes the blocking error message for events that support blocking. stdout handling depends on event type and output shape (plain text vs JSON fields like `additionalContext` / `systemMessage`).
+
+Hooks support four types: `command` (shell scripts, shown in all examples above), `prompt` (sends a prompt to an LLM for validation), `agent` (runs a multi-step agent), and `http` (calls an HTTP endpoint). Most hooks use `command` — see the [Hooks Guide](https://code.claude.com/docs/en/hooks-guide) for prompt and agent hook examples.
 
 ### Hook walkthrough: check-code-quality.sh
 
@@ -493,6 +530,8 @@ The regex matches `git commit`, `git -C path commit`, and `gsd-tools.cjs commit`
 Rules apply to every conversation. But some tasks need a different personality entirely — a code reviewer that only reads and never writes, a security auditor that can use a cheaper model, a WordPress specialist that only loads PHP-related tools. Rules can't do that. Agents can.
 
 Agents are markdown files with YAML frontmatter that define specialist subagents. Claude can delegate tasks to them when the work matches. The agent runs with its own instructions, its own tool restrictions, and optionally its own model. It reports back when done.
+
+**Tip:** Run `/agents` to create agents interactively, or use `--agents` CLI flag for session-scoped agents.
 
 ### Frontmatter fields
 
@@ -809,6 +848,32 @@ Skills support 10 frontmatter fields:
 | `agent` | Which subagent to use when `context: fork` is set. |
 | `hooks` | Hooks scoped to this skill's lifecycle. |
 
+<details>
+<summary>Example: A debugging skill (SKILL.md)</summary>
+
+```yaml
+---
+name: debug-wp
+description: Starts a structured interview to diagnose WordPress issues, then proposes a ranked list of solutions.
+argument-hint: "[symptom or error message]"
+disable-model-invocation: true
+allowed-tools: Read, Grep, Glob, Bash, AskUserQuestion
+---
+
+# Skill: debug-wp
+
+## When to Use
+Use this skill when diagnosing any WordPress problem...
+
+## Procedure
+### Phase 1: Triage Interview
+Ask questions in this order...
+```
+
+</details>
+
+Run `/debug-wp 500 error on checkout page` to invoke with arguments. The `argument-hint` text appears in the autocomplete menu.
+
 ### Forked context
 
 Set `context: fork` to run the skill in a separate subagent. The skill content becomes the prompt. Use `agent` to specify which subagent type handles it — built-in agents (`Explore`, `Plan`, `general-purpose`) or custom subagents from your `agents/` directory.
@@ -877,6 +942,127 @@ Agents can maintain their own persistent memory using the `memory` frontmatter f
 Use CLAUDE.md for explicit instructions you want every session — "use tabs," "no console.log," "always write tests first." Let auto memory handle learned patterns and corrections — things Claude picks up from how you work. If auto memory records something wrong, edit `MEMORY.md` directly. It's your file.
 
 For the full auto memory reference: [code.claude.com/docs/en/memory](https://code.claude.com/docs/en/memory)
+
+---
+
+## Beyond Default Claude
+
+Out of the box, Claude Code reads your CLAUDE.md, runs tools, and follows instructions. This setup goes further — enforcing behaviours that Claude won't do on its own, and catching failure modes that instructions alone can't prevent.
+
+Everything below is implemented through the rules, hooks, and agents in this repo. None of it requires external tools or plugins (except GSD, which is optional).
+
+### Test-Driven Development
+
+Claude's default behaviour is implementation-first: write the code, then write tests that confirm it works. This is backwards — tests written after seeing the implementation tend to test what the code *does*, not what it *should do*. The result: tests pass, but the code has bugs.
+
+This setup enforces a strict TDD cycle through `rules/testing.md`:
+
+1. **Write a failing test first** — from the requirement, not the code
+2. **Verify it fails for the right reason** — "module not found" doesn't count; the assertion itself must fail
+3. **Implement minimally** to make it pass
+4. **Run the full suite** to catch regressions
+5. **Mutation check** — mentally break the implementation (swap `>` for `>=`, remove a guard). If tests still pass, they're not testing what they claim
+
+The rule also addresses the most common AI testing failure: **over-mocking**. Every mock is an assumption about how the real dependency behaves. If the assumption is wrong, the test passes and production breaks. The rule limits mocks to things you genuinely can't control (network, time, third-party APIs) and flags any test with more than 3 mocks as a design smell.
+
+When users report bugs despite passing tests, the rule explicitly states: *the tests are wrong, not the user.* Claude is instructed to stop re-running the same tests and instead write a new test that reproduces the exact reported scenario.
+
+### Deterministic Code Quality Gates
+
+CLAUDE.md rules are advisory — Claude can ignore them under pressure, especially as context fills up. Hooks are deterministic. This setup uses `PreToolUse` hooks on `Edit|Write` that **block** bad code before it's written:
+
+- **Tab enforcement** — spaces are rejected (exit 2)
+- **No console.log** — blocked in JS/TS files
+- **No placeholder comments** — `// ...` and `// rest of...` are rejected with "write real code"
+- **Security-sensitive file detection** — when editing auth, session, or crypto files, injects a security reminder into context
+- **Dependency verification** — checks imported packages exist in `package.json`
+
+These run on every single file write. Claude gets immediate feedback and corrects before moving on.
+
+### Build and Test Verification on Stop
+
+The `verify-before-stop.sh` Stop hook runs the project's build command and test suite before Claude finishes a response. It auto-detects the stack (npm/bun/pnpm/yarn, pytest, cargo, go, deno, make) and runs with a 30-second timeout.
+
+If build or tests fail, Claude gets the output as feedback. The hook is advisory (exit 0) rather than blocking, because some projects don't have tests yet — but it ensures Claude sees failures instead of silently finishing with broken code.
+
+The official docs describe [agent-based Stop hooks](https://code.claude.com/docs/en/hooks-guide) for this purpose. The command hook approach here is simpler and doesn't consume LLM tokens, but trades off the ability to make judgment calls about what "done" means.
+
+### Opinionated UI/UX Design
+
+Claude produces generic-looking UI by default — centered layouts, default shadows, #000/#FFF, no micro-interactions. The conditional rule `rules/ui-ux.md` (loaded only when touching component/view/template files) enforces:
+
+- **8pt grid** — all spacing in multiples of 8px (4px for tight spots)
+- **Anti-AI polish** — empty states instead of blank screens, loading skeletons, toast notifications
+- **Rich grays** — no pure black or white; use slate-900 and similar
+- **Accessibility baseline** — semantic HTML, aria-labels, AA contrast, keyboard navigation
+- **Micro-interactions** — hover/active states, transitions using whatever animation library is installed
+
+### Manual Commit Control and Destructive Command Blocking
+
+By default, Claude will `git commit` whenever it feels appropriate and can run any Bash command. The `block-git-commit.sh` PreToolUse hook blocks:
+
+- **Git commits** — both `git commit` and GSD's `gsd-tools commit`
+- **Destructive commands** — `rm -rf`, filesystem destruction patterns, recursive `chmod`/`chown` on broad paths
+- **Data exfiltration** — `curl`/`wget` with POST data, upload flags, or data flags
+
+This keeps commits under your control and prevents accidental (or prompt-injection-driven) destruction. The hook uses `exit 2` to block and feed the reason back to Claude, so it adapts rather than retrying.
+
+### Context Preservation
+
+When Claude's context window fills up, compaction summarises the conversation and discards details. The `pre-compaction-preserve.sh` and `compact-restore.sh` hooks save and restore critical context (modified files, current task, decisions) across compaction events. The `track-modified-files.sh` hook maintains a running list of what changed during the session.
+
+### Specialised Agents
+
+Beyond the default Agent tool, this setup defines 14 custom agents for specific domains. Some notable ones that go beyond what Claude does on its own:
+
+| Agent | What it adds |
+|-------|-------------|
+| `ui-review` | Reviews frontend for usability, accessibility, responsive design — not just code correctness |
+| `simplify` | Finds over-engineering and suggests concrete simplifications |
+| `perf` | Runtime bottlenecks, bundle bloat, unnecessary network requests |
+| `wp` / `wp-perf` / `wp-security` | WordPress-specific expertise following Human Made and 10up standards |
+| `code-reviewer` | Read-only (`permissionMode: plan`), persistent memory across sessions (`memory: user`) |
+| `test-writer` | Persistent memory (`memory: user`) — learns your test patterns across projects |
+| `frontend-builder` / `backend-builder` | Run in isolated worktrees for parallel execution |
+
+### Hardening (Optional)
+
+This setup is opinionated but not locked down. If you want to go further, here are adjustments worth considering:
+
+**Block all outbound network access.** The `block-git-commit.sh` hook blocks `curl`/`wget` with POST data, but doesn't block GET requests or `WebFetch`. For stricter environments, add `WebFetch` and `Bash(curl *)` to the `permissions.deny` array in `settings.json`, or use `/sandbox` for OS-level network isolation. Trade-off: Claude can't fetch docs or check URLs.
+
+**Prune CLAUDE.md aggressively.** Community consensus is that CLAUDE.md instructions are suggestions, not contracts — and instruction-following quality degrades as line count increases. This repo's CLAUDE.md is 47 lines (well under the ~100-line ceiling). If you extend it, regularly ask: "Would removing this line cause Claude to make mistakes?" If not, cut it. Anything you can enforce via a hook, enforce via a hook instead.
+
+**Restrict MCP server access.** If you use MCP servers, explicitly allowlist trusted ones rather than enabling all project servers. In `settings.json`:
+
+```json
+{
+  "enabledMcpjsonServers": ["github", "memory"],
+  "disabledMcpjsonServers": ["filesystem"]
+}
+```
+
+**Async test runner.** The `verify-before-stop.sh` hook runs tests synchronously (blocks Claude for up to 30 seconds). If your test suite is fast and you want feedback after every file edit instead of only at stop time, add an async PostToolUse hook:
+
+```json
+{
+  "PostToolUse": [
+    {
+      "matcher": "Write|Edit",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "/path/to/run-tests-async.sh",
+          "async": true,
+          "timeout": 120
+        }
+      ]
+    }
+  ]
+}
+```
+
+Trade-off: fires on every file write (noisy for large refactors), and async hooks can't block — Claude sees results on the next turn, not immediately. The synchronous Stop hook is better for enforcement; async PostToolUse is better for fast feedback loops.
 
 ---
 

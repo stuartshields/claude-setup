@@ -11,6 +11,8 @@ allowed-tools: Read, Grep, Glob
 
 Run `/qa-check` on any web project to audit for Accessibility (WCAG 2.1 AA), Performance, and Code Quality issues. This skill auto-detects the tech stack and adapts its checks accordingly.
 
+Use `$ARGUMENTS` to scope the audit to a specific directory or file pattern (e.g., `/qa-check src/components/`). If empty, audit the entire project.
+
 Do NOT fix issues — only report them. Present findings as structured Markdown tables.
 
 ## Procedure

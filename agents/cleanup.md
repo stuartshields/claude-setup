@@ -2,6 +2,7 @@
 name: cleanup
 description: Finds dead code, unused exports, orphaned files, stale dependencies, and other cruft that accumulates in codebases over time. Use for periodic hygiene or before major refactors.
 tools: Read, Grep, Glob, Bash
+background: true
 model: sonnet
 maxTurns: 20
 ---

@@ -6,6 +6,14 @@
 - **If you're about to change something not mentioned in the task, stop and ask.** The user may have context you don't.
 
 ## Pattern Discovery (Before Writing ANY Code)
+
+```
+Before creating an API error handler:
+1. Grep for "catch" or "error" in existing service files
+2. Find the existing pattern (e.g., services/api.js line 42)
+3. Use the same error shape and logging approach
+```
+
 - **YOU MUST search the codebase for existing patterns before creating anything.** Use Grep/Glob to find how the project already handles: API calls, error handling, form validation, state management, component structure, naming conventions.
 - **YOU MUST match what exists.** If the project uses a specific pattern for API error handling, use the same pattern — even if you know a "better" way. Consistency > cleverness.
 - **Check what's already imported/available.** Before writing a utility function, search for existing utils. Before adding a dependency, check if the project already has one that does the same thing.
