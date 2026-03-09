@@ -13,8 +13,8 @@
 - **Hypothesis Testing:** When debugging, state your hypothesis first: "I suspect X, but I need to verify Y by reading [File Z]."
 
 ## Tests Pass ≠ Bug Fixed
-- **If the user says it's not fixed, the tests are wrong — not the user.** Passing tests only prove the tests pass, not that the bug is resolved.
+- **If the user says it's not fixed, the tests are wrong - not the user.** Passing tests only prove the tests pass, not that the bug is resolved.
 - **Widen the investigation:** The existing tests likely don't cover the actual reproduction path. Ask the user for exact steps to reproduce, then trace that specific path through the code.
 - **Check test assumptions:** Are the tests mocking something that behaves differently in real usage? Are they testing the right input/state? Are they testing at the wrong layer (unit test passes but integration is broken)?
-- **Never repeat the same fix.** If your first approach didn't work, the root cause is different from what you assumed. Go back to Phase 1 — re-read the code, re-trace the data flow, form a new hypothesis.
+- **Never repeat the same fix.** If your first approach didn't work, the root cause is different from what you assumed. Go back to Phase 1 - re-read the code, re-trace the data flow, form a new hypothesis.
 - **Write a new test that reproduces the user's exact scenario** before attempting another fix. If you can't reproduce it in a test, you don't understand the bug yet.

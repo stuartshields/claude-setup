@@ -31,7 +31,7 @@ paths:
 - Use semantic HTML (`main`, `nav`, `section`, `article`).
 - All interactive elements must have `aria-label` or visible labels.
 - Check color contrast (AA standard minimum).
-- 100% keyboard navigability — focus states must be visible.
+- 100% keyboard navigability - focus states must be visible.
 
 ## Anti-AI Polish
 - Use "Empty States" and "Loading Skeletons" instead of blank screens.

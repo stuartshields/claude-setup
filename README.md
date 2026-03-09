@@ -1,8 +1,8 @@
 # Claude Code Setup
 
-Here's how I set up my Claude Code. This repo IS the configuration — the files here belong in `~/.claude/`. When you clone this and copy the contents to `~/.claude/`, you get persistent instructions, automated quality gates, and specialised subagents that apply across every project you work on.
+Here's how I set up my Claude Code. This repo IS the configuration - the files here belong in `~/.claude/`. When you clone this and copy the contents to `~/.claude/`, you get persistent instructions, automated quality gates, and specialised subagents that apply across every project you work on.
 
-The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `agents/` → `~/.claude/agents/`, `hooks/` → `~/.claude/hooks/`, `skills/` → `~/.claude/skills/`, `settings.json` → `~/.claude/settings.json`. None of these directories belong in a project root — they're user-global configuration.
+The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `agents/` → `~/.claude/agents/`, `hooks/` → `~/.claude/hooks/`, `skills/` → `~/.claude/skills/`, `settings.json` → `~/.claude/settings.json`. None of these directories belong in a project root - they're user-global configuration.
 
 ## What's Changed
 
@@ -23,7 +23,7 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 - Updated loading order, hook events, agent frontmatter, skills section, and new concepts to match current official docs
 
 ### 2026-03-04
-- Initial release — rules, hooks, agents, settings, skills, GSD
+- Initial release - rules, hooks, agents, settings, skills, GSD
 
 ---
 
@@ -75,11 +75,11 @@ Want to try this now?
 1. Clone this repo: `git clone https://github.com/shieldsstuart/project-claude-setup`
 2. Copy the contents to your Claude directory: `cp -r project-claude-setup/. ~/.claude/`
 3. Restart Claude Code (quit and reopen)
-4. Open any project — your global rules, hooks, and agents are now active
+4. Open any project - your global rules, hooks, and agents are now active
 
 That's it. Claude Code automatically loads `~/.claude/CLAUDE.md` at session start, picks up rules from `~/.claude/rules/`, runs hooks from `~/.claude/hooks/`, and makes agents from `~/.claude/agents/` available.
 
-Read the rest of this to understand what each part does and why — so you can adapt it to your own workflow instead of just running mine.
+Read the rest of this to understand what each part does and why - so you can adapt it to your own workflow instead of just running mine.
 
 ---
 
@@ -89,11 +89,11 @@ Read the rest of this to understand what each part does and why — so you can a
 
 Without a CLAUDE.md, Claude loses your explicit standing instructions. Auto memory can still retain learned patterns, but it doesn't replace clear project rules like "use tabs not spaces", "never use var", "always write tests first".
 
-A CLAUDE.md file fixes this. It's a markdown file that loads automatically at the start of every session. Whatever you put in it, Claude reads it before responding to anything. Think of it as your standing instructions — the baseline expectations for how Claude behaves whenever you use it.
+A CLAUDE.md file fixes this. It's a markdown file that loads automatically at the start of every session. Whatever you put in it, Claude reads it before responding to anything. Think of it as your standing instructions - the baseline expectations for how Claude behaves whenever you use it.
 
-The CLAUDE.md in this repo is my global one. Open it — that's the actual file. It covers my workflow rules (plan before coding, write tests first), style defaults (tabs, ES6+, no console.log), and CLAUDE.md features like `@import` syntax and loading order.
+The CLAUDE.md in this repo is my global one. Open it - that's the actual file. It covers my workflow rules (plan before coding, write tests first), style defaults (tabs, ES6+, no console.log), and CLAUDE.md features like `@import` syntax and loading order.
 
-Here's the section I rely on most — the workflow rules:
+Here's the section I rely on most - the workflow rules:
 
 ```markdown
 ## 1. MANDATORY WORKFLOW
@@ -129,7 +129,7 @@ One pattern worth stealing: notice the `> Last verified: 2026-03-08` line in sec
 - **Verify**: After implementing, run the project's build/test/lint command. If it fails, diagnose and fix before moving on. Never mark work as done without verifying it runs.
 - **Scope Lock**: Do NOT modify files or add features beyond what the user asked for. No unrequested refactors, no bonus improvements, no "while I'm here" changes.
 - **On Compaction**: Always preserve in the summary: all modified file paths, the current task and acceptance criteria, test commands and results, key decisions and reasoning.
-- **CLAUDE.md is the Source of Truth**: Before making changes, read the project's `CLAUDE.md`. If your changes diverge from what it specifies, ask the user: "This differs from the project CLAUDE.md — should I update it first?" Update CLAUDE.md **early** — when you discover a new convention, make an architecture decision, or establish a pattern, propose the update immediately. Do not wait until the end of the task. Sessions can crash, compact, or be interrupted — anything not written to CLAUDE.md is lost.
+- **CLAUDE.md is the Source of Truth**: Before making changes, read the project's `CLAUDE.md`. If your changes diverge from what it specifies, ask the user: "This differs from the project CLAUDE.md - should I update it first?" Update CLAUDE.md **early** - when you discover a new convention, make an architecture decision, or establish a pattern, propose the update immediately. Do not wait until the end of the task. Sessions can crash, compact, or be interrupted - anything not written to CLAUDE.md is lost.
 - **Complexity Routing**: For changes touching 6+ files or requiring architectural decisions, ask: "This is complex enough to warrant structured planning. Want me to handle it ad-hoc or write a formal plan?" For 3-5 files, write the plan to `.planning/PLAN.md` instead of an ephemeral `<plan>` tag. For 6+ files, use [GSD](https://github.com/gsd-build/get-shit-done) if installed, or create a `.planning/` structure manually.
 
 ## 2. DYNAMIC PROJECT INITIALIZATION / MIGRATION
@@ -170,11 +170,11 @@ Rules auto-loaded from `~/.claude/rules/`:
 
 ### CLAUDE.local.md
 
-There's a second file worth knowing: `CLAUDE.local.md`. It lives alongside `CLAUDE.md` but is gitignored. Use it for personal notes that shouldn't be committed — your API keys, reminders about a local dev setup, project context that's specific to your machine. It loads at the same scope as `CLAUDE.md` but stays out of version control.
+There's a second file worth knowing: `CLAUDE.local.md`. It lives alongside `CLAUDE.md` but is gitignored. Use it for personal notes that shouldn't be committed - your API keys, reminders about a local dev setup, project context that's specific to your machine. It loads at the same scope as `CLAUDE.md` but stays out of version control.
 
 ### @import syntax
 
-CLAUDE.md supports `@path/to/file` imports. Instead of one giant file, you can split instructions across focused files and import them. That's what the `rules/` directory in this repo is for — each rule file covers one concern (security, testing, debugging, etc.), and they're loaded via `@import` references in CLAUDE.md.
+CLAUDE.md supports `@path/to/file` imports. Instead of one giant file, you can split instructions across focused files and import them. That's what the `rules/` directory in this repo is for - each rule file covers one concern (security, testing, debugging, etc.), and they're loaded via `@import` references in CLAUDE.md.
 
 The import system supports up to 5 hops. First time Claude encounters an `@import`, it asks for approval. If you decline, that import stays disabled permanently for that file.
 
@@ -191,7 +191,7 @@ Claude Code loads CLAUDE.md files from multiple locations. The priority order, h
 | 1 | Managed policy | System-managed | Can't be overridden by anything |
 | 2 | Local | `CLAUDE.local.md` | Gitignored personal notes |
 | 3 | Project | `./CLAUDE.md` or `./.claude/CLAUDE.md` | Project-specific instructions |
-| 4 | User (global) | `~/.claude/CLAUDE.md` | Your baseline — this repo |
+| 4 | User (global) | `~/.claude/CLAUDE.md` | Your baseline - this repo |
 
 More specific locations take precedence over broader ones. If your project's `CLAUDE.md` says "use 2-space indentation" but your global says "use tabs", the project wins.
 
@@ -201,7 +201,7 @@ A few other loading behaviors worth knowing:
 
 - CLAUDE.md files in **parent directories** above your working directory are also loaded (walking up the tree)
 - **Subdirectory** CLAUDE.md files load on demand when Claude reads files in those directories
-- The `claudeMdExcludes` setting in `settings.json` lets you skip specific CLAUDE.md files — useful in monorepos where you want to suppress a package's CLAUDE.md
+- The `claudeMdExcludes` setting in `settings.json` lets you skip specific CLAUDE.md files - useful in monorepos where you want to suppress a package's CLAUDE.md
 
 **This repo demonstrates the user-global scope** (`~/.claude/`). Individual projects can also have `./CLAUDE.md` or `./.claude/CLAUDE.md` files that layer on top. The global rules here form the baseline; project files add or override for specific codebases.
 
@@ -211,9 +211,9 @@ A few other loading behaviors worth knowing:
 
 Without rules, you repeat the same instructions every conversation. "Use tabs." "No console.log." "Always parameterize SQL." "Don't add unrequested features." Every. Single. Session.
 
-Rules fix that. Files in `~/.claude/rules/` load automatically at the start of every session — Claude reads them before doing anything else. Each file covers one concern. When a file gets too long, split it. Single responsibility applies to rules files the same way it applies to code.
+Rules fix that. Files in `~/.claude/rules/` load automatically at the start of every session - Claude reads them before doing anything else. Each file covers one concern. When a file gets too long, split it. Single responsibility applies to rules files the same way it applies to code.
 
-The rules in this repo import automatically because the [CLAUDE.md](#claudemd) `@import` syntax pulls them in. But the `~/.claude/rules/` directory also has a special property: files there load unconditionally without any explicit `@import` (unless you have `paths:` frontmatter — more on that below).
+The rules in this repo import automatically because the [CLAUDE.md](#claudemd) `@import` syntax pulls them in. But the `~/.claude/rules/` directory also has a special property: files there load unconditionally without any explicit `@import` (unless you have `paths:` frontmatter - more on that below).
 
 ### Always-loaded rules
 
@@ -221,16 +221,16 @@ These 8 files load every session, regardless of what project you're working on:
 
 | File | What problem it solves |
 |------|----------------------|
-| `architecture.md` | Prevents God Files — enforces the 200-line rule, atomic responsibility, and directory mapping |
-| `debugging.md` | Stops guessing — requires tracing data flow before proposing any fix |
+| `architecture.md` | Prevents God Files - enforces the 200-line rule, atomic responsibility, and directory mapping |
+| `debugging.md` | Stops guessing - requires tracing data flow before proposing any fix |
 | `dependencies.md` | Blocks hallucinated packages and unvetted dependencies from entering the codebase |
 | `discipline.md` | Prevents scope creep, bonus refactors, TODO placeholders, and over-engineered abstractions |
 | `security.md` | Enforces parameterized queries, input validation, and XSS prevention on every coding task |
-| `style.md` | Enforces tabs, clean code, no truncated snippets — no "// ... rest of code" shortcuts |
+| `style.md` | Enforces tabs, clean code, no truncated snippets - no "// ... rest of code" shortcuts |
 | `testing.md` | Enforces test-first workflow with failing tests before implementation, AAA pattern |
-| `verification.md` | Requires running build/test after every change — never assume success from a clean write |
+| `verification.md` | Requires running build/test after every change - never assume success from a clean write |
 
-Here's a taste of what a rule file looks like — this is the SQL injection section from `security.md`:
+Here's a taste of what a rule file looks like - this is the SQL injection section from `security.md`:
 
 ```markdown
 ## SQL Injection Prevention
@@ -245,7 +245,7 @@ This is the pattern across all rules: specific, actionable, no ambiguity. Claude
 
 ### Conditional rules
 
-Some rules only matter for certain file types. Loading PHP rules when you're writing JavaScript wastes context — those tokens could be used for something relevant.
+Some rules only matter for certain file types. Loading PHP rules when you're writing JavaScript wastes context - those tokens could be used for something relevant.
 
 The `paths:` frontmatter mechanism handles this. Add a YAML block at the top of a rule file, and Claude only loads that file when it reads a file matching one of the listed glob patterns. Here's what it looks like in `environment.md`:
 
@@ -295,13 +295,13 @@ The lifecycle events this setup uses (9 of 18 available):
 |-------|--------------|
 | `SessionStart` | Session begins or resumes |
 | `UserPromptSubmit` | Before Claude processes your prompt |
-| `PreToolUse` | Before any tool call — **can block** |
+| `PreToolUse` | Before any tool call - **can block** |
 | `PostToolUse` | After a tool call succeeds |
 | `PreCompact` | Before context compaction |
 | `Stop` | When Claude finishes responding (exit 2 continues the conversation) |
 | `SessionEnd` | Session terminates |
-| `PermissionRequest` | Permission dialog is about to appear — **can auto-approve/deny** |
-| `Notification` | Claude needs attention (permission, idle, auth) — **observe-only** |
+| `PermissionRequest` | Permission dialog is about to appear - **can auto-approve/deny** |
+| `Notification` | Claude needs attention (permission, idle, auth) - **observe-only** |
 
 For the full list of 18 events, see the [official Claude Code docs](https://code.claude.com/docs/en/hooks).
 
@@ -311,13 +311,13 @@ This is the most important thing to get right:
 
 | Exit code | Meaning |
 |-----------|---------|
-| `0` | Success — stdout is parsed for JSON output (e.g., `additionalContext`, `systemMessage`) |
-| `2` | **Block** — stderr is fed back to Claude. Effect depends on event (PreToolUse blocks the call, Stop continues the conversation) |
-| anything else | Non-blocking error — execution continues |
+| `0` | Success - stdout is parsed for JSON output (e.g., `additionalContext`, `systemMessage`) |
+| `2` | **Block** - stderr is fed back to Claude. Effect depends on event (PreToolUse blocks the call, Stop continues the conversation) |
+| anything else | Non-blocking error - execution continues |
 
 **The pitfall everyone hits: `exit 1` does NOT block.** If you want to stop Claude from writing a file, you must use `exit 2`. Exit 1 just logs a non-blocking error and lets the tool call proceed. Use exit 2 to block.
 
-**Another pitfall: Stop hook infinite loops.** Stop hooks that invoke Claude (e.g., prompt-type hooks) can trigger infinite loops — the Stop event fires, the hook runs Claude, Claude stops, firing Stop again. Guard against this with an environment variable check:
+**Another pitfall: Stop hook infinite loops.** Stop hooks that invoke Claude (e.g., prompt-type hooks) can trigger infinite loops - the Stop event fires, the hook runs Claude, Claude stops, firing Stop again. Guard against this with an environment variable check:
 
 ```bash
 if [ -n "$stop_hook_active" ]; then exit 0; fi
@@ -326,11 +326,11 @@ export stop_hook_active=1
 
 stdin/stdout: hooks receive a JSON object on stdin. Parse it with `jq`. Key fields are `tool_input.file_path` (the file being written) and `tool_input.command` (for Bash hooks). For command hooks, stderr with `exit 2` becomes the blocking error message for events that support blocking. stdout handling depends on event type and output shape (plain text vs JSON fields like `additionalContext` / `systemMessage`).
 
-Hooks support four types: `command` (shell scripts, shown in all examples above), `prompt` (sends a prompt to an LLM for validation), `agent` (runs a multi-step agent), and `http` (calls an HTTP endpoint). Most hooks use `command` — see the [Hooks Guide](https://code.claude.com/docs/en/hooks-guide) for prompt and agent hook examples.
+Hooks support four types: `command` (shell scripts, shown in all examples above), `prompt` (sends a prompt to an LLM for validation), `agent` (runs a multi-step agent), and `http` (calls an HTTP endpoint). Most hooks use `command` - see the [Hooks Guide](https://code.claude.com/docs/en/hooks-guide) for prompt and agent hook examples.
 
 ### Hook walkthrough: check-code-quality.sh
 
-The hook-as-quality-gate pattern. This is a `PreToolUse` hook that fires before every `Write` or `Edit` tool call. If it finds style violations, it exits 2 and blocks the write — Claude sees the error message and fixes the violation before trying again.
+The hook-as-quality-gate pattern. This is a `PreToolUse` hook that fires before every `Write` or `Edit` tool call. If it finds style violations, it exits 2 and blocks the write - Claude sees the error message and fixes the violation before trying again.
 
 Here's the core of how it works:
 
@@ -348,7 +348,7 @@ fi
 
 # Check for violations
 if grep -q 'console\.log(' "$TMPCODE"; then
-	ERRORS="${ERRORS}console.log() found — remove or use console.error. "
+	ERRORS="${ERRORS}console.log() found - remove or use console.error. "
 fi
 
 # Block if violations found
@@ -358,7 +358,7 @@ if [ -n "$ERRORS" ]; then
 fi
 ```
 
-Rules are instructions. Hooks are enforcement. The rules say "no console.log" — the hook makes it impossible to accidentally ship one.
+Rules are instructions. Hooks are enforcement. The rules say "no console.log" - the hook makes it impossible to accidentally ship one.
 
 <details>
 <summary>Full check-code-quality.sh script</summary>
@@ -366,7 +366,7 @@ Rules are instructions. Hooks are enforcement. The rules say "no console.log" �
 ```bash
 #!/bin/bash
 # Deterministic code quality gate for Write/Edit tool calls.
-# Replaces the Stop prompt hook — no LLM, no JSON validation errors.
+# Replaces the Stop prompt hook - no LLM, no JSON validation errors.
 
 TMPINPUT=$(mktemp)
 TMPCODE=$(mktemp)
@@ -396,11 +396,11 @@ fi
 
 ERRORS=""
 
-# Tabs not spaces — only for Write (full file).
+# Tabs not spaces - only for Write (full file).
 # Edit skipped because replacement may need to match existing indentation.
 if [ "$TOOL" = "Write" ]; then
 	if grep -Eq '^ ' "$TMPCODE"; then
-		ERRORS="${ERRORS}Space indentation detected — use tabs. "
+		ERRORS="${ERRORS}Space indentation detected - use tabs. "
 	fi
 fi
 
@@ -408,17 +408,17 @@ fi
 case "$FILE_PATH" in
 	*.js|*.mjs|*.ts|*.tsx|*.jsx)
 		if grep -q 'console\.log(' "$TMPCODE"; then
-			ERRORS="${ERRORS}console.log() found — remove or use console.error. "
+			ERRORS="${ERRORS}console.log() found - remove or use console.error. "
 		fi
 		;;
 esac
 
 # No placeholder comments
 if grep -Eq '//\s*\.\.\.\s*$' "$TMPCODE"; then
-	ERRORS="${ERRORS}Placeholder comment '// ...' found — write real code. "
+	ERRORS="${ERRORS}Placeholder comment '// ...' found - write real code. "
 fi
 if grep -Eiq '//\s*rest of' "$TMPCODE"; then
-	ERRORS="${ERRORS}Placeholder comment '// rest of...' found — write real code. "
+	ERRORS="${ERRORS}Placeholder comment '// rest of...' found - write real code. "
 fi
 
 if [ -n "$ERRORS" ]; then
@@ -433,13 +433,13 @@ exit 0
 
 ### Alerting: when Claude needs your attention
 
-Two hook events can notify you when Claude is waiting: `PermissionRequest` and `Notification`. This setup uses both — pick whichever fits your workflow, or run them together.
+Two hook events can notify you when Claude is waiting: `PermissionRequest` and `Notification`. This setup uses both - pick whichever fits your workflow, or run them together.
 
-**`PermissionRequest`** fires specifically when a permission dialog appears. It can auto-approve or deny tool calls — not just observe. Use this when you want control over which permissions get through.
+**`PermissionRequest`** fires specifically when a permission dialog appears. It can auto-approve or deny tool calls - not just observe. Use this when you want control over which permissions get through.
 
-**`Notification`** fires on any notification type: `permission_prompt`, `idle_prompt`, `auth_success`, `elicitation_dialog`. It's observe-only — it can't block or approve anything. Use this when you just want to know Claude is waiting, regardless of why.
+**`Notification`** fires on any notification type: `permission_prompt`, `idle_prompt`, `auth_success`, `elicitation_dialog`. It's observe-only - it can't block or approve anything. Use this when you just want to know Claude is waiting, regardless of why.
 
-If you run both on permission prompts, you'll get two alerts. That's intentional in this setup — `PermissionRequest` plays a simple sound, `Notification` shows a macOS banner. Remove one if the double-alert is too much.
+If you run both on permission prompts, you'll get two alerts. That's intentional in this setup - `PermissionRequest` plays a simple sound, `Notification` shows a macOS banner. Remove one if the double-alert is too much.
 
 ### Hook walkthrough: permission-notify.sh
 
@@ -453,7 +453,7 @@ afplay /System/Library/Sounds/Glass.aiff &
 exit 0
 ```
 
-Exit 0 with no output means "show the normal permission dialog" — the hook just adds a sound on top. The `&` backgrounds `afplay` so the hook returns immediately.
+Exit 0 with no output means "show the normal permission dialog" - the hook just adds a sound on top. The `&` backgrounds `afplay` so the hook returns immediately.
 
 `PermissionRequest` hooks can do more than notify. They receive JSON on stdin with `tool_name`, `tool_input`, and `permission_suggestions`. To auto-approve, output JSON with `hookSpecificOutput`:
 
@@ -466,7 +466,7 @@ Exit 0 with no output means "show the normal permission dialog" — the hook jus
 }
 ```
 
-To deny instead: `"behavior": "deny"` with an optional `"message"`. You can also modify the tool input before approval using `"updatedInput"`. This setup only uses the notification pattern — auto-approve is available but intentionally left out to keep the permission system intact.
+To deny instead: `"behavior": "deny"` with an optional `"message"`. You can also modify the tool input before approval using `"updatedInput"`. This setup only uses the notification pattern - auto-approve is available but intentionally left out to keep the permission system intact.
 
 ### Hook walkthrough: notification-alert.sh
 
@@ -487,9 +487,9 @@ osascript -e "display notification \"$MSG\" with title \"$TITLE\" sound name \"P
 exit 0
 ```
 
-The terminal bell (`\a`) triggers a dock bounce or tab badge in most terminal emulators — useful when you've switched to another app. The `osascript` call creates a native macOS notification banner that appears in Notification Center, visible even when the terminal is behind other windows.
+The terminal bell (`\a`) triggers a dock bounce or tab badge in most terminal emulators - useful when you've switched to another app. The `osascript` call creates a native macOS notification banner that appears in Notification Center, visible even when the terminal is behind other windows.
 
-The hook reads `title` and `message` from stdin JSON so the banner shows context-specific text (e.g., "Permission needed" vs "Claude Code is idle"). The `Notification` event fires on four types — use a matcher to filter:
+The hook reads `title` and `message` from stdin JSON so the banner shows context-specific text (e.g., "Permission needed" vs "Claude Code is idle"). The `Notification` event fires on four types - use a matcher to filter:
 
 ```json
 "Notification": [
@@ -504,7 +504,7 @@ Omit the matcher (as this setup does) to fire on all notification types.
 
 ### Hook walkthrough: block-git-commit.sh
 
-The hook-as-policy-enforcement pattern. This is a `PreToolUse` hook on the `Bash` tool that prevents Claude (and its subagents) from running `git commit` commands. All code changes are staged but never committed — you commit manually when ready.
+The hook-as-policy-enforcement pattern. This is a `PreToolUse` hook on the `Bash` tool that prevents Claude (and its subagents) from running `git commit` commands. All code changes are staged but never committed - you commit manually when ready.
 
 ```bash
 #!/bin/bash
@@ -519,7 +519,7 @@ fi
 exit 0
 ```
 
-The regex matches `git commit`, `git -C path commit`, and `gsd-tools.cjs commit` (the GSD framework's commit wrapper). Exit 2 blocks the Bash call entirely — Claude sees the error and skips the commit step.
+The regex matches `git commit`, `git -C path commit`, and `gsd-tools.cjs commit` (the GSD framework's commit wrapper). Exit 2 blocks the Bash call entirely - Claude sees the error and skips the commit step.
 
 **Note on matcher syntax:** Hook registration in `settings.json` uses regex matchers. A pipe (`|`) is standard regex OR, so `"Write|Edit"` matches both Write and Edit tool calls. This is documented behavior in the hooks reference matcher section.
 
@@ -527,7 +527,7 @@ The regex matches `git commit`, `git -C path commit`, and `gsd-tools.cjs commit`
 
 ## Agents
 
-Rules apply to every conversation. But some tasks need a different personality entirely — a code reviewer that only reads and never writes, a security auditor that can use a cheaper model, a WordPress specialist that only loads PHP-related tools. Rules can't do that. Agents can.
+Rules apply to every conversation. But some tasks need a different personality entirely - a code reviewer that only reads and never writes, a security auditor that can use a cheaper model, a WordPress specialist that only loads PHP-related tools. Rules can't do that. Agents can.
 
 Agents are markdown files with YAML frontmatter that define specialist subagents. Claude can delegate tasks to them when the work matches. The agent runs with its own instructions, its own tool restrictions, and optionally its own model. It reports back when done.
 
@@ -538,9 +538,9 @@ Agents are markdown files with YAML frontmatter that define specialist subagents
 | Field | What it does |
 |-------|-------------|
 | `name` | Lowercase-with-hyphens identifier. How you reference the agent. (Required) |
-| `description` | Tells Claude when to delegate to this agent. Quality matters — a vague description means missed delegations. (Required) |
+| `description` | Tells Claude when to delegate to this agent. Quality matters - a vague description means missed delegations. (Required) |
 | `tools` | Comma-separated list of allowed tools. Omit to inherit all tools. |
-| `disallowedTools` | Tools to deny — removed from inherited or specified list. |
+| `disallowedTools` | Tools to deny - removed from inherited or specified list. |
 | `model` | `sonnet`, `opus`, `haiku`, or `inherit`. Default: inherit. |
 | `permissionMode` | `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, or `plan`. Controls permission prompts. |
 | `maxTurns` | Limits agentic turns. Prevents runaway agents from looping. |
@@ -555,7 +555,7 @@ Agents are markdown files with YAML frontmatter that define specialist subagents
 
 The clearest example of why you'd want an agent instead of a rule. The code reviewer needs to:
 
-1. Be read-only — it should never write or edit files, only report
+1. Be read-only - it should never write or edit files, only report
 2. Run on `sonnet` (lighter model) since reviewing doesn't need the most capable model
 3. Have a 25-turn limit to prevent infinite review loops
 
@@ -564,7 +564,7 @@ Here's its frontmatter:
 ```yaml
 ---
 name: code-reviewer
-description: General-purpose code reviewer. Examines code for logical errors, race conditions, edge cases, type mismatches, and CLAUDE.md compliance. Read-only — never modifies code. Works on specific files by default; supports git diff review when explicitly requested.
+description: General-purpose code reviewer. Examines code for logical errors, race conditions, edge cases, type mismatches, and CLAUDE.md compliance. Read-only - never modifies code. Works on specific files by default; supports git diff review when explicitly requested.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 maxTurns: 25
@@ -577,7 +577,7 @@ A rule can say "never modify code when reviewing." An agent makes it structurall
 
 ### Where agent files live
 
-This repo's `agents/` directory maps to `~/.claude/agents/`. These are **user-global agents** — available across every project.
+This repo's `agents/` directory maps to `~/.claude/agents/`. These are **user-global agents** - available across every project.
 
 For **project-specific agents**, put them in `.claude/agents/` at the project root. Project agents are available only in that project. If you have a database migration specialist that only makes sense for one codebase, put it there rather than polluting your global agent list.
 
@@ -596,19 +596,19 @@ Rule of thumb: if it's a style preference or a guardrail → rule. If it's a dis
 
 A few agent-related features worth knowing about:
 
-**Permission modes** — Agents can specify a `permissionMode` to control how tool permissions are handled. `plan` mode lets the agent analyze without modifying files. `dontAsk` auto-denies tools unless pre-approved. `bypassPermissions` skips all prompts (for safe environments). The same five modes (`default`, `acceptEdits`, `plan`, `dontAsk`, `bypassPermissions`) are also available as a global `defaultMode` setting.
+**Permission modes** - Agents can specify a `permissionMode` to control how tool permissions are handled. `plan` mode lets the agent analyze without modifying files. `dontAsk` auto-denies tools unless pre-approved. `bypassPermissions` skips all prompts (for safe environments). The same five modes (`default`, `acceptEdits`, `plan`, `dontAsk`, `bypassPermissions`) are also available as a global `defaultMode` setting.
 
-**Agent teams** (experimental) — Multiple Claude Code instances coordinating on work. A team lead delegates, teammates work independently with shared task lists and direct messaging. Enabled via `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or settings. Higher token usage than single sessions. See the [agent teams docs](https://code.claude.com/docs/en/agent-teams).
+**Agent teams** (experimental) - Multiple Claude Code instances coordinating on work. A team lead delegates, teammates work independently with shared task lists and direct messaging. Enabled via `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or settings. Higher token usage than single sessions. See the [agent teams docs](https://code.claude.com/docs/en/agent-teams).
 
-**PostToolUseFailure** — A hook event that fires after a tool call fails (companion to `PostToolUse` which fires on success). Cannot block since the failure already happened. Useful for logging or alerting on tool failures.
+**PostToolUseFailure** - A hook event that fires after a tool call fails (companion to `PostToolUse` which fires on success). Cannot block since the failure already happened. Useful for logging or alerting on tool failures.
 
-**Plugin hooks** — Plugins can bundle their own hooks via a `hooks/hooks.json` file. When a plugin is enabled, its hooks merge with user and project hooks. This is a plugin-specific mechanism, not a standalone alternative to `settings.json` for regular hook configuration.
+**Plugin hooks** - Plugins can bundle their own hooks via a `hooks/hooks.json` file. When a plugin is enabled, its hooks merge with user and project hooks. This is a plugin-specific mechanism, not a standalone alternative to `settings.json` for regular hook configuration.
 
 ---
 
 ## Settings
 
-The `settings.json` in this repo is a template. **Copy it to `~/.claude/settings.json`** — that's where Claude Code looks for it. A `settings.json` at the repo root is not a recognized Claude Code path and will be silently ignored.
+The `settings.json` in this repo is a template. **Copy it to `~/.claude/settings.json`** - that's where Claude Code looks for it. A `settings.json` at the repo root is not a recognized Claude Code path and will be silently ignored.
 
 ```bash
 cp settings.json ~/.claude/settings.json
@@ -635,7 +635,7 @@ The permissions system uses `allow` and `deny` rules with a `Tool(pattern)` synt
 
 Pattern wildcards: `*` matches within a single directory level. `**` matches across directories.
 
-Why the deny rules? The `.env` deny prevents Claude from reading secrets that don't need to be in context. The `node_modules` deny prevents it from indexing thousands of dependency files when it does a broad search. Same logic for `dist/`, `build/`, lock files — noise that adds tokens without value.
+Why the deny rules? The `.env` deny prevents Claude from reading secrets that don't need to be in context. The `node_modules` deny prevents it from indexing thousands of dependency files when it does a broad search. Same logic for `dist/`, `build/`, lock files - noise that adds tokens without value.
 
 The `allow` rules pre-approve commonly-needed config files so Claude doesn't prompt every time it wants to read `package.json` or `CLAUDE.md`.
 
@@ -659,11 +659,11 @@ Hooks connect to lifecycle events in `settings.json`. Each event takes an array 
 }
 ```
 
-The `matcher` field filters by tool name — only fires the hook when the matched tool is called. Omit `matcher` to fire on every tool call for that event. See [Hooks](#hooks) for the exit code contract and what these hooks do.
+The `matcher` field filters by tool name - only fires the hook when the matched tool is called. Omit `matcher` to fire on every tool call for that event. See [Hooks](#hooks) for the exit code contract and what these hooks do.
 
 ### Hook scoping and teams
 
-Hooks from all settings files **merge — they don't override**. If your global `~/.claude/settings.json` registers a `PreToolUse` hook and a project's `.claude/settings.json` registers another, both run. Identical commands are deduplicated, but different hooks all fire.
+Hooks from all settings files **merge - they don't override**. If your global `~/.claude/settings.json` registers a `PreToolUse` hook and a project's `.claude/settings.json` registers another, both run. Identical commands are deduplicated, but different hooks all fire.
 
 This matters in teams. Settings files and what they're for:
 
@@ -675,13 +675,13 @@ This matters in teams. Settings files and what they're for:
 
 **You cannot disable a specific global hook from a project file.** There's no blacklist. Your options:
 
-1. **`"disableAllHooks": true`** — nuclear option. Put it in `.claude/settings.json` or `.claude/settings.local.json` to kill all hooks for that project. Managed policy hooks (enterprise) are exempt.
-2. **Don't register personal hooks at project level.** If a hook is personal preference (like notification sounds), keep it in `~/.claude/settings.json` — not in the project's `.claude/settings.json`.
-3. **Use `/hooks` menu** — toggle all hooks on/off for the current session.
+1. **`"disableAllHooks": true`** - nuclear option. Put it in `.claude/settings.json` or `.claude/settings.local.json` to kill all hooks for that project. Managed policy hooks (enterprise) are exempt.
+2. **Don't register personal hooks at project level.** If a hook is personal preference (like notification sounds), keep it in `~/.claude/settings.json` - not in the project's `.claude/settings.json`.
+3. **Use `/hooks` menu** - toggle all hooks on/off for the current session.
 
-**Example: the Bronson problem.** You add `notification-alert.sh` to the team's `.claude/settings.json` because you want everyone to hear when Claude needs input. Bronson hates it. But Bronson can't disable just that one hook — hooks merge, not override. His only escape is `"disableAllHooks": true` in `.claude/settings.local.json`, which kills *all* hooks including the code quality gates he actually wants.
+**Example: the Bronson problem.** You add `notification-alert.sh` to the team's `.claude/settings.json` because you want everyone to hear when Claude needs input. Bronson hates it. But Bronson can't disable just that one hook - hooks merge, not override. His only escape is `"disableAllHooks": true` in `.claude/settings.local.json`, which kills *all* hooks including the code quality gates he actually wants.
 
-The fix: don't put notification hooks in project settings. Keep them in personal `~/.claude/settings.json`. Each teammate chooses their own alert style (or none). Reserve `.claude/settings.json` for hooks the whole team needs — quality gates, security checks, project-specific linting.
+The fix: don't put notification hooks in project settings. Keep them in personal `~/.claude/settings.json`. Each teammate chooses their own alert style (or none). Reserve `.claude/settings.json` for hooks the whole team needs - quality gates, security checks, project-specific linting.
 
 ```
 ~/.claude/settings.json          ← Your notification hooks, personal preferences
@@ -689,7 +689,7 @@ The fix: don't put notification hooks in project settings. Keep them in personal
 .claude/settings.local.json       ← Personal project overrides (gitignored)
 ```
 
-Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and settings precedence: Managed policy > CLI args > Local > Project > User. Array settings like `permissions.allow` merge across scopes rather than override — project-level allow rules stack on top of global ones.
+Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and settings precedence: Managed policy > CLI args > Local > Project > User. Array settings like `permissions.allow` merge across scopes rather than override - project-level allow rules stack on top of global ones.
 
 <details>
 <summary>Full settings.json</summary>
@@ -806,18 +806,18 @@ Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and set
 
 </details>
 
-> **Note:** The `enabledPlugins` block lists plugins specific to this setup — remove or replace with your own.
+> **Note:** The `enabledPlugins` block lists plugins specific to this setup - remove or replace with your own.
 
 ---
 
 ## Skills
 
-Skills are reusable task templates with step-by-step instructions. They differ from agents: agents are delegatable specialists (a different "person" doing the work), skills are more like checklists — structured guidance for a task that the main Claude session follows directly.
+Skills are reusable task templates with step-by-step instructions. They differ from agents: agents are delegatable specialists (a different "person" doing the work), skills are more like checklists - structured guidance for a task that the main Claude session follows directly.
 
 This repo includes two skills:
 
-- `debug-wp` — WordPress debugging workflow: isolate, trace, reproduce, fix
-- `qa-check` — Quality assurance checklist for before-you-ship reviews
+- `debug-wp` - WordPress debugging workflow: isolate, trace, reproduce, fix
+- `qa-check` - Quality assurance checklist for before-you-ship reviews
 
 Directory structure:
 
@@ -876,7 +876,7 @@ Run `/debug-wp 500 error on checkout page` to invoke with arguments. The `argume
 
 ### Forked context
 
-Set `context: fork` to run the skill in a separate subagent. The skill content becomes the prompt. Use `agent` to specify which subagent type handles it — built-in agents (`Explore`, `Plan`, `general-purpose`) or custom subagents from your `agents/` directory.
+Set `context: fork` to run the skill in a separate subagent. The skill content becomes the prompt. Use `agent` to specify which subagent type handles it - built-in agents (`Explore`, `Plan`, `general-purpose`) or custom subagents from your `agents/` directory.
 
 ### String substitutions
 
@@ -884,7 +884,7 @@ Skills support variable substitution: `$ARGUMENTS` (full argument string), `$ARG
 
 ### Dynamic context
 
-The `` !`command` `` syntax runs shell commands before skill content is sent to Claude. Use it to inject dynamic context — git status, current branch, file listings — into the skill prompt.
+The `` !`command` `` syntax runs shell commands before skill content is sent to Claude. Use it to inject dynamic context - git status, current branch, file listings - into the skill prompt.
 
 ### Bundled skills
 
@@ -898,17 +898,17 @@ Without understanding memory, you don't know how Claude retains context between 
 
 ### Auto memory
 
-Claude writes notes for itself based on corrections you make and preferences it observes. If you tell Claude "always use `const` instead of `let` in this project," it remembers that for next time. This is enabled by default — you don't configure it, and it's separate from your CLAUDE.md files.
+Claude writes notes for itself based on corrections you make and preferences it observes. If you tell Claude "always use `const` instead of `let` in this project," it remembers that for next time. This is enabled by default - you don't configure it, and it's separate from your CLAUDE.md files.
 
 The difference: CLAUDE.md is what you tell Claude. Auto memory is what Claude tells itself.
 
 ### MEMORY.md
 
-The entrypoint for auto memory is `MEMORY.md`. Claude creates and maintains this file automatically. The first 200 lines load at the start of every session — this is the auto-loaded limit for MEMORY.md specifically, not for CLAUDE.md files (which load in full regardless of length).
+The entrypoint for auto memory is `MEMORY.md`. Claude creates and maintains this file automatically. The first 200 lines load at the start of every session - this is the auto-loaded limit for MEMORY.md specifically, not for CLAUDE.md files (which load in full regardless of length).
 
 ### Topic files
 
-When Claude accumulates enough notes on a subject, it creates separate `.md` files alongside MEMORY.md — things like `debugging.md`, `api-conventions.md`, or whatever topics emerge from your work. These are referenced from MEMORY.md and loaded on demand.
+When Claude accumulates enough notes on a subject, it creates separate `.md` files alongside MEMORY.md - things like `debugging.md`, `api-conventions.md`, or whatever topics emerge from your work. These are referenced from MEMORY.md and loaded on demand.
 
 ### Storage location
 
@@ -921,7 +921,7 @@ Auto memory lives in your Claude directory, organized by project:
 └── api-conventions.md
 ```
 
-The `<project-path-encoded>` is derived from your git repo's absolute path. For this repo, it's `-Users-stuart-Personal-project-claude-setup`. You can browse these files directly — they're plain markdown.
+The `<project-path-encoded>` is derived from your git repo's absolute path. For this repo, it's `-Users-stuart-Personal-project-claude-setup`. You can browse these files directly - they're plain markdown.
 
 ### The /memory command
 
@@ -939,7 +939,7 @@ Agents can maintain their own persistent memory using the `memory` frontmatter f
 
 ### CLAUDE.md vs auto memory
 
-Use CLAUDE.md for explicit instructions you want every session — "use tabs," "no console.log," "always write tests first." Let auto memory handle learned patterns and corrections — things Claude picks up from how you work. If auto memory records something wrong, edit `MEMORY.md` directly. It's your file.
+Use CLAUDE.md for explicit instructions you want every session - "use tabs," "no console.log," "always write tests first." Let auto memory handle learned patterns and corrections - things Claude picks up from how you work. If auto memory records something wrong, edit `MEMORY.md` directly. It's your file.
 
 For the full auto memory reference: [code.claude.com/docs/en/memory](https://code.claude.com/docs/en/memory)
 
@@ -947,21 +947,21 @@ For the full auto memory reference: [code.claude.com/docs/en/memory](https://cod
 
 ## Beyond Default Claude
 
-Out of the box, Claude Code reads your CLAUDE.md, runs tools, and follows instructions. This setup goes further — enforcing behaviours that Claude won't do on its own, and catching failure modes that instructions alone can't prevent.
+Out of the box, Claude Code reads your CLAUDE.md, runs tools, and follows instructions. This setup goes further - enforcing behaviours that Claude won't do on its own, and catching failure modes that instructions alone can't prevent.
 
 Everything below is implemented through the rules, hooks, and agents in this repo. None of it requires external tools or plugins (except GSD, which is optional).
 
 ### Test-Driven Development
 
-Claude's default behaviour is implementation-first: write the code, then write tests that confirm it works. This is backwards — tests written after seeing the implementation tend to test what the code *does*, not what it *should do*. The result: tests pass, but the code has bugs.
+Claude's default behaviour is implementation-first: write the code, then write tests that confirm it works. This is backwards - tests written after seeing the implementation tend to test what the code *does*, not what it *should do*. The result: tests pass, but the code has bugs.
 
 This setup enforces a strict TDD cycle through `rules/testing.md`:
 
-1. **Write a failing test first** — from the requirement, not the code
-2. **Verify it fails for the right reason** — "module not found" doesn't count; the assertion itself must fail
+1. **Write a failing test first** - from the requirement, not the code
+2. **Verify it fails for the right reason** - "module not found" doesn't count; the assertion itself must fail
 3. **Implement minimally** to make it pass
 4. **Run the full suite** to catch regressions
-5. **Mutation check** — mentally break the implementation (swap `>` for `>=`, remove a guard). If tests still pass, they're not testing what they claim
+5. **Mutation check** - mentally break the implementation (swap `>` for `>=`, remove a guard). If tests still pass, they're not testing what they claim
 
 The rule also addresses the most common AI testing failure: **over-mocking**. Every mock is an assumption about how the real dependency behaves. If the assumption is wrong, the test passes and production breaks. The rule limits mocks to things you genuinely can't control (network, time, third-party APIs) and flags any test with more than 3 mocks as a design smell.
 
@@ -969,13 +969,13 @@ When users report bugs despite passing tests, the rule explicitly states: *the t
 
 ### Deterministic Code Quality Gates
 
-CLAUDE.md rules are advisory — Claude can ignore them under pressure, especially as context fills up. Hooks are deterministic. This setup uses `PreToolUse` hooks on `Edit|Write` that **block** bad code before it's written:
+CLAUDE.md rules are advisory - Claude can ignore them under pressure, especially as context fills up. Hooks are deterministic. This setup uses `PreToolUse` hooks on `Edit|Write` that **block** bad code before it's written:
 
-- **Tab enforcement** — spaces are rejected (exit 2)
-- **No console.log** — blocked in JS/TS files
-- **No placeholder comments** — `// ...` and `// rest of...` are rejected with "write real code"
-- **Security-sensitive file detection** — when editing auth, session, or crypto files, injects a security reminder into context
-- **Dependency verification** — checks imported packages exist in `package.json`
+- **Tab enforcement** - spaces are rejected (exit 2)
+- **No console.log** - blocked in JS/TS files
+- **No placeholder comments** - `// ...` and `// rest of...` are rejected with "write real code"
+- **Security-sensitive file detection** - when editing auth, session, or crypto files, injects a security reminder into context
+- **Dependency verification** - checks imported packages exist in `package.json`
 
 These run on every single file write. Claude gets immediate feedback and corrects before moving on.
 
@@ -983,27 +983,27 @@ These run on every single file write. Claude gets immediate feedback and correct
 
 The `verify-before-stop.sh` Stop hook runs the project's build command and test suite before Claude finishes a response. It auto-detects the stack (npm/bun/pnpm/yarn, pytest, cargo, go, deno, make) and runs with a 30-second timeout.
 
-If build or tests fail, Claude gets the output as feedback. The hook is advisory (exit 0) rather than blocking, because some projects don't have tests yet — but it ensures Claude sees failures instead of silently finishing with broken code.
+If build or tests fail, Claude gets the output as feedback. The hook is advisory (exit 0) rather than blocking, because some projects don't have tests yet - but it ensures Claude sees failures instead of silently finishing with broken code.
 
 The official docs describe [agent-based Stop hooks](https://code.claude.com/docs/en/hooks-guide) for this purpose. The command hook approach here is simpler and doesn't consume LLM tokens, but trades off the ability to make judgment calls about what "done" means.
 
 ### Opinionated UI/UX Design
 
-Claude produces generic-looking UI by default — centered layouts, default shadows, #000/#FFF, no micro-interactions. The conditional rule `rules/ui-ux.md` (loaded only when touching component/view/template files) enforces:
+Claude produces generic-looking UI by default - centered layouts, default shadows, #000/#FFF, no micro-interactions. The conditional rule `rules/ui-ux.md` (loaded only when touching component/view/template files) enforces:
 
-- **8pt grid** — all spacing in multiples of 8px (4px for tight spots)
-- **Anti-AI polish** — empty states instead of blank screens, loading skeletons, toast notifications
-- **Rich grays** — no pure black or white; use slate-900 and similar
-- **Accessibility baseline** — semantic HTML, aria-labels, AA contrast, keyboard navigation
-- **Micro-interactions** — hover/active states, transitions using whatever animation library is installed
+- **8pt grid** - all spacing in multiples of 8px (4px for tight spots)
+- **Anti-AI polish** - empty states instead of blank screens, loading skeletons, toast notifications
+- **Rich grays** - no pure black or white; use slate-900 and similar
+- **Accessibility baseline** - semantic HTML, aria-labels, AA contrast, keyboard navigation
+- **Micro-interactions** - hover/active states, transitions using whatever animation library is installed
 
 ### Manual Commit Control and Destructive Command Blocking
 
 By default, Claude will `git commit` whenever it feels appropriate and can run any Bash command. The `block-git-commit.sh` PreToolUse hook blocks:
 
-- **Git commits** — both `git commit` and GSD's `gsd-tools commit`
-- **Destructive commands** — `rm -rf`, filesystem destruction patterns, recursive `chmod`/`chown` on broad paths
-- **Data exfiltration** — `curl`/`wget` with POST data, upload flags, or data flags
+- **Git commits** - both `git commit` and GSD's `gsd-tools commit`
+- **Destructive commands** - `rm -rf`, filesystem destruction patterns, recursive `chmod`/`chown` on broad paths
+- **Data exfiltration** - `curl`/`wget` with POST data, upload flags, or data flags
 
 This keeps commits under your control and prevents accidental (or prompt-injection-driven) destruction. The hook uses `exit 2` to block and feed the reason back to Claude, so it adapts rather than retrying.
 
@@ -1017,12 +1017,12 @@ Beyond the default Agent tool, this setup defines 14 custom agents for specific 
 
 | Agent | What it adds |
 |-------|-------------|
-| `ui-review` | Reviews frontend for usability, accessibility, responsive design — not just code correctness |
+| `ui-review` | Reviews frontend for usability, accessibility, responsive design - not just code correctness |
 | `simplify` | Finds over-engineering and suggests concrete simplifications |
 | `perf` | Runtime bottlenecks, bundle bloat, unnecessary network requests |
 | `wp` / `wp-perf` / `wp-security` | WordPress-specific expertise following Human Made and 10up standards |
 | `code-reviewer` | Read-only (`permissionMode: plan`), persistent memory across sessions (`memory: user`) |
-| `test-writer` | Persistent memory (`memory: user`) — learns your test patterns across projects |
+| `test-writer` | Persistent memory (`memory: user`) - learns your test patterns across projects |
 | `frontend-builder` / `backend-builder` | Run in isolated worktrees for parallel execution |
 
 ### Hardening (Optional)
@@ -1031,7 +1031,7 @@ This setup is opinionated but not locked down. If you want to go further, here a
 
 **Block all outbound network access.** The `block-git-commit.sh` hook blocks `curl`/`wget` with POST data, but doesn't block GET requests or `WebFetch`. For stricter environments, add `WebFetch` and `Bash(curl *)` to the `permissions.deny` array in `settings.json`, or use `/sandbox` for OS-level network isolation. Trade-off: Claude can't fetch docs or check URLs.
 
-**Prune CLAUDE.md aggressively.** Community consensus is that CLAUDE.md instructions are suggestions, not contracts — and instruction-following quality degrades as line count increases. This repo's CLAUDE.md is 47 lines (well under the ~100-line ceiling). If you extend it, regularly ask: "Would removing this line cause Claude to make mistakes?" If not, cut it. Anything you can enforce via a hook, enforce via a hook instead.
+**Prune CLAUDE.md aggressively.** Community consensus is that CLAUDE.md instructions are suggestions, not contracts - and instruction-following quality degrades as line count increases. This repo's CLAUDE.md is 47 lines (well under the ~100-line ceiling). If you extend it, regularly ask: "Would removing this line cause Claude to make mistakes?" If not, cut it. Anything you can enforce via a hook, enforce via a hook instead.
 
 **Restrict MCP server access.** If you use MCP servers, explicitly allowlist trusted ones rather than enabling all project servers. In `settings.json`:
 
@@ -1062,17 +1062,17 @@ This setup is opinionated but not locked down. If you want to go further, here a
 }
 ```
 
-Trade-off: fires on every file write (noisy for large refactors), and async hooks can't block — Claude sees results on the next turn, not immediately. The synchronous Stop hook is better for enforcement; async PostToolUse is better for fast feedback loops.
+Trade-off: fires on every file write (noisy for large refactors), and async hooks can't block - Claude sees results on the next turn, not immediately. The synchronous Stop hook is better for enforcement; async PostToolUse is better for fast feedback loops.
 
 ---
 
 ## GSD
 
-GSD is a workflow framework I use on top of Claude Code. It's not required for any of this to work. Everything in this repo — the rules, hooks, agents, settings — functions without it.
+GSD is a workflow framework I use on top of Claude Code. It's not required for any of this to work. Everything in this repo - the rules, hooks, agents, settings - functions without it.
 
 What GSD adds: structured planning (breaking work into phases and plans), phased execution with per-task commits, and verification gates between phases. If you see references to `.planning/` directories or `/gsd:` commands in the CLAUDE.md, that's GSD. You can safely ignore or remove those sections if you don't use it.
 
-GSD installs its own hooks during setup (`gsd-check-update.js` for version checks, `gsd-context-monitor.js` for context window tracking). These are not included in this repo's `settings.json` — GSD manages them separately. If you install GSD and see these hooks added to your settings, that's expected.
+GSD installs its own hooks during setup (`gsd-check-update.js` for version checks, `gsd-context-monitor.js` for context window tracking). These are not included in this repo's `settings.json` - GSD manages them separately. If you install GSD and see these hooks added to your settings, that's expected.
 
 More at: [github.com/gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done)
 
@@ -1087,7 +1087,7 @@ git clone https://github.com/shieldsstuart/project-claude-setup
 cp -r project-claude-setup/. ~/.claude/
 ```
 
-Then adapt it. The rules are opinionated — they reflect how I work. Read through each one in `rules/` and remove or modify anything that doesn't fit your style. If you don't work with WordPress, delete `php-wordpress.md`. If you prefer a different SQL library, update the parameterized query examples in `security.md`.
+Then adapt it. The rules are opinionated - they reflect how I work. Read through each one in `rules/` and remove or modify anything that doesn't fit your style. If you don't work with WordPress, delete `php-wordpress.md`. If you prefer a different SQL library, update the parameterized query examples in `security.md`.
 
 The official docs go deeper on everything here:
 - Claude Code docs: [code.claude.com/docs](https://code.claude.com/docs)

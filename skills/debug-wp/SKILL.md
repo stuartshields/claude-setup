@@ -10,7 +10,7 @@ allowed-tools: Read, Grep, Glob, Bash, AskUserQuestion
 
 ## When to Use
 
-Use this skill when diagnosing any WordPress problem — white screen of death, plugin conflicts, 500 errors, broken layouts, admin lockouts, performance issues, migration failures, cron problems, or any "it was working yesterday" scenario.
+Use this skill when diagnosing any WordPress problem - white screen of death, plugin conflicts, 500 errors, broken layouts, admin lockouts, performance issues, migration failures, cron problems, or any "it was working yesterday" scenario.
 
 Do NOT jump to solutions. Always complete the triage interview first.
 
@@ -110,16 +110,16 @@ wp plugin verify-checksums --all
 
 After diagnosis, present solutions as a **numbered list ordered by**:
 
-1. **Likelihood** — most probable fix first
-2. **Reversibility** — safest / most easily undone fixes before destructive ones
-3. **Effort** — quick wins before complex multi-step fixes
+1. **Likelihood** - most probable fix first
+2. **Reversibility** - safest / most easily undone fixes before destructive ones
+3. **Effort** - quick wins before complex multi-step fixes
 
 For each solution, include:
 
-- **What to do** — specific steps, commands, or file edits
-- **Why this fixes it** — brief explanation connecting back to the diagnosed root cause
-- **Risk level** — Low (easily reversed), Medium (backup recommended), High (data loss possible)
-- **Rollback plan** — how to undo if it makes things worse
+- **What to do** - specific steps, commands, or file edits
+- **Why this fixes it** - brief explanation connecting back to the diagnosed root cause
+- **Risk level** - Low (easily reversed), Medium (backup recommended), High (data loss possible)
+- **Rollback plan** - how to undo if it makes things worse
 
 Always recommend a **backup before any fix** that modifies files or database. Suggest `wp db export backup.sql` or the hosting provider's snapshot tool.
 
@@ -135,8 +135,8 @@ After the user applies a fix:
 ## Rules
 
 - **Never skip the interview.** Even if the symptom seems obvious, confirm the environment and trigger before proposing fixes.
-- **Never suggest editing core WordPress files** (`wp-includes/`, `wp-admin/`) — changes will be overwritten on update.
+- **Never suggest editing core WordPress files** (`wp-includes/`, `wp-admin/`) - changes will be overwritten on update.
 - **Always recommend child themes** if the fix involves theme file edits.
 - **Always recommend backups** before database changes or file modifications.
-- **Prefer WP-CLI commands** when the user has shell access — they're more precise and scriptable than admin UI steps.
-- **Prefer reversible fixes first** — renaming a folder is safer than deleting it.
+- **Prefer WP-CLI commands** when the user has shell access - they're more precise and scriptable than admin UI steps.
+- **Prefer reversible fixes first** - renaming a folder is safer than deleting it.

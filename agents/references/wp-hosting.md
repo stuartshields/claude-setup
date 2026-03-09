@@ -2,7 +2,7 @@
 
 ## Hosting Detection
 
-Check CLAUDE.md first for an explicit `Hosting:` declaration — this is the **authoritative source** and overrides any auto-detection. Projects that have migrated between hosts (e.g., WP Engine → Kinsta) will have stale markers in their codebase (old mu-plugins, constants, config files). Only fall back to auto-detection if CLAUDE.md doesn't specify:
+Check CLAUDE.md first for an explicit `Hosting:` declaration - this is the **authoritative source** and overrides any auto-detection. Projects that have migrated between hosts (e.g., WP Engine → Kinsta) will have stale markers in their codebase (old mu-plugins, constants, config files). Only fall back to auto-detection if CLAUDE.md doesn't specify:
 
 | Platform | Detection Markers |
 |---|---|
@@ -32,18 +32,18 @@ Check CLAUDE.md first for an explicit `Hosting:` declaration — this is the **a
 |---|---|---|
 | **Altis** | `DISALLOW_FILE_MODS` enforced, XML-RPC restricted, `altis/security` module (login rate limiting, 2FA, headers), WAF at CDN layer | Altis-specific REST endpoints, `.config/` YAML misconfigs, Elasticsearch query injection if using raw ES queries |
 | **VIP** | Code review before deploy, restricted filesystem, restricted functions, WAF, `DISALLOW_FILE_MODS` enforced | VIP-specific hooks, `vip-config/` secrets management, custom `wpcom_vip_*` function misuse |
-| **WP Engine** | Managed updates, WAF, brute-force protection | No enforced `DISALLOW_FILE_MODS` by default — verify. SFTP access means broader attack surface than git-only deploy. |
+| **WP Engine** | Managed updates, WAF, brute-force protection | No enforced `DISALLOW_FILE_MODS` by default - verify. SFTP access means broader attack surface than git-only deploy. |
 | **Kinsta** | DDoS protection (Cloudflare), malware scanning, automatic backups | Redis connection security if exposed. SSH access means broader attack surface. |
-| **Generic** | None assumed — check everything. | Full server-level audit may be needed. All configuration checks are relevant. |
+| **Generic** | None assumed - check everything. | Full server-level audit may be needed. All configuration checks are relevant. |
 
 ## Platform-Specific Hosting Considerations
 
 ### Altis (HM Cloud)
-- Built-in Elasticsearch via `altis/search` — prefer `Altis\Enhanced_Search` over raw `WP_Query` for complex search
+- Built-in Elasticsearch via `altis/search` - prefer `Altis\Enhanced_Search` over raw `WP_Query` for complex search
 - Object cache: **Memcached** (built-in, no config needed). Use `wp_cache_*` directly.
 - Page cache: **Batcache** (built-in). Personalisation must be client-side JS.
 - Built-in CDN (CloudFront). No need for external CDN plugins.
-- Use Altis modules (`altis/cms`, `altis/media`, `altis/security`) — don't duplicate their functionality
+- Use Altis modules (`altis/cms`, `altis/media`, `altis/security`) - don't duplicate their functionality
 - `DISALLOW_FILE_MODS` is always `true`
 - Local dev via `composer serve` (Docker-based)
 - Config in `.config/` YAML files, not `wp-config.php` constants
@@ -52,18 +52,18 @@ Check CLAUDE.md first for an explicit `Hosting:` declaration — this is the **a
 - **Strict code review requirements.** VIP reviews all code before deploy.
 - **Disallowed functions:** `query_posts()`, `wp_reset_query()`, `get_posts()` (use `WP_Query`), `wp_remote_get()` without caching, `$wpdb->prepare()` without proper usage, `switch_to_blog()` in loops
 - Object cache: **Memcached** (built-in). Mandatory for production performance.
-- Page cache: built-in edge caching. Cannot be bypassed selectively — design around it.
+- Page cache: built-in edge caching. Cannot be bypassed selectively - design around it.
 - No direct filesystem writes. Use VIP Files service for uploads.
 - No `eval()`, `create_function()`, `extract()`, `file_put_contents()`, `file_get_contents()` for remote URLs
 - Use `wpcom_vip_*` helper functions where available
-- `wp_cache_get()` / `wp_cache_set()` — always use, especially for repeated queries
+- `wp_cache_get()` / `wp_cache_set()` - always use, especially for repeated queries
 - No cron jobs that run longer than 60 seconds
 
 ### WP Engine
 - Object cache: **Memcached** (built-in on most plans) or **Redis** (on higher plans). Check plan level.
 - Page cache: **EverCache** (proprietary). Cleared per page or full-site via admin or API.
 - No server config access (no `.htaccess` for Apache rules on their infrastructure)
-- Git push deploys or SFTP — no Composer-based deploys by default
+- Git push deploys or SFTP - no Composer-based deploys by default
 - Multisite supported but with caveats
 - No custom PHP extensions
 

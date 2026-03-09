@@ -17,7 +17,7 @@ Before doing anything, determine the project context:
 1. **Is this WordPress?** Check for `wp-config.php`, `composer.json` with WordPress deps, `style.css` with `Theme Name:`, `functions.php`, `wp-content/`, `content/`. If not WordPress, say so and offer general PHP/JS guidance instead.
 2. **Hosting platform:** Read `~/.claude/agents/references/wp-hosting.md` for detection markers and platform-specific details. Check CLAUDE.md first (authoritative), fall back to auto-detection.
 3. **Editor:** Check for `@wordpress/block-editor` or `@wordpress/scripts` in `package.json`, block registration in PHP (`register_block_type`), `block.json` files → **Gutenberg**. If none found, or Classic Editor plugin detected in `wp-config.php`/`composer.json`/active plugins → **Classic Editor**. Do not assume Gutenberg.
-4. **Code origin:** Is this HM-authored code or inherited from another agency? Check for HM namespaces (`HM\`), `humanmade/coding-standards` in composer, or CLAUDE.md notes. Legacy code from other agencies will have different patterns — adapt your review accordingly.
+4. **Code origin:** Is this HM-authored code or inherited from another agency? Check for HM namespaces (`HM\`), `humanmade/coding-standards` in composer, or CLAUDE.md notes. Legacy code from other agencies will have different patterns - adapt your review accordingly.
 5. **Build tooling:** Check for `@wordpress/scripts` in `package.json`, or custom Webpack/Gulp/Grunt configs. Note what's in use.
 
 Print a brief context summary:
@@ -81,17 +81,17 @@ Many HM client projects include code inherited from previous agencies. When revi
 
 Before using ANY action or filter in code you write:
 
-1. **Grep the full project first** — this catches core, plugin, theme, and mu-plugin hooks:
+1. **Grep the full project first** - this catches core, plugin, theme, and mu-plugin hooks:
    ```
    Grep for "do_action( 'hook_name'" or "apply_filters( 'hook_name'" across the entire project
    ```
   Search `wp-content/plugins/`, `wp-content/themes/`, `wp-content/mu-plugins/`, `content/plugins/`, `content/themes/`, `content/mu-plugins/`, and if available `wp-includes/` and `wp-admin/`.
 
    **Finding WP core:** If your working directory is `wp-content/`, `content/`, or deeper, core lives nearby. Check in this order:
-   1. **Parent directory first** — check if `../` is the WordPress root (look for `wp-includes/`, `wp-admin/`, `wp-load.php`). This is the most common layout.
-   2. **Sibling `wordpress/` directory** — check `../wordpress/wp-includes/`. Composer installs (including Altis) often put core in a `wordpress/` folder next to `content/`.
-   3. **Composer config** — read `composer.json` for `wordpress-install-dir` or `extra.wordpress-install-dir` to find the exact path.
-   4. **Gitignored core** — if none of the above finds core but `composer.json` references `johnpbloch/wordpress` or `roots/wordpress`, core is installed via Composer but may be in `.gitignore`. Ask the user: "WP core appears to be Composer-installed but gitignored. Can I look in `vendor/` or the Composer install path to verify hooks?"
+   1. **Parent directory first** - check if `../` is the WordPress root (look for `wp-includes/`, `wp-admin/`, `wp-load.php`). This is the most common layout.
+   2. **Sibling `wordpress/` directory** - check `../wordpress/wp-includes/`. Composer installs (including Altis) often put core in a `wordpress/` folder next to `content/`.
+   3. **Composer config** - read `composer.json` for `wordpress-install-dir` or `extra.wordpress-install-dir` to find the exact path.
+   4. **Gitignored core** - if none of the above finds core but `composer.json` references `johnpbloch/wordpress` or `roots/wordpress`, core is installed via Composer but may be in `.gitignore`. Ask the user: "WP core appears to be Composer-installed but gitignored. Can I look in `vendor/` or the Composer install path to verify hooks?"
 
    If you find `wp-includes/`, grep it. If you can't locate core on disk, fall back to step 2.
 
@@ -101,19 +101,19 @@ Before using ANY action or filter in code you write:
    ```
    https://developer.wordpress.org/reference/hooks/{hook_name}/
    ```
-   A 404 means the hook doesn't exist in core. This only works for core hooks — plugin/theme hooks won't be in the docs.
+   A 404 means the hook doesn't exist in core. This only works for core hooks - plugin/theme hooks won't be in the docs.
 
 3. **If neither confirms the hook exists**, do NOT use it. Instead:
    - Grep for related hooks in the relevant file (e.g. `do_action` calls in the plugin's main file, or `wp-includes/post.php` for post-related core hooks)
    - Or note the gap and ask the user what behaviour they need
 
-This applies to core hooks, plugin hooks, and theme hooks equally. The naming convention (`{prefix}_{object}_{action}`) is regular enough that fabricated names look correct — grep is the only reliable defence.
+This applies to core hooks, plugin hooks, and theme hooks equally. The naming convention (`{prefix}_{object}_{action}`) is regular enough that fabricated names look correct - grep is the only reliable defence.
 
 ## Architecture Patterns
 
 ### Hooks & Bootstrapping
 - Use namespaced functions with a `bootstrap()` function for action/filter registration
-- **Never use anonymous functions for hooks** — they cannot be unhooked
+- **Never use anonymous functions for hooks** - they cannot be unhooked
 - Register hooks outside `__construct()` for loose coupling and testability
 - Every hook callback should be a named, referenceable function
 
@@ -129,12 +129,12 @@ function bootstrap() {
 **Legacy note:** You'll see anonymous closures, `__construct()`-registered hooks, and singleton `get_instance()` patterns in inherited code. These work but can't be unhooked. Only refactor when actively modifying the component.
 
 ### Anti-Patterns to Avoid (in new code)
-- **No "main class" singletons** — Replace with namespaced functions for bootstrapping
-- **No cargo-cult patterns** — Don't use factories/singletons just because other plugins do
-- **No global variables** — Pass objects as parameters or use factories
-- **No `static` variables in functions** — Complicates testing and invalidation
-- Avoid strict paradigm adherence — favour functional/imperative style, use OOP only for modelling actual objects
-- **No external PHP frameworks** — WordPress APIs cover 99% of needs
+- **No "main class" singletons** - Replace with namespaced functions for bootstrapping
+- **No cargo-cult patterns** - Don't use factories/singletons just because other plugins do
+- **No global variables** - Pass objects as parameters or use factories
+- **No `static` variables in functions** - Complicates testing and invalidation
+- Avoid strict paradigm adherence - favour functional/imperative style, use OOP only for modelling actual objects
+- **No external PHP frameworks** - WordPress APIs cover 99% of needs
 
 ### Theme/Plugin Decoupling
 - Use `add_theme_support()` to declare plugin feature support
@@ -171,12 +171,12 @@ Use `@wordpress/scripts` (`wp-scripts`) as the standard build tool for WordPress
 - Supports JSX, TypeScript, SCSS, CSS Modules, PostCSS out of the box
 - Multiple entry points via `wp-scripts build src/editor.js src/frontend.js`
 
-**Legacy note:** Existing projects may use custom Webpack, Gulp, or Grunt. Don't migrate build tooling mid-task — note it as a future improvement. New projects and new build setups should use wp-scripts.
+**Legacy note:** Existing projects may use custom Webpack, Gulp, or Grunt. Don't migrate build tooling mid-task - note it as a future improvement. New projects and new build setups should use wp-scripts.
 
 ## REST API Patterns
 
 ### Endpoint Design
-- Register routes with `register_rest_route()` — always include `permission_callback`
+- Register routes with `register_rest_route()` - always include `permission_callback`
 - Use `WP_REST_Controller` pattern for complex endpoints
 - Return `WP_REST_Response` objects with appropriate status codes
 - Use `WP_Error` for error responses with meaningful codes and messages
@@ -187,19 +187,19 @@ Use `@wordpress/scripts` (`wp-scripts`) as the standard build tool for WordPress
 - Hook into `template_redirect` for lightweight custom endpoints
 - Build endpoints that work with page caching
 
-**Legacy note:** Many inherited projects use `admin-ajax.php` extensively. It works but bypasses page caching. Don't rewrite existing AJAX handlers unprompted — flag for future migration to REST API when the component is next modified.
+**Legacy note:** Many inherited projects use `admin-ajax.php` extensively. It works but bypasses page caching. Don't rewrite existing AJAX handlers unprompted - flag for future migration to REST API when the component is next modified.
 
 ## Database Queries
 
 ### WP_Query Best Practices
-- Use `WP_Query` over `get_posts()` (especially on VIP — `get_posts()` disables filters)
-- **Never `posts_per_page => -1`** — always set a reasonable upper limit
+- Use `WP_Query` over `get_posts()` (especially on VIP - `get_posts()` disables filters)
+- **Never `posts_per_page => -1`** - always set a reasonable upper limit
 - Performance args when you don't need full data:
-  - `'no_found_rows' => true` — skip pagination count
-  - `'update_post_meta_cache' => false` — skip meta priming
-  - `'update_post_term_cache' => false` — skip taxonomy priming
-  - `'fields' => 'ids'` — return only IDs
-- **Avoid `post__not_in`** — filter results in PHP instead
+  - `'no_found_rows' => true` - skip pagination count
+  - `'update_post_meta_cache' => false` - skip meta priming
+  - `'update_post_term_cache' => false` - skip taxonomy priming
+  - `'fields' => 'ids'` - return only IDs
+- **Avoid `post__not_in`** - filter results in PHP instead
 - Use taxonomies for efficient post lookups, not meta queries for filtering
 - Paginate through large datasets in batches, never load all at once
 
@@ -224,7 +224,7 @@ Use `@wordpress/scripts` (`wp-scripts`) as the standard build tool for WordPress
 ### Block Development
 - Use `block.json` for block registration (metadata-driven)
 - Register with `register_block_type( __DIR__ . '/build/blocks/my-block' )`
-- Build with `wp-scripts` — one entry per block or shared entry with multiple blocks
+- Build with `wp-scripts` - one entry per block or shared entry with multiple blocks
 - Use `@wordpress/block-editor`, `@wordpress/components`, `@wordpress/data` packages
 - Server-side rendering via `render_callback` or `render.php` for dynamic blocks
 
@@ -232,14 +232,14 @@ Use `@wordpress/scripts` (`wp-scripts`) as the standard build tool for WordPress
 - ES6 class syntax or functional components with hooks
 - Method order: lifecycle → custom methods → `render()`
 - Event handlers: `onEventName` pattern
-- Props over state — avoid copying props into state
+- Props over state - avoid copying props into state
 - PropTypes for all properties; use specific validators, not `any`/`array`/`object`
 - Component CSS alongside component file, imported with `import './styles.css'`
 - Tests colocated with source files: `Component.test.js`
-- No inline styles in JS — use CSS/SCSS files
-- No jQuery for DOM manipulation — use React state + native APIs
+- No inline styles in JS - use CSS/SCSS files
+- No jQuery for DOM manipulation - use React state + native APIs
 - Use `fetch()` or `@wordpress/api-fetch` over `$.ajax` or Backbone models
-- State in JS (React/Redux/`@wordpress/data`), never in DOM attributes — use `wp_localize_script` or `wp_add_inline_script` for PHP→JS data
+- State in JS (React/Redux/`@wordpress/data`), never in DOM attributes - use `wp_localize_script` or `wp_add_inline_script` for PHP→JS data
 
 ## Editor: Classic Editor
 
