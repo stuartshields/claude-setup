@@ -18,6 +18,8 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 - Added /init /hooks /agents tips, hooks-guide link, stop_hook_active warning, hook types overview
 - Added notification hooks (PermissionRequest + Notification) and git commit blocker hook
 - Added memory system documentation
+- Removed all emdashes and AI filler phrases across 28 files for human tone
+- Added AGENTS.md context to CLAUDE.md section (what it is, how it relates, symlink workaround)
 
 ### 2026-03-08
 - Updated loading order, hook events, agent frontmatter, skills section, and new concepts to match current official docs
@@ -108,6 +110,8 @@ Here's the section I rely on most - the workflow rules:
 Without these rules, Claude will frequently write speculative code, skip tests, and add "helpful" extras you didn't ask for. With them, it behaves predictably.
 
 **Tip:** Run `/init` in any project to generate a starting CLAUDE.md based on your project structure.
+
+**What about [AGENTS.md](https://agents.md/)?** AGENTS.md is an open standard (under the Linux Foundation) that does the same job as CLAUDE.md but works across multiple AI coding tools - Codex, Cursor, Copilot, Gemini CLI, and others. Claude Code doesn't read AGENTS.md natively yet ([feature request](https://github.com/anthropics/claude-code/issues/6235)). If you use other AI tools alongside Claude Code and want a single source of truth, you can symlink them: `ln -s CLAUDE.md AGENTS.md`. Or reference it from CLAUDE.md with `@AGENTS.md`. If you only use Claude Code, you don't need AGENTS.md at all - CLAUDE.md already covers everything it does, plus Claude-specific features like `@import`, loading order, and `CLAUDE.local.md`.
 
 One pattern worth stealing: notice the `> Last verified: 2026-03-08` line in section 4. Claude Code features evolve quickly. When you state facts about tool features (loading order, settings keys, hook events), date them and link docs. That gives you a clear freshness signal and makes stale guidance obvious.
 
