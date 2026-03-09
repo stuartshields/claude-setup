@@ -7,6 +7,8 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 ## What's Changed
 
 ### 2026-03-09
+- Added Figma MCP rule enforcing tool-based design extraction (`get_design_context`, `get_screenshot`, `get_variable_defs`) over assumptions. Includes required tool call sequence, design token mapping, Code Connect support, and visual verification loop.
+- Added Playwright MCP rule for browser automation best practices (`browser_snapshot` vs `browser_take_screenshot`, Figma comparison workflow, form interactions, debugging, token efficiency)
 - Expanded block-git-commit hook to block destructive Bash commands (rm -rf, filesystem destruction, recursive permission changes) and data exfiltration (curl/wget POST)
 - Fixed false positive where grep/search commands containing "rm -rf" as a string were incorrectly blocked
 - Added "Beyond Default Claude" section and "Hardening" tips to README
@@ -271,13 +273,19 @@ paths:
 ---
 ```
 
-The three conditional rules in this repo and what triggers each:
+The five conditional rules in this repo and what triggers each:
 
 | File | Triggers on |
 |------|------------|
 | `environment.md` | `.env`, Docker, deployment config, `package.json`, `tsconfig`, `wrangler` |
+| `figma.md` | CSS, SCSS, HTML, JSX, TSX, Vue, PHP, component/block/template directories |
+| `playwright.md` | CSS, SCSS, HTML, JSX, TSX, Vue, test/spec/e2e files, component/page/view directories |
 | `php-wordpress.md` | `.php` files, `wp-config.php`, `composer.json`, `phpunit.xml` |
 | `ui-ux.md` | Component files, CSS, layout files |
+
+The Figma rule enforces using Figma MCP tools (`get_design_context`, `get_screenshot`, `get_metadata`, `get_variable_defs`) instead of guessing at design specs. When Claude reads a CSS or component file while a Figma URL is in context, this rule requires it to call the actual Figma API for measurements, colors, spacing, and visual verification before writing any code. The rule exists because without it, Claude tends to assume what a design looks like rather than fetching the actual specs, which leads to subtle but persistent visual bugs.
+
+The Playwright rule enforces proper usage of the Playwright MCP's browser automation tools. It establishes that `browser_snapshot` (accessibility tree) should be the default for understanding page state and planning actions, while `browser_take_screenshot` is reserved for visual verification. The rule includes a Figma comparison workflow: capture the Figma design screenshot, navigate to the implementation, resize the viewport to match, take a browser screenshot, and compare until visual parity is achieved. It also covers form interaction patterns, debugging with console/network tools, and token efficiency for large pages.
 
 Key insight from testing: conditional rules trigger on **file-read, not tool-use**. Claude reads a `.php` file → PHP rules load. Claude hasn't read any `.php` files in the session → PHP rules stay unloaded. If you're debugging why a conditional rule isn't firing, check whether Claude has actually read a matching file yet.
 
