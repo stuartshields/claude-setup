@@ -10,7 +10,7 @@ read -r SESSION_ID EVENT < <(jq -r '[.session_id // "", .hook_event_name // ""] 
 [ -z "$SESSION_ID" ] && exit 0
 
 STATE="/tmp/claude-tasks-${SESSION_ID}.json"
-[ ! -f "$STATE" ] && exit 0
+[ ! -s "$STATE" ] && exit 0
 
 # Count incomplete tasks
 PENDING=$(jq '[to_entries[] | select(.value.done == false)] | length' "$STATE" 2>/dev/null || echo "0")

@@ -16,13 +16,13 @@ case "$TOOL" in
 		# Use tool_response.id if available, otherwise fall back to sequential
 		TASK_ID=$(echo "$INPUT" | jq -r '.tool_response.id // empty')
 		if [ -z "$TASK_ID" ]; then
-			if [ -f "$STATE" ] && jq -e . "$STATE" >/dev/null 2>&1; then
+			if [ -s "$STATE" ] && jq -e . "$STATE" >/dev/null 2>&1; then
 				TASK_ID=$(($(jq 'length' "$STATE") + 1))
 			else
 				TASK_ID="1"
 			fi
 		fi
-		if [ -f "$STATE" ] && jq -e . "$STATE" >/dev/null 2>&1; then
+		if [ -s "$STATE" ] && jq -e . "$STATE" >/dev/null 2>&1; then
 			jq --arg id "$TASK_ID" --arg s "$SUBJECT" \
 				'. + {($id): {"subject": $s, "done": false}}' \
 				"$STATE" > "${STATE}.tmp" && mv "${STATE}.tmp" "$STATE"

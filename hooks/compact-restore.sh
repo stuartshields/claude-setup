@@ -9,7 +9,7 @@ CWD=$(echo "$INPUT" | jq -r '.cwd // ""')
 
 # Try PreCompact saved state first
 PRECOMPACT="/tmp/claude-precompact-${SESSION_ID}.txt"
-if [ -f "$PRECOMPACT" ]; then
+if [ -s "$PRECOMPACT" ]; then
 	printf 'POST-COMPACTION CONTEXT RESTORE:\n'
 	cat "$PRECOMPACT"
 	rm -f "$PRECOMPACT"

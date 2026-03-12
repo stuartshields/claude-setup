@@ -13,7 +13,7 @@ CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
 [ -z "$SESSION_ID" ] && exit 0
 
 TRACK_FILE="/tmp/claude-drift-${SESSION_ID}"
-[ ! -f "$TRACK_FILE" ] && exit 0
+[ ! -s "$TRACK_FILE" ] && exit 0
 
 # Safety valve: don't block more than once
 FLAG="/tmp/claude-drift-reviewed-${SESSION_ID}"
