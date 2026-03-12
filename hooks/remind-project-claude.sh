@@ -65,7 +65,7 @@ PROJECT_HASH=$(echo "$PROJECT_ROOT" | md5sum 2>/dev/null | cut -d' ' -f1 || echo
 CACHE_FILE="/tmp/claude-remind-${PROJECT_HASH}"
 MSG_HASH=$(echo "$MSG" | md5sum 2>/dev/null | cut -d' ' -f1 || echo "$MSG" | md5 2>/dev/null | cut -d' ' -f1 || echo "")
 
-if [ -f "$CACHE_FILE" ] && [ "$(cat "$CACHE_FILE" 2>/dev/null)" = "$MSG_HASH" ]; then
+if [ -s "$CACHE_FILE" ] && [ "$(cat "$CACHE_FILE" 2>/dev/null)" = "$MSG_HASH" ]; then
 	# Same message as last prompt — skip injection to save tokens
 	exit 0
 fi
