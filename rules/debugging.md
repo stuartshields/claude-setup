@@ -1,5 +1,12 @@
 # Debugging & Investigation
 
+## No Fix Before Validation
+- **IMPORTANT: Do NOT propose code changes until the root cause is validated.** Isolation first, fix second.
+- **One hypothesis at a time.** If multiple causes are possible, rank them and test the most likely one first. Never propose multiple speculative fixes.
+- **Every hypothesis needs a validation step.** State: (1) what you suspect, (2) how to confirm it, (3) what the expected output is, (4) what it means if the output differs.
+- **No speculative language.** Replace "maybe," "possibly," "could be" with testable instrumentation. Uncertainty means you need more data, not a guess.
+- **Assume your initial diagnosis is wrong.** Define what would falsify your hypothesis before testing it.
+
 ## Deep-Trace Debugging
 - **Step Through the Code:** Never debug a file in isolation.
 - **Ancestry Check:** Use Grep to find parent components, context providers, or service layers that feed data to the affected file.

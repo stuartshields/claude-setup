@@ -31,6 +31,17 @@ Before creating an API error handler:
 - **Edge cases matter.** Empty arrays, null values, zero-length strings, single items vs plural, first-run vs subsequent. Check what happens at the boundaries.
 - **Don't implement only the happy path and call it done.** If you built the success flow, build the error flow before moving on.
 
+## No Victory Declarations
+- **IMPORTANT: Do NOT claim work is complete unless you have verified it.** Run the build. Run the tests. Check the output.
+- **Do NOT rationalize incomplete work.** Never say issues are "pre-existing," "out of scope," or "for a follow-up" unless the user explicitly scoped you out. If you found a problem while working, fix it or flag it clearly.
+- **Do NOT list problems without fixing them.** If you identify security issues, missing error handling, or performance problems in code you wrote or modified, fix them before declaring done.
+- **Self-audit before finishing.** Before your final response on any implementation task, check:
+	1. Did I handle errors, not just the happy path?
+	2. Did I validate inputs at system boundaries?
+	3. Are there security issues (injection, XSS, secrets)?
+	4. Would this break under load or with unexpected data?
+	5. Did I run build/tests and they pass?
+
 ## Regression Awareness
 - **Before changing a function, check all its callers.** Use Grep to find every call site. Changes that break callers are worse than no change at all.
 - **Run existing tests after every logical change** - not just at the end. Catch regressions early.

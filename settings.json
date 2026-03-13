@@ -92,7 +92,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/verify-before-stop.sh"
+            "command": "~/.claude/hooks/stop-wrapper.sh ~/.claude/hooks/verify-before-stop.sh"
           }
         ]
       },
@@ -100,7 +100,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/check-unfinished-tasks.sh"
+            "command": "~/.claude/hooks/stop-wrapper.sh ~/.claude/hooks/check-unfinished-tasks.sh"
           }
         ]
       },
@@ -108,7 +108,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/drift-review-stop.sh"
+            "command": "~/.claude/hooks/stop-wrapper.sh ~/.claude/hooks/drift-review-stop.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/stop-wrapper.sh ~/.claude/hooks/stop-quality-check.sh"
           }
         ]
       }
