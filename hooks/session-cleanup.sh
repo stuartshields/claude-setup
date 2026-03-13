@@ -24,4 +24,16 @@ if [ -n "$PROJECT_HASH" ]; then
 	rm -f "/tmp/claude-remind-${PROJECT_HASH}" 2>/dev/null
 fi
 
+# Rotate hooks.log to prevent unbounded growth (issue #16047)
+HOOKS_LOG="$HOME/.claude/hooks.log"
+if [ -f "$HOOKS_LOG" ]; then
+	LOG_SIZE=$(wc -c < "$HOOKS_LOG" 2>/dev/null | tr -d ' ')
+	# Rotate if larger than 512KB
+	if [ "${LOG_SIZE:-0}" -gt 524288 ]; then
+		# Keep last 200 lines for debugging, discard the rest
+		tail -200 "$HOOKS_LOG" > "${HOOKS_LOG}.tmp" 2>/dev/null && \
+			mv "${HOOKS_LOG}.tmp" "$HOOKS_LOG" 2>/dev/null
+	fi
+fi
+
 exit 0

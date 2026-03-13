@@ -7,6 +7,10 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 ## What's Changed
 
 ### 2026-03-13
+- Added `fix-indentation.sh` - PostToolUse hook that auto-converts leading spaces to tabs via `unexpand` after Write/Edit, eliminating wasted token cycles from repeated Write rejections
+- Changed tab enforcement in `check-code-quality.sh` from blocking (exit 2) to non-blocking warning - the PostToolUse hook handles the fix automatically
+- Added "Tab Handling for Edit Tool" rule to `style.md` - explicit directives for using literal tab characters in `old_string`/`new_string`, with a ban on sed/awk/python3 fallbacks (addresses known Claude Code bugs [#11447](https://github.com/anthropics/claude-code/issues/11447), [#25913](https://github.com/anthropics/claude-code/issues/25913), [#26996](https://github.com/anthropics/claude-code/issues/26996))
+- Removed `Bash(python3:*)` from allowed permissions - closes the escape hatch that let Claude bypass the quality hook entirely
 - Added `stop-wrapper.sh` - JSON-safe wrapper that guarantees valid JSON output from all Stop hooks, preventing parse failures that caused silent hook bypasses
 - Added `stop-quality-check.sh` - Stop hook that detects incomplete work patterns: deferred follow-ups, rationalised pre-existing issues, unverified success claims, "too many issues" excuses. Blocks once per session.
 - Added `detect-perf-degradation.sh` - PostToolUse/PostToolUseFailure hook that tracks tool calls and detects reasoning loops (same call 3+ times) and error spikes (5+ failures in last 10 calls)
@@ -55,6 +59,7 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 - [Hooks](#hooks)
 	- [Exit code contract](#exit-code-contract)
 	- [Hook walkthrough: check-code-quality.sh](#hook-walkthrough-check-code-qualitysh)
+	- [Hook walkthrough: fix-indentation.sh](#hook-walkthrough-fix-indentationsh)
 	- [Alerting: when Claude needs your attention](#alerting-when-claude-needs-your-attention)
 	- [Hook walkthrough: permission-notify.sh](#hook-walkthrough-permission-notifysh)
 	- [Hook walkthrough: notification-alert.sh](#hook-walkthrough-notification-alertsh)
@@ -358,7 +363,7 @@ Hooks support four types: `command` (shell scripts, shown in all examples above)
 
 ### Hook walkthrough: check-code-quality.sh
 
-The hook-as-quality-gate pattern. This is a `PreToolUse` hook that fires before every `Write` or `Edit` tool call. If it finds style violations, it exits 2 and blocks the write - Claude sees the error message and fixes the violation before trying again.
+The hook-as-quality-gate pattern. This is a `PreToolUse` hook that fires before every `Write` or `Edit` tool call. Hard violations (console.log, placeholder comments) exit 2 and block the write. Soft violations (space indentation) emit a non-blocking warning - the companion `fix-indentation.sh` PostToolUse hook auto-corrects spaces to tabs after the write, so no tokens are wasted on rejected retries.
 
 Here's the core of how it works:
 
@@ -424,11 +429,10 @@ fi
 
 ERRORS=""
 
-# Tabs not spaces - only for Write (full file).
-# Edit skipped because replacement may need to match existing indentation.
+# Tabs not spaces - non-blocking warning (fix-indentation.sh auto-corrects via PostToolUse).
 if [ "$TOOL" = "Write" ]; then
 	if grep -Eq '^ ' "$TMPCODE"; then
-		ERRORS="${ERRORS}Space indentation detected - use tabs. "
+		NONBLOCKING_NOTES="${NONBLOCKING_NOTES}INDENTATION: Space indentation detected - use tabs. File will be auto-corrected. "
 	fi
 fi
 
@@ -458,6 +462,26 @@ exit 0
 ```
 
 </details>
+
+### Hook walkthrough: fix-indentation.sh
+
+A `PostToolUse` hook that fires after every `Write` or `Edit` on code files. It detects leading spaces, determines the indent width, and runs `unexpand` to convert them to tabs. This exists because Claude's model output defaults to spaces - instead of blocking writes and burning tokens on retries (29 rejections across 12 sessions in practice), the file gets silently corrected.
+
+```bash
+# Skip if no leading spaces
+grep -qE '^ ' "$FILE_PATH" || exit 0
+
+# Detect indent width: smallest non-zero leading space count
+INDENT=$(grep -oE '^ +' "$FILE_PATH" | awk '{print length}' | sort -nu | head -1)
+[ -z "$INDENT" ] || [ "$INDENT" -lt 2 ] && exit 0
+
+# Convert leading spaces to tabs
+unexpand -t "$INDENT" "$FILE_PATH" > "${FILE_PATH}.unexpand.tmp" && mv "${FILE_PATH}.unexpand.tmp" "$FILE_PATH"
+```
+
+This pairs with the `check-code-quality.sh` PreToolUse hook, which now emits a non-blocking warning instead of blocking. Claude still gets feedback to use tabs (so it learns within the session), but the file is correct either way.
+
+The `style.md` rule also covers the Edit tool side of the problem - a [known Claude Code bug](https://github.com/anthropics/claude-code/issues/11447) where the Read tool shows tabs as visual spaces, then Edit fails because `old_string` has spaces but the file has tabs. The rule instructs Claude to use literal tab characters and never fall back to sed/awk/python3 workarounds.
 
 ### Alerting: when Claude needs your attention
 
@@ -1051,15 +1075,15 @@ When users report bugs despite passing tests, the rule explicitly states: *the t
 
 ### Deterministic Code Quality Gates
 
-CLAUDE.md rules are advisory - Claude can ignore them under pressure, especially as context fills up. Hooks are deterministic. This setup uses `PreToolUse` hooks on `Edit|Write` that **block** bad code before it's written:
+CLAUDE.md rules are advisory - Claude can ignore them under pressure, especially as context fills up. Hooks are deterministic. This setup uses `PreToolUse` hooks on `Edit|Write` that catch violations, plus a `PostToolUse` hook that auto-fixes indentation:
 
-- **Tab enforcement** - spaces are rejected (exit 2)
-- **No console.log** - blocked in JS/TS files
-- **No placeholder comments** - `// ...` and `// rest of...` are rejected with "write real code"
+- **Tab enforcement** - spaces trigger a non-blocking warning (PreToolUse), then `fix-indentation.sh` auto-converts to tabs (PostToolUse). This replaced a blocking approach that caused 29 wasted API round-trips across 12 sessions and led Claude to bypass the hook via `python3`.
+- **No console.log** - blocked in JS/TS files (exit 2)
+- **No placeholder comments** - `// ...` and `// rest of...` are rejected with "write real code" (exit 2)
 - **Security-sensitive file detection** - when editing auth, session, or crypto files, injects a security reminder into context
 - **Dependency verification** - checks imported packages exist in `package.json`
 
-These run on every single file write. Claude gets immediate feedback and corrects before moving on.
+Hard violations (console.log, placeholders) block the write. Soft violations (indentation) get auto-corrected so no tokens are wasted.
 
 ### Build and Test Verification on Stop
 
@@ -1133,6 +1157,40 @@ This setup is opinionated but not locked down. If you want to go further, here a
   "disabledMcpjsonServers": ["filesystem"]
 }
 ```
+
+### MCP Server Context Overhead
+
+Each MCP server adds its tool definitions to your context window, even when the tools are not being used. This overhead is invisible but measurable.
+
+#### Measuring Overhead
+
+Run `/context` in Claude Code to see a breakdown of what consumes your context budget. Look for:
+
+- **Tool definitions** -- each MCP server contributes a block of tool schemas. The more servers enabled, the larger this block.
+- **MCP server instructions** -- some servers (like Figma) inject their own behavioral instructions alongside tool definitions.
+
+#### Reducing Overhead
+
+| Lever | How | When to Use |
+|-------|-----|-------------|
+| **Per-project disable** | Set `enabledPlugins` to `false` for unused servers in the project's `.claude/settings.json` | When a project never uses certain servers (e.g., disable Figma MCP on a backend-only project) |
+| **Tool search threshold** | Set `ENABLE_TOOL_SEARCH=auto:N` where N is the minimum tool count before search activates | When you have many MCP servers but rarely need most of them |
+| **Global vs project** | Enable servers globally, disable per-project where not needed | When different projects need different server sets |
+
+#### Example: Disabling a Server Per-Project
+
+Create or edit `.claude/settings.json` in the project root:
+
+```json
+{
+  "enabledPlugins": {
+    "figma@claude-plugins-official": false,
+    "swift-lsp@claude-plugins-official": false
+  }
+}
+```
+
+This overrides the global setting for this project only. The servers remain available in other projects where they are needed.
 
 **Async test runner.** The `verify-before-stop.sh` hook runs tests synchronously (blocks Claude for up to 30 seconds). If your test suite is fast and you want feedback after every file edit instead of only at stop time, add an async PostToolUse hook:
 

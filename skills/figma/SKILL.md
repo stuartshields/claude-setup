@@ -1,18 +1,20 @@
 ---
-paths:
-  - "**/*.css"
-  - "**/*.scss"
-  - "**/*.html"
-  - "**/*.jsx"
-  - "**/*.tsx"
-  - "**/*.vue"
-  - "**/*.php"
-  - "**/template-parts/**"
-  - "**/blocks/**"
-  - "**/components/**"
+name: figma
+description: Figma-to-code workflow using MCP tools. Fetches design context, screenshots, variables, and Code Connect mappings before implementation.
+argument-hint: "[figma URL or file key]"
+disable-model-invocation: true
+allowed-tools: Read, Grep, Glob, Bash, Write, Edit, mcp__figma__get_design_context, mcp__figma__get_screenshot, mcp__figma__get_metadata, mcp__figma__get_variable_defs, mcp__figma__get_code_connect_map, mcp__figma__get_code_connect_suggestions, mcp__figma__send_code_connect_mappings, mcp__playwright__browser_navigate, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_snapshot, mcp__playwright__browser_resize, mcp__playwright__browser_evaluate
 ---
 
-# Figma-to-Code
+# Skill: figma
+
+## When to Use
+
+Use this skill when implementing UI from a Figma design. Invoke with `/figma [URL]` where the URL is a Figma design link, or `/figma` to start without a specific URL.
+
+Use `$ARGUMENTS` as the Figma URL or file key. If empty, ask the user for the Figma URL.
+
+Do NOT use this skill for general frontend work that doesn't involve a Figma design.
 
 ## MCP Tools Are Mandatory
 

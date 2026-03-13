@@ -17,26 +17,30 @@ fi
 # rm -rf (with any flag ordering) — only match rm as an actual command,
 # not when it appears inside grep/echo/string arguments.
 # Anchors: start of command, or after && || ; | ( — with optional whitespace.
-if echo "$command" | grep -qE '(^|[;&|]\s*|\|\|\s*|&&\s*|\(\s*)rm\s+-[a-zA-Z]*r[a-zA-Z]*f\b|(^|[;&|]\s*|\|\|\s*|&&\s*|\(\s*)rm\s+-[a-zA-Z]*f[a-zA-Z]*r\b'; then
+if [[ "$command" =~ (^|[[:space:];\&\|\(])rm[[:space:]]+-[a-zA-Z]*r[a-zA-Z]*f ]] || \
+   [[ "$command" =~ (^|[[:space:];\&\|\(])rm[[:space:]]+-[a-zA-Z]*f[a-zA-Z]*r ]]; then
 	echo "BLOCKED: rm -rf is not allowed. Remove files individually or ask the user." >&2
 	exit 2
 fi
 
 # Filesystem destruction patterns
-if echo "$command" | grep -qE '>\s*/dev/sd|mkfs\.|:\(\)\{|fork\s*bomb'; then
+if [[ "$command" =~ \>[[:space:]]*/dev/sd ]] || \
+   [[ "$command" =~ mkfs\. ]] || \
+   [[ "$command" =~ :\(\)\{ ]] || \
+   [[ "$command" =~ fork[[:space:]]*bomb ]]; then
 	echo "BLOCKED: Destructive filesystem operation detected." >&2
 	exit 2
 fi
 
 # chmod/chown on broad paths
-if echo "$command" | grep -qE '(chmod|chown)\s+.*-R\s+[/~]'; then
+if [[ "$command" =~ (chmod|chown)[[:space:]]+.*-R[[:space:]]+[/~] ]]; then
 	echo "BLOCKED: Recursive permission change on broad path. Be more specific." >&2
 	exit 2
 fi
 
 # --- Data exfiltration blocking ---
 # curl/wget posting data to external URLs
-if echo "$command" | grep -qE '(curl|wget)\s.*(-d\s|--data|--upload|-X\s*POST|-X\s*PUT|-F\s)'; then
+if [[ "$command" =~ (curl|wget)[[:space:]].*(-d[[:space:]]|--data|--upload|-X[[:space:]]*POST|-X[[:space:]]*PUT|-F[[:space:]]) ]]; then
 	echo "BLOCKED: Outbound data transfer via curl/wget. Ask the user first." >&2
 	exit 2
 fi

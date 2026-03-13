@@ -25,6 +25,25 @@ Before creating an API error handler:
 - **No unnecessary indirection.** Don't create a wrapper around a function that already has a clean API. Don't add a config option for something with only one valid value.
 - **No "just in case" code.** If a parameter is always a string, don't add type coercion "just in case." If a function is only called from one place, don't make it generic.
 
+## Resolving the Tension
+
+Anti-Over-Engineering and Complete Implementations appear to conflict. The boundary is **system boundaries vs internal code**:
+
+- **System boundaries** = where data enters or leaves your control: user input, API responses, file I/O, database queries, third-party libraries. **Complete Implementations applies here.** Always validate, always handle errors -- the data is untrusted and operations can fail.
+- **Internal code** = your own functions calling each other, data flowing between modules you wrote, framework-guaranteed behavior. **Anti-Over-Engineering applies here.** Don't add try/catch for conditions your code makes impossible.
+
+```javascript
+// System boundary: API response -- MUST handle errors
+const user = await fetchUser(id);
+if (!user) return { error: 'User not found' };
+
+// Internal code: formatName is our function, always returns a string
+// DON'T add: if (typeof name !== 'string') throw ...
+const display = formatName(user.name);
+```
+
+**Decision test:** Ask "can this fail for reasons outside my code?" If yes, handle it (Complete Implementations). If no, don't add defensive code (Anti-Over-Engineering).
+
 ## Complete Implementations
 - **IMPORTANT: No TODO comments in shipped code.** If something can't be implemented now, say so - don't leave a placeholder.
 - **YOU MUST handle the unhappy path.** Every API call needs error handling. Every form needs validation. Every async operation needs a loading and error state.

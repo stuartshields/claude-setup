@@ -92,31 +92,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/stop-wrapper.sh ~/.claude/hooks/verify-before-stop.sh"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/stop-wrapper.sh ~/.claude/hooks/check-unfinished-tasks.sh"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/stop-wrapper.sh ~/.claude/hooks/drift-review-stop.sh"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/stop-wrapper.sh ~/.claude/hooks/stop-quality-check.sh"
+            "command": "~/.claude/hooks/stop-dispatcher.sh"
           }
         ]
       }
@@ -141,7 +117,7 @@
         ]
       },
       {
-        "matcher": "Bash|Read|Edit|Write|Grep|Glob",
+        "matcher": "Bash|Edit|Write",
         "hooks": [
           {
             "type": "command",
@@ -152,7 +128,7 @@
     ],
     "PostToolUseFailure": [
       {
-        "matcher": "Bash|Read|Edit|Write|Grep|Glob",
+        "matcher": "Bash|Edit|Write",
         "hooks": [
           {
             "type": "command",

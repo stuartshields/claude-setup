@@ -1,20 +1,20 @@
 ---
-paths:
-  - "**/*.css"
-  - "**/*.scss"
-  - "**/*.html"
-  - "**/*.jsx"
-  - "**/*.tsx"
-  - "**/*.vue"
-  - "**/*.spec.*"
-  - "**/*.test.*"
-  - "**/*.e2e.*"
-  - "**/components/**"
-  - "**/pages/**"
-  - "**/views/**"
+name: playwright
+description: Playwright MCP browser automation workflow. Snapshot-first approach for page interaction, visual verification, form filling, and debugging.
+argument-hint: "[URL to navigate to]"
+disable-model-invocation: true
+allowed-tools: Read, Grep, Glob, Bash, Write, Edit, mcp__playwright__browser_navigate, mcp__playwright__browser_snapshot, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_click, mcp__playwright__browser_type, mcp__playwright__browser_fill_form, mcp__playwright__browser_select_option, mcp__playwright__browser_press_key, mcp__playwright__browser_hover, mcp__playwright__browser_evaluate, mcp__playwright__browser_console_messages, mcp__playwright__browser_network_requests, mcp__playwright__browser_wait_for, mcp__playwright__browser_resize, mcp__playwright__browser_close, mcp__playwright__browser_tabs, mcp__playwright__browser_drag, mcp__playwright__browser_handle_dialog, mcp__playwright__browser_file_upload, mcp__playwright__browser_navigate_back, mcp__playwright__browser_run_code
 ---
 
-# Playwright MCP
+# Skill: playwright
+
+## When to Use
+
+Use this skill for browser automation tasks: visual testing, page interaction, form filling, screenshot comparison, and debugging rendered pages. Invoke with `/playwright [URL]` to navigate to a specific page, or `/playwright` to start without a URL.
+
+Use `$ARGUMENTS` as the URL to navigate to. If empty, ask the user what page to work with.
+
+Do NOT use this skill for writing test files or test code. This is for live browser interaction via MCP tools.
 
 ## Snapshot First, Screenshot Second
 
