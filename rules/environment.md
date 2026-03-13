@@ -1,8 +1,6 @@
 ---
 paths:
-  # JS/Node/React
-  - "**/package.json"
-  - "**/tsconfig.*"
+  # Config files (editing these = environment/tooling work)
   - "**/vite.config.*"
   - "**/next.config.*"
   - "**/webpack.config.*"
@@ -10,8 +8,8 @@ paths:
   - "**/tailwind.config.*"
   - "**/.eslintrc*"
   - "**/.prettierrc*"
-  # PHP/WordPress
-  - "**/composer.json"
+  - "**/tsconfig.*"
+  # PHP/WordPress config
   - "**/wp-config.php"
   - "**/phpunit.xml*"
   - "**/.php-cs-fixer*"

@@ -8,7 +8,8 @@ trap 'rm -f "$TMPINPUT" "$TMPCODE"' EXIT
 
 cat > "$TMPINPUT"
 
-FILE_PATH=$(jq -r '.tool_input.file_path // empty' < "$TMPINPUT")
+# Single jq call for metadata (was 2 separate calls: file_path + tool_name)
+IFS=$'\t' read -r FILE_PATH TOOL < <(jq -r '[(.tool_input.file_path // ""), (.tool_name // "")] | @tsv' < "$TMPINPUT")
 
 # Only check code files
 case "$FILE_PATH" in
@@ -16,26 +17,21 @@ case "$FILE_PATH" in
 	*) exit 0 ;;
 esac
 
-TOOL=$(jq -r '.tool_name' < "$TMPINPUT")
-
-if [ "$TOOL" = "Write" ]; then
-	jq -r '.tool_input.content // empty' < "$TMPINPUT" > "$TMPCODE"
-elif [ "$TOOL" = "Edit" ]; then
-	jq -r '.tool_input.new_string // empty' < "$TMPINPUT" > "$TMPCODE"
-else
-	exit 0
-fi
+# Extract content based on tool type (1 jq call, only for matching code files)
+case "$TOOL" in
+	Write) jq -r '.tool_input.content // empty' < "$TMPINPUT" > "$TMPCODE" ;;
+	Edit)  jq -r '.tool_input.new_string // empty' < "$TMPINPUT" > "$TMPCODE" ;;
+	*)     exit 0 ;;
+esac
 
 [ ! -s "$TMPCODE" ] && exit 0
 
 ERRORS=""
+NONBLOCKING_NOTES=""
 
-# Tabs not spaces — only for Write (full file).
-# Edit skipped because replacement may need to match existing indentation.
-if [ "$TOOL" = "Write" ]; then
-	if grep -Eq '^ ' "$TMPCODE"; then
-		ERRORS="${ERRORS}Space indentation detected — use tabs. "
-	fi
+# Tabs not spaces — blocking error.
+if grep -Eq '^ ' "$TMPCODE"; then
+	ERRORS="${ERRORS}INDENTATION: Space indentation detected — rewrite using tabs. "
 fi
 
 # No console.log in JS/TS
@@ -63,7 +59,6 @@ fi
 # --- Security-sensitive file detection (non-blocking context) ---
 BASENAME=$(basename "$FILE_PATH" 2>/dev/null | tr '[:upper:]' '[:lower:]')
 DIRPATH=$(dirname "$FILE_PATH" 2>/dev/null | tr '[:upper:]' '[:lower:]')
-NONBLOCKING_NOTES=""
 
 SECURITY_HIT=""
 # Check filename patterns
@@ -98,16 +93,32 @@ case "$FILE_PATH" in
 		if [ -f "$PKG_JSON" ]; then
 			# Extract imported package names (not relative paths)
 			IMPORTS=$(grep -Eo "(from|require\()\s*['\"]([^./][^'\"]*)" "$TMPCODE" 2>/dev/null | sed "s/.*['\"]//g" | sed 's/\/.*//g' | sort -u)
+
+			# Filter out node builtins
+			FILTERED=""
 			for PKG in $IMPORTS; do
-				# Skip node builtins
 				case "$PKG" in
 					fs|path|os|url|http|https|crypto|util|stream|events|buffer|child_process|assert|net|tls|dns|cluster|zlib|readline|querystring|string_decoder|timers|tty|v8|vm|worker_threads|perf_hooks|async_hooks|diagnostics_channel|node|process|module|inspector|constants|punycode|domain|sys|wasi|trace_events|repl|dgram|http2|test) continue ;;
 				esac
-				# Check if package exists in dependencies or devDependencies
-				if ! jq -e "(.dependencies[\"$PKG\"] // .devDependencies[\"$PKG\"] // .peerDependencies[\"$PKG\"]) != null" "$PKG_JSON" >/dev/null 2>&1; then
-					NONBLOCKING_NOTES="${NONBLOCKING_NOTES}DEPENDENCY WARNING: Package '$PKG' imported but not found in package.json. Verify this is a real package. "
-				fi
+				FILTERED="${FILTERED}${PKG}\n"
 			done
+
+			# Single batched jq call to check all packages at once (was 1 jq per package)
+			if [ -n "$FILTERED" ]; then
+				MISSING=$(printf '%b' "$FILTERED" | sed '/^$/d' | jq -R -s -r --slurpfile pkg "$PKG_JSON" '
+					split("\n") | map(select(length > 0)) | .[] as $name |
+					if ($pkg[0].dependencies[$name] // $pkg[0].devDependencies[$name] // $pkg[0].peerDependencies[$name]) == null
+					then $name
+					else empty
+					end
+				' 2>/dev/null)
+
+				if [ -n "$MISSING" ]; then
+					while IFS= read -r PKG; do
+						NONBLOCKING_NOTES="${NONBLOCKING_NOTES}DEPENDENCY WARNING: Package '$PKG' imported but not found in package.json. Verify this is a real package. "
+					done <<< "$MISSING"
+				fi
+			fi
 		fi
 		;;
 esac

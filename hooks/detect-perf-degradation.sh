@@ -14,8 +14,8 @@ LOG_FILE="/tmp/claude-perf-${SESSION_ID}.log"
 STATUS="ok"
 [ "$EVENT" = "PostToolUseFailure" ] && STATUS="fail"
 
-# Hash input — first 8 chars for dedup
-INPUT_HASH=$(printf '%s' "$TOOL_INPUT" | md5 2>/dev/null | cut -c1-8 || printf '%s' "$TOOL_INPUT" | md5sum 2>/dev/null | cut -c1-8 || echo "00000000")
+# Hash input — first 8 chars for dedup (macOS: md5 reads from pipe, outputs 32-char hex directly)
+INPUT_HASH=$(printf '%s' "$TOOL_INPUT" | md5 | cut -c1-8)
 
 # Append: tool_name|input_hash|status
 echo "${TOOL_NAME}|${INPUT_HASH}|${STATUS}" >> "$LOG_FILE"

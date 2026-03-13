@@ -28,13 +28,26 @@ case "$PROJECT_ROOT" in
 	*/.claude) exit 0 ;;
 esac
 
-# Get file age in minutes
-if command -v stat >/dev/null 2>&1; then
-	if [ "$(uname)" = "Darwin" ]; then
-		MODIFIED=$(stat -f %m "$CLAUDE_MD" 2>/dev/null || echo 0)
-	else
-		MODIFIED=$(stat -c %Y "$CLAUDE_MD" 2>/dev/null || echo 0)
+# --- Cache check FIRST (before expensive git/stat calls) ---
+# macOS: printf '%s' | md5 outputs just the 32-char hex hash (no filename prefix)
+PROJECT_HASH=$(printf '%s' "$PROJECT_ROOT" | md5)
+CACHE_FILE="/tmp/claude-remind-${PROJECT_HASH}"
+
+# If cache file was written in the last 30 seconds, skip entirely.
+# The message can only change if CLAUDE.md was modified or files were committed,
+# neither of which happens multiple times within 30 seconds.
+if [ -f "$CACHE_FILE" ]; then
+	CACHE_AGE=$(( $(date +%s) - $(stat -f %m "$CACHE_FILE" 2>/dev/null || echo 0) ))
+	if [ "$CACHE_AGE" -lt 30 ]; then
+		exit 0
 	fi
+fi
+
+# --- Cache miss or stale: compute full message ---
+
+# Get file age in days
+if command -v stat >/dev/null 2>&1; then
+	MODIFIED=$(stat -f %m "$CLAUDE_MD" 2>/dev/null || echo 0)
 	NOW=$(date +%s)
 	AGE_DAYS=$(( (NOW - MODIFIED) / 86400 ))
 else
@@ -60,13 +73,13 @@ fi
 
 MSG="$MSG | RULE: If your changes diverge from what CLAUDE.md specifies, ask the user: 'This differs from the project CLAUDE.md — should I update it first?'"
 
-# Cache: skip injection if message unchanged since last prompt (saves tokens)
-PROJECT_HASH=$(echo "$PROJECT_ROOT" | md5sum 2>/dev/null | cut -d' ' -f1 || echo "$PROJECT_ROOT" | md5 2>/dev/null | cut -d' ' -f1 || echo "nocache")
-CACHE_FILE="/tmp/claude-remind-${PROJECT_HASH}"
-MSG_HASH=$(echo "$MSG" | md5sum 2>/dev/null | cut -d' ' -f1 || echo "$MSG" | md5 2>/dev/null | cut -d' ' -f1 || echo "")
+# Check if message content changed since last injection
+# macOS: printf '%s' | md5 outputs just the 32-char hex hash
+MSG_HASH=$(printf '%s' "$MSG" | md5)
 
 if [ -s "$CACHE_FILE" ] && [ "$(cat "$CACHE_FILE" 2>/dev/null)" = "$MSG_HASH" ]; then
-	# Same message as last prompt — skip injection to save tokens
+	# Same message as last prompt — update cache timestamp but skip injection
+	touch "$CACHE_FILE"
 	exit 0
 fi
 
