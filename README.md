@@ -6,6 +6,15 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 
 ## What's Changed
 
+### 2026-03-13
+- Added `stop-wrapper.sh` - JSON-safe wrapper that guarantees valid JSON output from all Stop hooks, preventing parse failures that caused silent hook bypasses
+- Added `stop-quality-check.sh` - Stop hook that detects incomplete work patterns: deferred follow-ups, rationalised pre-existing issues, unverified success claims, "too many issues" excuses. Blocks once per session.
+- Added `detect-perf-degradation.sh` - PostToolUse/PostToolUseFailure hook that tracks tool calls and detects reasoning loops (same call 3+ times) and error spikes (5+ failures in last 10 calls)
+- All Stop hooks now wrapped with `stop-wrapper.sh` for reliable JSON output
+- Added `PostToolUseFailure` event to hook configuration (fires `detect-perf-degradation.sh` on tool failures)
+- Added Figma plugin (`figma@claude-plugins-official`) to enabledPlugins
+- Updated CLAUDE.md "Plan First" rule - action-type routing (investigate vs implement) replaces the blanket "> 2 files" plan gate
+
 ### 2026-03-09
 - Added Figma MCP rule enforcing tool-based design extraction (`get_design_context`, `get_screenshot`, `get_variable_defs`) over assumptions. Includes required tool call sequence, design token mapping, Code Connect support, and visual verification loop.
 - Added Playwright MCP rule for browser automation best practices (`browser_snapshot` vs `browser_take_screenshot`, Figma comparison workflow, form interactions, debugging, token efficiency)
@@ -50,6 +59,8 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 	- [Hook walkthrough: permission-notify.sh](#hook-walkthrough-permission-notifysh)
 	- [Hook walkthrough: notification-alert.sh](#hook-walkthrough-notification-alertsh)
 	- [Hook walkthrough: block-git-commit.sh](#hook-walkthrough-block-git-commitsh)
+	- [Hook walkthrough: stop-quality-check.sh](#hook-walkthrough-stop-quality-checksh)
+	- [Hook walkthrough: detect-perf-degradation.sh](#hook-walkthrough-detect-perf-degradationsh)
 - [Agents](#agents)
 	- [Rules vs agents: when to use which](#rules-vs-agents-when-to-use-which)
 - [Settings](#settings)
@@ -62,6 +73,8 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 	- [Test-Driven Development](#test-driven-development)
 	- [Deterministic Code Quality Gates](#deterministic-code-quality-gates)
 	- [Build and Test Verification on Stop](#build-and-test-verification-on-stop)
+	- [Shortcut Detection on Stop](#shortcut-detection-on-stop)
+	- [Reasoning Loop and Error Spike Detection](#reasoning-loop-and-error-spike-detection)
 	- [Opinionated UI/UX Design](#opinionated-uiux-design)
 	- [Manual Commit Control and Destructive Command Blocking](#manual-commit-control-and-destructive-command-blocking)
 	- [Context Preservation](#context-preservation)
@@ -101,7 +114,9 @@ Here's the section I rely on most - the workflow rules:
 
 ```markdown
 ## 1. MANDATORY WORKFLOW
-- **Plan First**: For any change > 2 files, output a `<plan>` and wait for approval.
+- **Plan First**: If the user asks to investigate, review, or explore — report findings
+  and wait for direction. If the user asks to fix, implement, add, or update — execute
+  directly. Only gate on a `<plan>` when the scope is genuinely unclear.
 - **Test First**: If the project has tests, write or update a failing test BEFORE implementing.
 - **Context Pruning**: Read ONLY files strictly necessary for the current task.
 - **No Yapping**: Skip introductions/conclusions. Output code or direct answers only.
@@ -128,7 +143,7 @@ One pattern worth stealing: notice the `> Last verified: 2026-03-08` line in sec
 - **"Trace"** or **"/trace"**: Perform a deep-trace audit per the debugging rules in `~/.claude/rules/debugging.md`.
 
 ## 1. MANDATORY WORKFLOW
-- **Plan First**: For any change > 2 files, output a `<plan>` and wait for approval.
+- **Plan First**: If the user asks to **investigate, review, or explore** — report findings and wait for direction. If the user asks to **fix, implement, add, or update** — execute directly. Only gate on a `<plan>` when the scope is genuinely unclear (not when you've already identified the changes). See Complexity Routing below for file-count thresholds.
 - **Test First**: If the project has tests, write or update a failing test BEFORE implementing. Run the test to confirm it fails, then implement, then run again to confirm it passes.
 - **Context Pruning**: Read ONLY files strictly necessary for the current task.
 - **No Yapping**: Skip introductions/conclusions. Output code or direct answers only.
@@ -170,7 +185,7 @@ Rules auto-loaded from `~/.claude/rules/`:
 - **Conditional** (loaded when working with matching files): ui-ux, environment, php-wordpress
 ```
 
-*Last synced with CLAUDE.md: 2026-03-09*
+*Last synced with CLAUDE.md: 2026-03-13*
 
 </details>
 
@@ -301,7 +316,7 @@ Hooks are shell scripts that run at key moments in Claude's lifecycle. Registere
 
 **Tip:** Run `/hooks` to create and manage hooks interactively instead of editing JSON manually.
 
-The lifecycle events this setup uses (9 of 18 available):
+The lifecycle events this setup uses (10 of 18 available):
 
 | Event | When it fires |
 |-------|--------------|
@@ -309,6 +324,7 @@ The lifecycle events this setup uses (9 of 18 available):
 | `UserPromptSubmit` | Before Claude processes your prompt |
 | `PreToolUse` | Before any tool call - **can block** |
 | `PostToolUse` | After a tool call succeeds |
+| `PostToolUseFailure` | After a tool call fails - **observe-only** |
 | `PreCompact` | Before context compaction |
 | `Stop` | When Claude finishes responding (exit 2 continues the conversation) |
 | `SessionEnd` | Session terminates |
@@ -534,6 +550,48 @@ exit 0
 The regex matches `git commit`, `git -C path commit`, and `gsd-tools.cjs commit` (the GSD framework's commit wrapper). Exit 2 blocks the Bash call entirely - Claude sees the error and skips the commit step.
 
 **Note on matcher syntax:** Hook registration in `settings.json` uses regex matchers. A pipe (`|`) is standard regex OR, so `"Write|Edit"` matches both Write and Edit tool calls. This is documented behavior in the hooks reference matcher section.
+
+### Hook walkthrough: stop-quality-check.sh
+
+The hook-as-accountability pattern. This is a `Stop` hook that scans Claude's final message for signs of incomplete work before it finishes responding. It catches five patterns:
+
+1. **Deferred follow-ups** - "in a follow-up", "as a next step", "out of scope for now"
+2. **Rationalised pre-existing issues** - "pre-existing issue", "was already broken"
+3. **Listed problems without fixing** - "you may want to", "consider adding", TODO/FIXME/HACK
+4. **Success claims without evidence** - "all done", "should work now" with no mention of test/build output
+5. **"Too many issues" excuses** - "would require significant", "beyond what can be"
+
+```bash
+# Pattern 4: Claiming success without verification evidence
+if echo "$LAST_MSG" | grep -qiE '(all (done|set|good|fixed)|everything (works|is working|looks good)|should (work|be fine) now)' && \
+   ! echo "$LAST_MSG" | grep -qiE '(test|build|lint|verified|ran |pass|EXIT|output)'; then
+	ISSUES="${ISSUES}- Declared success without verification evidence\n"
+fi
+```
+
+When triggered, it blocks via `exit 2` and feeds the issues back - Claude sees the list and addresses them before finishing. A per-session flag prevents the hook from blocking twice (so it doesn't loop if Claude addresses the feedback but uses similar language in its follow-up).
+
+All Stop hooks in this setup are wrapped with `stop-wrapper.sh`, which guarantees valid JSON output. Stop hooks that produce non-JSON stdout can cause silent failures - the wrapper catches that by wrapping any plain text in a valid JSON envelope.
+
+### Hook walkthrough: detect-perf-degradation.sh
+
+The hook-as-early-warning pattern. This is a `PostToolUse` and `PostToolUseFailure` hook that tracks every tool call in a session log and watches for two degradation signals:
+
+- **Reasoning loops** - the same tool with the same input called 3+ times in the last 10 calls
+- **Error spikes** - 5+ tool failures in the last 10 calls
+
+```bash
+# Repeat detection: same tool + same input hash 3+ times in last 10
+REPEAT_COUNT=$(echo "$LAST_10" | awk -F'|' -v tool="$TOOL_NAME" -v hash="$INPUT_HASH" \
+	'$1 == tool && $2 == hash' | wc -l | tr -d ' ')
+if [ "$REPEAT_COUNT" -ge 3 ]; then
+	echo "PERF WARNING: Repeated identical call to ${TOOL_NAME} detected (${REPEAT_COUNT}x). Possible reasoning loop."
+fi
+```
+
+The hook is advisory (exit 0) - warnings appear as system reminders, not blocks. It only analyses every 5th entry to minimise overhead. Each tool call is logged as `tool_name|input_hash|status`, where the input hash is the first 8 characters of an MD5 of the tool input. This keeps the log compact while still catching exact duplicates.
+
+Both events (`PostToolUse` and `PostToolUseFailure`) feed into the same log, so the error rate calculation sees the full picture regardless of whether individual calls succeeded or failed.
 
 ---
 
@@ -777,9 +835,10 @@ Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and set
       }
     ],
     "Stop": [
-      { "hooks": [{ "type": "command", "command": "~/.claude/hooks/verify-before-stop.sh" }] },
-      { "hooks": [{ "type": "command", "command": "~/.claude/hooks/check-unfinished-tasks.sh" }] },
-      { "hooks": [{ "type": "command", "command": "~/.claude/hooks/drift-review-stop.sh" }] }
+      { "hooks": [{ "type": "command", "command": "~/.claude/hooks/stop-wrapper.sh ~/.claude/hooks/verify-before-stop.sh" }] },
+      { "hooks": [{ "type": "command", "command": "~/.claude/hooks/stop-wrapper.sh ~/.claude/hooks/check-unfinished-tasks.sh" }] },
+      { "hooks": [{ "type": "command", "command": "~/.claude/hooks/stop-wrapper.sh ~/.claude/hooks/drift-review-stop.sh" }] },
+      { "hooks": [{ "type": "command", "command": "~/.claude/hooks/stop-wrapper.sh ~/.claude/hooks/stop-quality-check.sh" }] }
     ],
     "PostToolUse": [
       {
@@ -789,6 +848,16 @@ Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and set
       {
         "matcher": "TaskCreate|TaskUpdate",
         "hooks": [{ "type": "command", "command": "~/.claude/hooks/track-tasks.sh" }]
+      },
+      {
+        "matcher": "Bash|Read|Edit|Write|Grep|Glob",
+        "hooks": [{ "type": "command", "command": "~/.claude/hooks/detect-perf-degradation.sh" }]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "Bash|Read|Edit|Write|Grep|Glob",
+        "hooks": [{ "type": "command", "command": "~/.claude/hooks/detect-perf-degradation.sh" }]
       }
     ],
     "UserPromptSubmit": [
@@ -811,7 +880,8 @@ Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and set
   "enabledPlugins": {
     "frontend-design@claude-code-plugins": true,
     "claude-hud@claude-hud": true,
-    "swift-lsp@claude-plugins-official": true
+    "swift-lsp@claude-plugins-official": true,
+    "figma@claude-plugins-official": true
   }
 }
 ```
@@ -998,6 +1068,16 @@ The `verify-before-stop.sh` Stop hook runs the project's build command and test 
 If build or tests fail, Claude gets the output as feedback. The hook is advisory (exit 0) rather than blocking, because some projects don't have tests yet - but it ensures Claude sees failures instead of silently finishing with broken code.
 
 The official docs describe [agent-based Stop hooks](https://code.claude.com/docs/en/hooks-guide) for this purpose. The command hook approach here is simpler and doesn't consume LLM tokens, but trades off the ability to make judgment calls about what "done" means.
+
+### Shortcut Detection on Stop
+
+The `stop-quality-check.sh` Stop hook catches a different failure mode: Claude declaring victory without actually finishing. It scans Claude's final message for patterns like deferred follow-ups ("in a separate PR"), rationalised pre-existing issues ("was already broken"), unverified success claims ("all done" with no test output), and listed-but-unfixed problems. When triggered, it blocks and feeds the issues back so Claude addresses them before finishing.
+
+All Stop hooks are wrapped with `stop-wrapper.sh`, which guarantees valid JSON output. Without the wrapper, a Stop hook that prints plain text to stdout can cause JSON parse failures that silently bypass the hook entirely.
+
+### Reasoning Loop and Error Spike Detection
+
+The `detect-perf-degradation.sh` hook runs after every tool call (success and failure) and watches for two signals: the same tool called with identical input 3+ times (reasoning loop), or 5+ failures in the last 10 calls (degraded session). Warnings appear as system reminders so Claude can self-correct - try a different approach instead of repeating a broken one.
 
 ### Opinionated UI/UX Design
 
