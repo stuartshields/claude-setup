@@ -17,7 +17,8 @@ rm -f "/tmp/claude-ctx-${SESSION_ID}"*.json \
 	"/tmp/claude-task-stop-${SESSION_ID}.count" \
 	"/tmp/claude-drift-${SESSION_ID}" \
 	"/tmp/claude-drift-reviewed-${SESSION_ID}" \
-	"/tmp/claude-compacted-${SESSION_ID}" 2>/dev/null
+	"/tmp/claude-compacted-${SESSION_ID}" \
+	"/tmp/claude-perf-${SESSION_ID}.log" 2>/dev/null
 
 if [ -n "$PROJECT_HASH" ]; then
 	rm -f "/tmp/claude-remind-${PROJECT_HASH}" 2>/dev/null
