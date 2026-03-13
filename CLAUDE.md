@@ -5,7 +5,7 @@
 - **"Trace"** or **"/trace"**: Perform a deep-trace audit per the debugging rules in `~/.claude/rules/debugging.md`.
 
 ## 1. MANDATORY WORKFLOW
-- **Plan First**: For any change > 2 files, output a `<plan>` and wait for approval.
+- **Plan First**: If the user asks to **investigate, review, or explore** — report findings and wait for direction. If the user asks to **fix, implement, add, or update** — execute directly. Only gate on a `<plan>` when the scope is genuinely unclear (not when you've already identified the changes). See Complexity Routing below for file-count thresholds.
 - **Test First**: If the project has tests, write or update a failing test BEFORE implementing. Run the test to confirm it fails, then implement, then run again to confirm it passes.
 - **Context Pruning**: Read ONLY files strictly necessary for the current task.
 - **No Yapping**: Skip introductions/conclusions. Output code or direct answers only.
