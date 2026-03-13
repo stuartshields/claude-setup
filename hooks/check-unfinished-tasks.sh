@@ -12,6 +12,17 @@ read -r SESSION_ID EVENT < <(jq -r '[.session_id // "", .hook_event_name // ""] 
 STATE="/tmp/claude-tasks-${SESSION_ID}.json"
 [ ! -s "$STATE" ] && exit 0
 
+MISMATCH_STATE="/tmp/claude-task-state-mismatch-${SESSION_ID}.txt"
+if [ -s "$MISMATCH_STATE" ]; then
+	MISMATCH_MSG=$(cat "$MISMATCH_STATE" 2>/dev/null)
+	if [ "$EVENT" = "Stop" ]; then
+		echo "TASK STATE MISMATCH: $MISMATCH_MSG — Resolve task mapping before finishing (update with a valid taskId)." >&2
+		exit 2
+	fi
+	echo "TASK STATE WARNING: $MISMATCH_MSG — Use a valid taskId on TaskUpdate so unfinished-task checks remain reliable."
+	exit 0
+fi
+
 # Count incomplete tasks
 PENDING=$(jq '[to_entries[] | select(.value.done == false)] | length' "$STATE" 2>/dev/null || echo "0")
 [ "$PENDING" -eq 0 ] && exit 0

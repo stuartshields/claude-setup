@@ -6,6 +6,13 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 
 ## What's Changed
 
+### 2026-03-14
+- Added `stop-dispatcher.sh` - single Stop hook entry that runs `check-unfinished-tasks.sh`, `drift-review-stop.sh`, and `stop-quality-check.sh` in order, then returns one final decision
+- Changed Stop policy to block-only - advisory output no longer surfaces on Stop, which avoids noisy finish loops and keeps Stop deterministic
+- Moved `verify-before-stop.sh` from `Stop` to `UserPromptSubmit` - now emits a compact, rate-limited verification reminder before prompts instead of running build/test at finish time
+- Hardened task state tracking - removed fallback completion in `track-tasks.sh`; `TaskUpdate` now requires valid `taskId` mapping and persists mismatches for follow-up hooks
+- Updated `check-unfinished-tasks.sh` mismatch handling - warns on `UserPromptSubmit`, blocks on `Stop` until task mapping is corrected
+
 ### 2026-03-13
 - Added `fix-indentation.sh` - PostToolUse hook that auto-converts leading spaces to tabs via `unexpand` after Write/Edit, eliminating wasted token cycles from repeated Write rejections
 - Changed tab enforcement in `check-code-quality.sh` from blocking (exit 2) to non-blocking warning - the PostToolUse hook handles the fix automatically
@@ -595,7 +602,7 @@ fi
 
 When triggered, it blocks via `exit 2` and feeds the issues back - Claude sees the list and addresses them before finishing. A per-session flag prevents the hook from blocking twice (so it doesn't loop if Claude addresses the feedback but uses similar language in its follow-up).
 
-All Stop hooks in this setup are wrapped with `stop-wrapper.sh`, which guarantees valid JSON output. Stop hooks that produce non-JSON stdout can cause silent failures - the wrapper catches that by wrapping any plain text in a valid JSON envelope.
+Stop handling in this setup is centralised through `stop-dispatcher.sh`. It runs the Stop checks in sequence and emits a single final decision, so Stop remains block-only and deterministic while non-blocking reminders are surfaced earlier via `UserPromptSubmit` hooks.
 
 ### Hook walkthrough: detect-perf-degradation.sh
 
@@ -859,10 +866,9 @@ Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and set
       }
     ],
     "Stop": [
-      { "hooks": [{ "type": "command", "command": "~/.claude/hooks/stop-wrapper.sh ~/.claude/hooks/verify-before-stop.sh" }] },
-      { "hooks": [{ "type": "command", "command": "~/.claude/hooks/stop-wrapper.sh ~/.claude/hooks/check-unfinished-tasks.sh" }] },
-      { "hooks": [{ "type": "command", "command": "~/.claude/hooks/stop-wrapper.sh ~/.claude/hooks/drift-review-stop.sh" }] },
-      { "hooks": [{ "type": "command", "command": "~/.claude/hooks/stop-wrapper.sh ~/.claude/hooks/stop-quality-check.sh" }] }
+      {
+        "hooks": [{ "type": "command", "command": "~/.claude/hooks/stop-dispatcher.sh" }]
+      }
     ],
     "PostToolUse": [
       {
@@ -874,19 +880,20 @@ Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and set
         "hooks": [{ "type": "command", "command": "~/.claude/hooks/track-tasks.sh" }]
       },
       {
-        "matcher": "Bash|Read|Edit|Write|Grep|Glob",
+        "matcher": "Bash|Edit|Write",
         "hooks": [{ "type": "command", "command": "~/.claude/hooks/detect-perf-degradation.sh" }]
       }
     ],
     "PostToolUseFailure": [
       {
-        "matcher": "Bash|Read|Edit|Write|Grep|Glob",
+        "matcher": "Bash|Edit|Write",
         "hooks": [{ "type": "command", "command": "~/.claude/hooks/detect-perf-degradation.sh" }]
       }
     ],
     "UserPromptSubmit": [
       { "hooks": [{ "type": "command", "command": "~/.claude/hooks/remind-project-claude.sh" }] },
-      { "hooks": [{ "type": "command", "command": "~/.claude/hooks/check-unfinished-tasks.sh" }] }
+      { "hooks": [{ "type": "command", "command": "~/.claude/hooks/check-unfinished-tasks.sh" }] },
+      { "hooks": [{ "type": "command", "command": "~/.claude/hooks/verify-before-stop.sh" }] }
     ],
     "PreCompact": [
       { "hooks": [{ "type": "command", "command": "~/.claude/hooks/pre-compaction-preserve.sh" }] }
@@ -1087,17 +1094,15 @@ Hard violations (console.log, placeholders) block the write. Soft violations (in
 
 ### Build and Test Verification on Stop
 
-The `verify-before-stop.sh` Stop hook runs the project's build command and test suite before Claude finishes a response. It auto-detects the stack (npm/bun/pnpm/yarn, pytest, cargo, go, deno, make) and runs with a 30-second timeout.
+The `verify-before-stop.sh` logic now runs on `UserPromptSubmit` rather than `Stop`. Instead of running build/test at finish time, it emits a compact advisory reminder before prompts (rate-limited per session) when there are uncommitted changes, so Claude gets a verification nudge without making Stop noisy.
 
-If build or tests fail, Claude gets the output as feedback. The hook is advisory (exit 0) rather than blocking, because some projects don't have tests yet - but it ensures Claude sees failures instead of silently finishing with broken code.
-
-The official docs describe [agent-based Stop hooks](https://code.claude.com/docs/en/hooks-guide) for this purpose. The command hook approach here is simpler and doesn't consume LLM tokens, but trades off the ability to make judgment calls about what "done" means.
+Stop itself stays block-only through `stop-dispatcher.sh`, which keeps finish-time decisions deterministic. Advisory guidance now belongs to prompt-time hooks; blocking remains reserved for true stop conditions.
 
 ### Shortcut Detection on Stop
 
 The `stop-quality-check.sh` Stop hook catches a different failure mode: Claude declaring victory without actually finishing. It scans Claude's final message for patterns like deferred follow-ups ("in a separate PR"), rationalised pre-existing issues ("was already broken"), unverified success claims ("all done" with no test output), and listed-but-unfixed problems. When triggered, it blocks and feeds the issues back so Claude addresses them before finishing.
 
-All Stop hooks are wrapped with `stop-wrapper.sh`, which guarantees valid JSON output. Without the wrapper, a Stop hook that prints plain text to stdout can cause JSON parse failures that silently bypass the hook entirely.
+Stop checks now run through `stop-dispatcher.sh`, which emits one final Stop decision after evaluating the configured stop checks. This keeps Stop output stable and avoids per-hook output handling drift.
 
 ### Reasoning Loop and Error Spike Detection
 
