@@ -33,7 +33,7 @@ case "$TOOL" in
 	TaskUpdate)
 		STATUS=$(echo "$INPUT" | jq -r '.tool_input.status // empty')
 		TASK_ID=$(echo "$INPUT" | jq -r '.tool_input.taskId // empty')
-		if [ -f "$STATE" ] && { [ "$STATUS" = "completed" ] || [ "$STATUS" = "deleted" ]; }; then
+		if [ -s "$STATE" ] && { [ "$STATUS" = "completed" ] || [ "$STATUS" = "deleted" ]; }; then
 			# Try exact match first, then scan by subject as fallback
 			if jq -e --arg id "$TASK_ID" 'has($id)' "$STATE" >/dev/null 2>&1; then
 				jq --arg id "$TASK_ID" '.[$id].done = true' \

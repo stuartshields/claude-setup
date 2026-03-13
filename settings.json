@@ -111,6 +111,15 @@
             "command": "~/.claude/hooks/drift-review-stop.sh"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Review the assistant's final response for signs of incomplete work or rationalized shortcuts. Reject if ANY of these patterns appear: (1) claiming issues are 'pre-existing' or 'out of scope' without the user explicitly scoping them out, (2) saying there are 'too many issues' to fix, (3) deferring work to unrequested 'follow-ups' or 'next steps', (4) listing problems without fixing them, (5) skipping test or build failures with excuses, (6) declaring success without running verification, (7) leaving TODO/FIXME comments in new code. Respond with {\"ok\": true} if the work appears complete and honest, or {\"ok\": false, \"reason\": \"description of incomplete work\"} if shortcuts were taken.",
+            "timeout": 30
+          }
+        ]
       }
     ],
     "PostToolUse": [

@@ -33,7 +33,7 @@ if [ "$EVENT" = "Stop" ]; then
 
 	if [ "$COUNT" -gt 2 ]; then
 		# Downgrade to non-blocking after 2 blocks
-		echo "UNFINISHED TASKS ($PENDING remaining): $SUBJECTS — You've been reminded multiple times. Finish these or tell the user you're leaving them incomplete."
+		echo "UNFINISHED TASKS ($PENDING remaining): $SUBJECTS — You've been reminded multiple times. Finish these or tell the user you're leaving them incomplete." >&2
 		exit 0
 	fi
 
