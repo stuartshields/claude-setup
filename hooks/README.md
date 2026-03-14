@@ -260,6 +260,15 @@ The regex matches `git commit`, `git -C path commit`, and `gsd-tools.cjs commit`
 
 ---
 
+## Continue Reading
+
+- Configuration and loading model: [Core Guide](../docs/core-guide.md)
+- Governance and audit workflow: [Governance Review Template](../docs/governance-review-template.md)
+- Specialist subagents: [Agents README](../agents/README.md)
+- Skills and memory system: [Skills README](../skills/README.md)
+
+---
+
 ### Files in this folder
 
 How to use this folder in Claude:

@@ -258,6 +258,15 @@ Hooks connect to lifecycle events in `settings.json`. Each event takes an array 
     }
   ]
 }
+
+---
+
+## Continue Reading
+
+- Governance checklist: [Governance Review Template](governance-review-template.md)
+- Hook lifecycle and examples: [Hooks README](../hooks/README.md)
+- Agent frontmatter and usage: [Agents README](../agents/README.md)
+- Skills and memory guide: [Skills README](../skills/README.md)
 ```
 
 The `matcher` field filters by tool name - only fires the hook when the matched tool is called. Omit `matcher` to fire on every tool call for that event. See [Hooks](../hooks/README.md) for the exit code contract and what these hooks do.

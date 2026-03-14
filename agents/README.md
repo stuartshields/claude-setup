@@ -108,4 +108,13 @@ How to use this folder in Claude:
 
 `README.md` in this folder is the usage guide and frontmatter reference.
 
+---
+
+## Continue Reading
+
+- Runtime setup and loading model: [Core Guide](../docs/core-guide.md)
+- Hook enforcement and lifecycle events: [Hooks README](../hooks/README.md)
+- Skills and memory model: [Skills README](../skills/README.md)
+- Governance checklist: [Governance Review Template](../docs/governance-review-template.md)
+
 
