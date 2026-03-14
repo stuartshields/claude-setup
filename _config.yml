@@ -1,19 +1,42 @@
-theme: jekyll-theme-modernist
+remote_theme: just-the-docs/just-the-docs
 title: Claude Code Setup
 description: Global Claude Code configuration with rules, hooks, agents, and governance docs.
 url: https://stuartshields.github.io
 baseurl: /claude-setup
 lang: en-GB
 author: Stuart Shields
+
 markdown: kramdown
 highlighter: rouge
 kramdown:
   input: GFM
   syntax_highlighter: rouge
+
 plugins:
   - jekyll-relative-links
+  - jekyll-remote-theme
+
 relative_links:
   enabled: true
   collections: true
-exclude: [".claude/", ".planning/", ".playwright-mcp/"]
+
+# just-the-docs config
+color_scheme: dark
+search_enabled: true
+heading_anchors: true
+
+aux_links:
+  "View on GitHub":
+    - "https://github.com/stuartshields/claude-setup"
+aux_links_new_tab: true
+
+footer_content: ""
+
+exclude:
+  - ".claude/"
+  - ".planning/"
+  - ".playwright-mcp/"
+  - "CLAUDE.md"
+  - "CHANGELOG.md"
+  - "docs/governance-review-template.md"
 social: { name: "Stuart Shields", links: ["https://github.com/stuartshields"] }

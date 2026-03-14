@@ -1,6 +1,6 @@
 ---
-layout: default
 title: Governance Workflow
+nav_order: 8
 ---
 
 # Governance Workflow
