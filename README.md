@@ -7,6 +7,10 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 ## What's Changed
 
 ### 2026-03-14
+- Added `hook-observability-summary.sh` - PostToolUse/PostToolUseFailure hook that writes a per-session hook outcome summary to `docs/hook-observability-summary.md` in `~/.claude`
+- Added governance controls for Hook Observability Summary and Memory Governance in `docs/governance/template.md`
+- Reorganized governance docs under `docs/governance/` with `template.md`, `audits/`, and `evidence/` for easier handling
+- Moved hook observability output to `docs/governance/evidence/hook-observability-summary.md`
 - Added `stop-dispatcher.sh` - single Stop hook entry that runs `check-unfinished-tasks.sh`, `drift-review-stop.sh`, and `stop-quality-check.sh` in order, then returns one final decision
 - Changed Stop policy to block-only - advisory output no longer surfaces on Stop, which avoids noisy finish loops and keeps Stop deterministic
 - Moved `verify-before-stop.sh` from `Stop` to `UserPromptSubmit` - now emits a compact, rate-limited verification reminder before prompts instead of running build/test at finish time
@@ -60,6 +64,9 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 - [Quick Start](#quick-start)
 - [Full Documentation](#full-documentation)
 	- [Core Guide](docs/core-guide.md)
+	- [Governance Template](docs/governance/template.md)
+	- [Governance Audits](docs/governance/audits/)
+	- [Governance Evidence](docs/governance/evidence/)
 	- [Hooks](hooks/README.md)
 	- [Agents](agents/README.md)
 	- [Skills and Memory](skills/README.md)
@@ -81,14 +88,12 @@ Read the rest of this to understand what each part does and why - so you can ada
 
 ---
 
-## Full Documentation
+The governance template gives you a repeatable audit workflow for your global Claude setup: same controls each cycle, pass/fail gates, evidence capture, and simple prioritization scoring so drift and weak spots are visible early.
 
-The rest of this documentation is now split by area:
+## Governance Workflow
 
-- [Core Guide](docs/core-guide.md)
-- [Rules](rules/README.md)
-- [Hooks](hooks/README.md)
-- [Agents](agents/README.md)
-- [Skills and Memory](skills/README.md)
+Use [Governance Template](docs/governance/template.md) as the single source for cadence, scoring, evidence capture, and improvement workflow.
 
-Each section above was moved from this README without rewriting the original content.
+The template now includes explicit controls for hook observability and memory governance, so governance details stay in one place instead of duplicating long policy text in this README.
+
+Mirror-sync note: copy only intentionally changed files (for example `docs/governance/**`, `hooks/hook-observability-summary.sh`, `README.md`) and do not bring over unrelated folders.

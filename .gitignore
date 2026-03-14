@@ -1,5 +1,11 @@
 .planning/
+.claude/
 .DS_Store
 **/.DS_Store
 Thumbs.db
 .playwright-mcp/
+
+# Generated runtime logs and observability outputs
+logs/
+*.log
+docs/governance/evidence/hook-observability-summary.md
