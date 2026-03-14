@@ -1,4 +1,4 @@
-theme: jekyll-theme-architect
+theme: jekyll-theme-modernist
 title: Claude Code Setup
 description: Global Claude Code configuration with rules, hooks, agents, and governance docs.
 url: https://stuartshields.github.io
