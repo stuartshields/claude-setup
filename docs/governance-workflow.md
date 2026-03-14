@@ -1,3 +1,8 @@
+---
+layout: default
+title: Governance Workflow
+---
+
 # Governance Workflow
 
 This is the operational workflow for keeping your global Claude setup healthy over time.

@@ -1,3 +1,8 @@
+---
+layout: default
+title: Skills & Memory
+---
+
 ## Skills
 
 Skills are reusable task templates with step-by-step instructions. They differ from agents: agents are delegatable specialists (a different "person" doing the work), skills are more like checklists - structured guidance for a task that the main Claude session follows directly.

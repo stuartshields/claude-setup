@@ -1,3 +1,8 @@
+---
+layout: default
+title: Claude Code Setup
+---
+
 # Claude Code Setup
 
 Here's how I set up my Claude Code. This repo IS the configuration - the files here belong in `~/.claude/`. When you clone this and copy the contents to `~/.claude/`, you get persistent instructions, automated quality gates, and specialised subagents that apply across every project you work on.

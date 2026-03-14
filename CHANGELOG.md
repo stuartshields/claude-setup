@@ -1,3 +1,8 @@
+---
+layout: default
+title: Changelog
+---
+
 # Changelog
 
 ## 2026-03-14

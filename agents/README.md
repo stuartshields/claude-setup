@@ -1,3 +1,8 @@
+---
+layout: default
+title: Agents
+---
+
 ## Agents
 
 Rules apply to every conversation. But some tasks need a different personality entirely - a code reviewer that only reads and never writes, a security auditor that can use a cheaper model, a WordPress specialist that only loads PHP-related tools. Rules can't do that. Agents can.

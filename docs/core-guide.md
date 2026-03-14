@@ -1,3 +1,8 @@
+---
+layout: default
+title: Core Guide
+---
+
 ## CLAUDE.md
 
 ### What it does
