@@ -627,3 +627,19 @@ The official docs go deeper on everything here:
 - Hooks reference: [code.claude.com/docs/en/hooks](https://code.claude.com/docs/en/hooks)
 
 And if you want structured workflow on top: [github.com/gsd-build/get-shit-done](https://github.com/gsd-build/get-shit-done)
+
+---
+
+## Continue Reading
+
+[Previous: Start Here](start-here.md) | [Next: Governance Workflow](governance-workflow.md)
+
+## Quick Links
+
+- [Home](../index.md)
+- [Start Here](start-here.md)
+- [Governance Workflow](governance-workflow.md)
+- [Rules](../rules/README.md)
+- [Hooks](../hooks/README.md)
+- [Agents](../agents/README.md)
+- [Skills & Memory](../skills/README.md)

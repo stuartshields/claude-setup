@@ -264,14 +264,6 @@ The regex matches `git commit`, `git -C path commit`, and `gsd-tools.cjs commit`
 
 ---
 
-## Continue Reading
-
-- Configuration and loading model: [Core Guide](../docs/core-guide.md)
-- Specialist subagents: [Agents README](../agents/README.md)
-- Skills and memory system: [Skills README](../skills/README.md)
-
----
-
 ### Files in this folder
 
 How to use this folder in Claude:
@@ -349,4 +341,18 @@ The hook is advisory (exit 0) - warnings appear as system reminders, not blocks.
 Both events (`PostToolUse` and `PostToolUseFailure`) feed into the same log, so the error rate calculation sees the full picture regardless of whether individual calls succeeded or failed.
 
 ---
+
+## Continue Reading
+
+[Previous: Rules](../rules/README.md) | [Next: Agents](../agents/README.md)
+
+## Quick Links
+
+- [Home](../index.md)
+- [Start Here](../docs/start-here.md)
+- [Core Guide](../docs/core-guide.md)
+- [Governance Workflow](../docs/governance-workflow.md)
+- [Rules](../rules/README.md)
+- [Agents](../agents/README.md)
+- [Skills & Memory](../skills/README.md)
 

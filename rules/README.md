@@ -52,3 +52,19 @@ These are scoped by frontmatter so Claude only loads them when relevant files ar
 - `environment.md`
 - `php-wordpress.md`
 - `ui-ux.md`
+
+---
+
+## Continue Reading
+
+[Previous: Governance Workflow](../docs/governance-workflow.md) | [Next: Hooks](../hooks/README.md)
+
+## Quick Links
+
+- [Home](../index.md)
+- [Start Here](../docs/start-here.md)
+- [Core Guide](../docs/core-guide.md)
+- [Governance Workflow](../docs/governance-workflow.md)
+- [Hooks](../hooks/README.md)
+- [Agents](../agents/README.md)
+- [Skills & Memory](../skills/README.md)

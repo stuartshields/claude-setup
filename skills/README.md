@@ -164,8 +164,16 @@ How to use this folder in Claude:
 
 ## Continue Reading
 
-- Runtime setup and instruction loading: [Core Guide](../docs/core-guide.md)
-- Specialist subagents: [Agents README](../agents/README.md)
-- Hook lifecycle automation: [Hooks README](../hooks/README.md)
+[Previous: Agents](../agents/README.md)
+
+## Quick Links
+
+- [Home](../index.md)
+- [Start Here](../docs/start-here.md)
+- [Core Guide](../docs/core-guide.md)
+- [Governance Workflow](../docs/governance-workflow.md)
+- [Rules](../rules/README.md)
+- [Hooks](../hooks/README.md)
+- [Agents](../agents/README.md)
 
 

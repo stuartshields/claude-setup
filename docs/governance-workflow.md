@@ -113,4 +113,14 @@ For weekly checks, you don't need the full template. Just scan controls 1 (drift
 
 ## Continue Reading
 
+[Previous: Core Guide](core-guide.md) | [Next: Rules](../rules/README.md)
+
+## Quick Links
+
+- [Home](../index.md)
+- [Start Here](start-here.md)
 - [Core Guide](core-guide.md)
+- [Rules](../rules/README.md)
+- [Hooks](../hooks/README.md)
+- [Agents](../agents/README.md)
+- [Skills & Memory](../skills/README.md)

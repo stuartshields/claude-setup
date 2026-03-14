@@ -29,10 +29,16 @@ Use this page as your entry point, then follow the reading path below.
 3. Restart Claude Code.
 4. Open any project and confirm your global rules/hooks/agents are active.
 
-## Recommended Reading Path
+## Continue Reading
 
-1. [Core Guide](core-guide.md)
-2. [Governance Workflow](governance-workflow.md)
-3. [Hooks README](../hooks/README.md)
-4. [Agents README](../agents/README.md)
-5. [Skills README](../skills/README.md)
+[Next: Core Guide](core-guide.md)
+
+## Quick Links
+
+- [Home](../index.md)
+- [Core Guide](core-guide.md)
+- [Governance Workflow](governance-workflow.md)
+- [Rules](../rules/README.md)
+- [Hooks](../hooks/README.md)
+- [Agents](../agents/README.md)
+- [Skills & Memory](../skills/README.md)
