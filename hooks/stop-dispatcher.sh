@@ -37,13 +37,12 @@ for hook in "${HOOKS[@]}"; do
 	fi
 
 	if [ "$IS_BLOCK" = true ]; then
-		# Ensure output is valid JSON
+		# Extract or build reason, prepend hook name
 		if echo "$OUTPUT" | jq -e . >/dev/null 2>&1; then
-			[ -z "$BLOCK_OUTPUT" ] && BLOCK_OUTPUT="$OUTPUT"
+			REASON=$(echo "$OUTPUT" | jq -r '.reason // "Blocked by hook"')
+			BLOCK_OUTPUT=$(jq -n --arg reason "[$hook] $REASON" '{"decision":"block","reason":$reason}')
 		else
-			# Non-JSON blocking output -- wrap it
-			WRAPPED=$(jq -n --arg reason "$OUTPUT" '{"decision":"block","reason":$reason}' 2>/dev/null)
-			[ -z "$BLOCK_OUTPUT" ] && BLOCK_OUTPUT="${WRAPPED:-"{\"decision\":\"block\"}"}"
+			BLOCK_OUTPUT=$(jq -n --arg reason "[$hook] $OUTPUT" '{"decision":"block","reason":$reason}')
 		fi
 	fi
 done
