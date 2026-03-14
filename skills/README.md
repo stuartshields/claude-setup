@@ -1,6 +1,6 @@
 ---
-layout: default
 title: Skills & Memory
+nav_order: 7
 ---
 
 ## Skills
@@ -168,6 +168,5 @@ How to use this folder in Claude:
 - Runtime setup and instruction loading: [Core Guide](../docs/core-guide.md)
 - Specialist subagents: [Agents README](../agents/README.md)
 - Hook lifecycle automation: [Hooks README](../hooks/README.md)
-- Governance checklist: [Governance Review Template](../docs/governance-review-template.md)
 
 

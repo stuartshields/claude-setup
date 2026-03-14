@@ -1,6 +1,6 @@
 ---
-layout: default
-title: Claude Code Setup
+title: Home
+nav_order: 1
 description: Global Claude Code configuration with rules, hooks, agents, and governance docs.
 ---
 
@@ -13,11 +13,8 @@ If you want a practical setup with rules, hooks, agents, and governance docs you
 ## Quick Links
 
 - [Start Here](docs/start-here.md)
-- [README](README.md)
-- [Changelog](CHANGELOG.md)
 - [Core Guide](docs/core-guide.md)
 - [Governance Workflow](docs/governance-workflow.md)
-- [Governance Review Template](docs/governance-review-template.md)
 - [Hooks Reference](hooks/README.md)
 - [Agents Reference](agents/README.md)
 - [Skills and Memory](skills/README.md)

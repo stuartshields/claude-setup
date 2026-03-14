@@ -1,6 +1,6 @@
 ---
-layout: default
 title: Start Here
+nav_order: 2
 ---
 
 # Start Here
@@ -34,13 +34,6 @@ Use this page as your entry point, then follow the reading path below.
 
 1. [Core Guide](core-guide.md)
 2. [Governance Workflow](governance-workflow.md)
-3. [Governance Review Template](governance-review-template.md)
-4. [Hooks README](../hooks/README.md)
-5. [Agents README](../agents/README.md)
-6. [Skills README](../skills/README.md)
-
-## Related Docs
-
-- [Repository README](../README.md)
-- [Contributing](../CONTRIBUTING.md)
-- [Changelog](../CHANGELOG.md)
+3. [Hooks README](../hooks/README.md)
+4. [Agents README](../agents/README.md)
+5. [Skills README](../skills/README.md)
