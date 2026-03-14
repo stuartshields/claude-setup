@@ -8,4 +8,4 @@ Thumbs.db
 # Generated runtime logs and observability outputs
 logs/
 *.log
-docs/governance/evidence/hook-observability-summary.md
+docs/governance/evidence/
