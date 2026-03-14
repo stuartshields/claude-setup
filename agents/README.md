@@ -65,6 +65,28 @@ For **project-specific agents**, put them in `.claude/agents/` at the project ro
 
 Rule of thumb: if it's a style preference or a guardrail → rule. If it's a distinct task with a different set of capabilities → agent.
 
+### Subagents vs agent teams
+
+Every agent in this repo is designed as a **subagent** — a focused specialist that does work and reports back. Claude Code also offers **agent teams** (experimental), where multiple Claude instances coordinate through shared task lists and direct messaging. These are different tools for different problems.
+
+**Why these agents are subagents:**
+- Each agent has a single, well-defined role (review code, audit security, write tests)
+- They report findings or deliver artifacts back to the caller — they don't need to discuss with each other
+- Token cost is proportional to the task, not multiplied per teammate
+- Tool restrictions, hooks, and model selection give enough control without team coordination overhead
+
+**When agent teams would add value:**
+- Multiple reviewers need to cross-reference and challenge each other's findings (e.g., a security reviewer flagging that an a11y fix introduces an XSS vector)
+- Debugging with competing hypotheses — agents actively trying to disprove each other's theories
+- Cross-layer feature work where frontend, backend, and test writers need to agree on interfaces in real time
+
+**Current tradeoffs against teams:**
+- Significantly higher token usage (each teammate is a full Claude instance)
+- Experimental status with known limitations (no session resumption, task status lag, slow shutdown)
+- No per-agent effort control, so teammates can't run at different reasoning depths
+
+For now, subagents cover our use cases more efficiently. Revisit teams when token costs improve or per-agent effort levels land.
+
 ### Agent-scoped hooks
 
 Agents can define lifecycle hooks in their frontmatter. These hooks run only when the agent is active, enforcing constraints structurally rather than relying on prompt instructions alone.
@@ -173,9 +195,10 @@ How to use this folder in Claude:
 | `simplify.md` | Complexity-reduction specialist for over-engineered code. | |
 | `test-writer.md` | Test-writing specialist aligned with project test framework/patterns. | `disallowedTools` |
 | `ui-review.md` | UI/UX review specialist for usability/accessibility/responsiveness. | |
-| `wp.md` | Principal WordPress development specialist (architecture/hooks/REST/editor). | `skills` (debug-wp) |
+| `wp.md` | Principal WordPress implementation specialist (architecture/hooks/REST/editor). | |
 | `wp-perf.md` | WordPress performance specialist (queries, caching, CWV, DB optimization). | |
-| `wp-security.md` | WordPress security specialist (sanitization, escaping, nonce/auth/REST risk). | |
+| `wp-reviewer.md` | Read-only WordPress code reviewer (PHP/hooks/queries/REST/security standards). | read-only, lean context |
+| `wp-security.md` | WordPress security specialist (sanitization, escaping, nonce/auth/REST risk). | `model: opus` |
 
 `references/` contains supporting reference docs used by WordPress-specialized agents.
 

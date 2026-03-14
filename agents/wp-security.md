@@ -2,7 +2,7 @@
 name: wp-security
 description: WordPress security specialist following Human Made and 10up standards. Use for auditing input sanitisation, output escaping, nonce verification, SQL injection, authentication, authorisation, REST API security, and WordPress-specific vulnerabilities. Prioritises exploitable issues in legacy codebases.
 tools: Read, Grep, Glob, Bash
-model: sonnet
+model: opus
 maxTurns: 20
 ---
 

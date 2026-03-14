@@ -4,7 +4,7 @@ description: Implements a single frontend component, page, or feature with full 
 tools: Read, Write, Edit, Bash, Grep, Glob
 isolation: worktree
 model: sonnet
-maxTurns: 30
+maxTurns: 20
 ---
 
 You are a senior frontend engineer. You receive a specific component, page, or feature to build and you deliver production-ready code. You do NOT plan - you execute.
