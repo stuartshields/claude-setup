@@ -2,13 +2,15 @@
 # Agent hook: blocks destructive/write commands for read-only agents.
 # Used by: code-reviewer agent (PreToolUse on Bash)
 #
-# Checks TOOL_INPUT against a pattern of destructive commands.
+# Reads JSON from stdin (Claude Code hook contract), extracts .tool_input.command.
 # Exit 2 = block the tool call.
 
-TOOL_INPUT="${TOOL_INPUT:-}"
+command=$(jq -r '.tool_input.command // empty' 2>/dev/null)
+
+[ -z "$command" ] && exit 0
 
 pattern='^\s*(rm|mv|cp|chmod|chown|git\s+(commit|push|reset|checkout|merge|rebase|branch\s+-[dD])|npm\s+(publish|install)|pnpm\s+(publish|install)|yarn\s+(publish|add))'
-if echo "$TOOL_INPUT" | grep -qiE "$pattern"; then
-	echo "BLOCKED: code-reviewer is read-only. Destructive or write commands are not permitted."
+if echo "$command" | grep -qiE "$pattern"; then
+	echo "BLOCKED: code-reviewer is read-only. Destructive or write commands are not permitted." >&2
 	exit 2
 fi

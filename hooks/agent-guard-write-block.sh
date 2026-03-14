@@ -4,5 +4,5 @@
 #
 # Exit 2 = block the tool call.
 
-echo "BLOCKED: code-reviewer is read-only. Write and Edit tools are not permitted."
+echo "BLOCKED: code-reviewer is read-only. Write and Edit tools are not permitted." >&2
 exit 2
