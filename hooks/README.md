@@ -1,3 +1,8 @@
+---
+layout: default
+title: Hooks
+---
+
 ## Hooks
 
 Rules tell Claude what to do. But Claude doesn't verify its own work automatically. It won't check code quality before writing a file, or warn you before stopping with unfinished tasks. Hooks solve that.

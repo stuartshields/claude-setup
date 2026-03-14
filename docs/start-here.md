@@ -1,3 +1,8 @@
+---
+layout: default
+title: Start Here
+---
+
 # Start Here
 
 If you are new to this repo, read this first.

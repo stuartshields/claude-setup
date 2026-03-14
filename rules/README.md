@@ -1,3 +1,8 @@
+---
+layout: default
+title: Rules
+---
+
 ## Rules
 
 Without rules, you repeat the same instructions every conversation. "Use tabs." "No console.log." "Always parameterize SQL." "Don't add unrequested features." Every. Single. Session.
