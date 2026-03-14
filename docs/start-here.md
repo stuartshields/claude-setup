@@ -1,6 +1,5 @@
 ---
 title: Start Here
-nav_order: 2
 ---
 
 # Start Here
