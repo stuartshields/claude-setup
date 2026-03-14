@@ -9,6 +9,7 @@ TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty')
 [ -z "$SESSION_ID" ] && exit 0
 
 STATE="/tmp/claude-tasks-${SESSION_ID}.json"
+MISMATCH_STATE="/tmp/claude-task-state-mismatch-${SESSION_ID}.txt"
 
 case "$TOOL" in
 	TaskCreate)
@@ -34,20 +35,14 @@ case "$TOOL" in
 		STATUS=$(echo "$INPUT" | jq -r '.tool_input.status // empty')
 		TASK_ID=$(echo "$INPUT" | jq -r '.tool_input.taskId // empty')
 		if [ -s "$STATE" ] && { [ "$STATUS" = "completed" ] || [ "$STATUS" = "deleted" ]; }; then
-			# Try exact match first, then scan by subject as fallback
+			# Require exact task id mapping to preserve task-state integrity.
 			if jq -e --arg id "$TASK_ID" 'has($id)' "$STATE" >/dev/null 2>&1; then
 				jq --arg id "$TASK_ID" '.[$id].done = true' \
 					"$STATE" > "${STATE}.tmp" && mv "${STATE}.tmp" "$STATE"
+				rm -f "$MISMATCH_STATE"
 			else
-				# Fallback: mark first unfinished task as done.
-				jq '(
-					to_entries
-					| map(select(.value.done == false))
-					| first
-					| .key
-				) as $first_undone
-				| if $first_undone then .[$first_undone].done = true else . end' \
-					"$STATE" > "${STATE}.tmp" 2>/dev/null && mv "${STATE}.tmp" "$STATE" || true
+				KNOWN_IDS=$(jq -r 'keys | join(", ")' "$STATE" 2>/dev/null)
+				printf "TaskUpdate mismatch: taskId='%s' status='%s' known_task_ids=[%s]" "$TASK_ID" "$STATUS" "$KNOWN_IDS" > "$MISMATCH_STATE"
 			fi
 		fi
 		;;

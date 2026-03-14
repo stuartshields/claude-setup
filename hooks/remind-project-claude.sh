@@ -1,12 +1,14 @@
 #!/bin/bash
-# UserPromptSubmit hook: Injects project CLAUDE.md context before every prompt.
-# Ensures Claude always has the project's source of truth loaded and flags divergence.
+# UserPromptSubmit hook: emits only actionable CLAUDE.md reminders.
+# Keeps steady-state prompts quiet to reduce context overhead.
 
-# Read only .cwd from stdin — avoid buffering full payload (screenshots = multi-MB base64)
-CWD=$(jq -r '.cwd // ""')
+# Read only needed fields — avoid buffering full payload.
+read -r CWD SESSION_ID < <(jq -r '[.cwd // "", .session_id // ""] | @tsv')
 if [ -z "$CWD" ] || [ ! -d "$CWD" ]; then
 	exit 0
 fi
+
+[ -z "$SESSION_ID" ] && exit 0
 
 cd "$CWD" || exit 0
 
@@ -28,22 +30,9 @@ case "$PROJECT_ROOT" in
 	*/.claude) exit 0 ;;
 esac
 
-# --- Cache check FIRST (before expensive git/stat calls) ---
-# macOS: printf '%s' | md5 outputs just the 32-char hex hash (no filename prefix)
+# Cache file for this project/session.
 PROJECT_HASH=$(printf '%s' "$PROJECT_ROOT" | md5)
-CACHE_FILE="/tmp/claude-remind-${PROJECT_HASH}"
-
-# If cache file was written in the last 30 seconds, skip entirely.
-# The message can only change if CLAUDE.md was modified or files were committed,
-# neither of which happens multiple times within 30 seconds.
-if [ -f "$CACHE_FILE" ]; then
-	CACHE_AGE=$(( $(date +%s) - $(stat -f %m "$CACHE_FILE" 2>/dev/null || echo 0) ))
-	if [ "$CACHE_AGE" -lt 30 ]; then
-		exit 0
-	fi
-fi
-
-# --- Cache miss or stale: compute full message ---
+CACHE_FILE="/tmp/claude-remind-${PROJECT_HASH}-${SESSION_ID}.state"
 
 # Get file age in days
 if command -v stat >/dev/null 2>&1; then
@@ -60,30 +49,33 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 	CHANGED_FILES=$(git diff --name-only 2>/dev/null | wc -l | tr -d ' ')
 fi
 
-# Build context message
-MSG="PROJECT CLAUDE.md ACTIVE: $CLAUDE_MD"
+# Build only actionable reminders.
+NOTES=""
 
-if [ "$AGE_DAYS" -gt 7 ]; then
-	MSG="$MSG | STALE ($AGE_DAYS days old) — consider updating after this task."
+if [ "$AGE_DAYS" -gt 14 ]; then
+	NOTES="${NOTES}CLAUDE.md CHECK: Project CLAUDE.md is ${AGE_DAYS} days old. Review if conventions changed. "
 fi
 
-if [ "$CHANGED_FILES" -gt 5 ]; then
-	MSG="$MSG | $CHANGED_FILES files changed this session — if architecture decisions were made, update CLAUDE.md."
+if [ "$CHANGED_FILES" -gt 8 ]; then
+	NOTES="${NOTES}CLAUDE.md CHECK: ${CHANGED_FILES} files modified. If architecture changed, update project CLAUDE.md. "
 fi
 
-MSG="$MSG | RULE: If your changes diverge from what CLAUDE.md specifies, ask the user: 'This differs from the project CLAUDE.md — should I update it first?'"
+[ -z "$NOTES" ] && exit 0
 
-# Check if message content changed since last injection
-# macOS: printf '%s' | md5 outputs just the 32-char hex hash
-MSG_HASH=$(printf '%s' "$MSG" | md5)
+STATE_KEY=$(printf '%s' "$NOTES" | md5)
+NOW=$(date +%s)
+LAST_TS="0"
+LAST_KEY=""
+if [ -s "$CACHE_FILE" ]; then
+	IFS='|' read -r LAST_TS LAST_KEY < "$CACHE_FILE"
+fi
 
-if [ -s "$CACHE_FILE" ] && [ "$(cat "$CACHE_FILE" 2>/dev/null)" = "$MSG_HASH" ]; then
-	# Same message as last prompt — update cache timestamp but skip injection
-	touch "$CACHE_FILE"
+# Re-emit only when state changes, or every 15m as a sparse reminder.
+if [ "$STATE_KEY" = "$LAST_KEY" ] && [ $((NOW - LAST_TS)) -lt 900 ]; then
 	exit 0
 fi
 
-# New or changed message — inject and update cache
-echo "$MSG_HASH" > "$CACHE_FILE" 2>/dev/null
-echo "$MSG"
+echo "${NOW}|${STATE_KEY}" > "$CACHE_FILE" 2>/dev/null
+echo "$NOTES"
+
 exit 0

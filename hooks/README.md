@@ -1,0 +1,338 @@
+## Hooks
+
+Rules tell Claude what to do. But Claude doesn't verify its own work automatically. It won't check code quality before writing a file, or warn you before stopping with unfinished tasks. Hooks solve that.
+
+Hooks are shell scripts that run at key moments in Claude's lifecycle. Registered in [settings.json](../docs/core-guide.md#hook-registration), they intercept tool calls, prompt submissions, and session events. The hook decides what happens: let it through, block it, or add context. For step-by-step examples, see the [Hooks Guide](https://code.claude.com/docs/en/hooks-guide).
+
+**Tip:** Run `/hooks` to create and manage hooks interactively instead of editing JSON manually.
+
+The lifecycle events this setup uses (10 of 18 available):
+
+| Event | When it fires |
+|-------|--------------|
+| `SessionStart` | Session begins or resumes |
+| `UserPromptSubmit` | Before Claude processes your prompt |
+| `PreToolUse` | Before any tool call - **can block** |
+| `PostToolUse` | After a tool call succeeds |
+| `PostToolUseFailure` | After a tool call fails - **observe-only** |
+| `PreCompact` | Before context compaction |
+| `Stop` | When Claude finishes responding (exit 2 continues the conversation) |
+| `SessionEnd` | Session terminates |
+| `PermissionRequest` | Permission dialog is about to appear - **can auto-approve/deny** |
+| `Notification` | Claude needs attention (permission, idle, auth) - **observe-only** |
+
+For the full list of 18 events, see the [official Claude Code docs](https://code.claude.com/docs/en/hooks).
+
+### Exit code contract
+
+This is the most important thing to get right:
+
+| Exit code | Meaning |
+|-----------|---------|
+| `0` | Success - stdout is parsed for JSON output (e.g., `additionalContext`, `systemMessage`) |
+| `2` | **Block** - stderr is fed back to Claude. Effect depends on event (PreToolUse blocks the call, Stop continues the conversation) |
+| anything else | Non-blocking error - execution continues |
+
+**The pitfall everyone hits: `exit 1` does NOT block.** If you want to stop Claude from writing a file, you must use `exit 2`. Exit 1 just logs a non-blocking error and lets the tool call proceed. Use exit 2 to block.
+
+**Another pitfall: Stop hook infinite loops.** Stop hooks that invoke Claude (e.g., prompt-type hooks) can trigger infinite loops - the Stop event fires, the hook runs Claude, Claude stops, firing Stop again. Guard against this with an environment variable check:
+
+```bash
+if [ -n "$stop_hook_active" ]; then exit 0; fi
+export stop_hook_active=1
+```
+
+stdin/stdout: hooks receive a JSON object on stdin. Parse it with `jq`. Key fields are `tool_input.file_path` (the file being written) and `tool_input.command` (for Bash hooks). For command hooks, stderr with `exit 2` becomes the blocking error message for events that support blocking. stdout handling depends on event type and output shape (plain text vs JSON fields like `additionalContext` / `systemMessage`).
+
+Hooks support four types: `command` (shell scripts, shown in all examples above), `prompt` (sends a prompt to an LLM for validation), `agent` (runs a multi-step agent), and `http` (calls an HTTP endpoint). Most hooks use `command` - see the [Hooks Guide](https://code.claude.com/docs/en/hooks-guide) for prompt and agent hook examples.
+
+### Hook walkthrough: check-code-quality.sh
+
+The hook-as-quality-gate pattern. This is a `PreToolUse` hook that fires before every `Write` or `Edit` tool call. Hard violations (console.log, placeholder comments) exit 2 and block the write. Soft violations (space indentation) emit a non-blocking warning - the companion `fix-indentation.sh` PostToolUse hook auto-corrects spaces to tabs after the write, so no tokens are wasted on rejected retries.
+
+Here's the core of how it works:
+
+```bash
+# Read stdin JSON, extract file path and tool name
+FILE_PATH=$(jq -r '.tool_input.file_path // empty' < "$TMPINPUT")
+TOOL=$(jq -r '.tool_name' < "$TMPINPUT")
+
+# Get the content being written
+if [ "$TOOL" = "Write" ]; then
+	jq -r '.tool_input.content // empty' < "$TMPINPUT" > "$TMPCODE"
+elif [ "$TOOL" = "Edit" ]; then
+	jq -r '.tool_input.new_string // empty' < "$TMPINPUT" > "$TMPCODE"
+fi
+
+# Check for violations
+if grep -q 'console\.log(' "$TMPCODE"; then
+	ERRORS="${ERRORS}console.log() found - remove or use console.error. "
+fi
+
+# Block if violations found
+if [ -n "$ERRORS" ]; then
+	echo "$ERRORS" >&2
+	exit 2  # Block the write, feed error back to Claude
+fi
+```
+
+Rules are instructions. Hooks are enforcement. The rules say "no console.log" - the hook makes it impossible to accidentally ship one.
+
+<details>
+<summary>Full check-code-quality.sh script</summary>
+
+```bash
+#!/bin/bash
+# Deterministic code quality gate for Write/Edit tool calls.
+# Replaces the Stop prompt hook - no LLM, no JSON validation errors.
+
+TMPINPUT=$(mktemp)
+TMPCODE=$(mktemp)
+trap 'rm -f "$TMPINPUT" "$TMPCODE"' EXIT
+
+cat > "$TMPINPUT"
+
+FILE_PATH=$(jq -r '.tool_input.file_path // empty' < "$TMPINPUT")
+
+# Only check code files
+case "$FILE_PATH" in
+	*.js|*.mjs|*.ts|*.tsx|*.jsx|*.py|*.css|*.html|*.sql|*.go|*.rs|*.php) ;;
+	*) exit 0 ;;
+esac
+
+TOOL=$(jq -r '.tool_name' < "$TMPINPUT")
+
+if [ "$TOOL" = "Write" ]; then
+	jq -r '.tool_input.content // empty' < "$TMPINPUT" > "$TMPCODE"
+elif [ "$TOOL" = "Edit" ]; then
+	jq -r '.tool_input.new_string // empty' < "$TMPINPUT" > "$TMPCODE"
+else
+	exit 0
+fi
+
+[ ! -s "$TMPCODE" ] && exit 0
+
+ERRORS=""
+
+# Tabs not spaces - non-blocking warning (fix-indentation.sh auto-corrects via PostToolUse).
+if [ "$TOOL" = "Write" ]; then
+	if grep -Eq '^ ' "$TMPCODE"; then
+		NONBLOCKING_NOTES="${NONBLOCKING_NOTES}INDENTATION: Space indentation detected - use tabs. File will be auto-corrected. "
+	fi
+fi
+
+# No console.log in JS/TS
+case "$FILE_PATH" in
+	*.js|*.mjs|*.ts|*.tsx|*.jsx)
+		if grep -q 'console\.log(' "$TMPCODE"; then
+			ERRORS="${ERRORS}console.log() found - remove or use console.error. "
+		fi
+		;;
+esac
+
+# No placeholder comments
+if grep -Eq '//\s*\.\.\.\s*$' "$TMPCODE"; then
+	ERRORS="${ERRORS}Placeholder comment '// ...' found - write real code. "
+fi
+if grep -Eiq '//\s*rest of' "$TMPCODE"; then
+	ERRORS="${ERRORS}Placeholder comment '// rest of...' found - write real code. "
+fi
+
+if [ -n "$ERRORS" ]; then
+	echo "$ERRORS" >&2
+	exit 2
+fi
+
+exit 0
+```
+
+</details>
+
+### Hook walkthrough: fix-indentation.sh
+
+A `PostToolUse` hook that fires after every `Write` or `Edit` on code files. It detects leading spaces, determines the indent width, and runs `unexpand` to convert them to tabs. This exists because Claude's model output defaults to spaces - instead of blocking writes and burning tokens on retries (29 rejections across 12 sessions in practice), the file gets silently corrected.
+
+```bash
+# Skip if no leading spaces
+grep -qE '^ ' "$FILE_PATH" || exit 0
+
+# Detect indent width: smallest non-zero leading space count
+INDENT=$(grep -oE '^ +' "$FILE_PATH" | awk '{print length}' | sort -nu | head -1)
+[ -z "$INDENT" ] || [ "$INDENT" -lt 2 ] && exit 0
+
+# Convert leading spaces to tabs
+unexpand -t "$INDENT" "$FILE_PATH" > "${FILE_PATH}.unexpand.tmp" && mv "${FILE_PATH}.unexpand.tmp" "$FILE_PATH"
+```
+
+This pairs with the `check-code-quality.sh` PreToolUse hook, which now emits a non-blocking warning instead of blocking. Claude still gets feedback to use tabs (so it learns within the session), but the file is correct either way.
+
+The `style.md` rule also covers the Edit tool side of the problem - a [known Claude Code bug](https://github.com/anthropics/claude-code/issues/11447) where the Read tool shows tabs as visual spaces, then Edit fails because `old_string` has spaces but the file has tabs. The rule instructs Claude to use literal tab characters and never fall back to sed/awk/python3 workarounds.
+
+### Alerting: when Claude needs your attention
+
+Two hook events can notify you when Claude is waiting: `PermissionRequest` and `Notification`. This setup uses both - pick whichever fits your workflow, or run them together.
+
+**`PermissionRequest`** fires specifically when a permission dialog appears. It can auto-approve or deny tool calls - not just observe. Use this when you want control over which permissions get through.
+
+**`Notification`** fires on any notification type: `permission_prompt`, `idle_prompt`, `auth_success`, `elicitation_dialog`. It's observe-only - it can't block or approve anything. Use this when you just want to know Claude is waiting, regardless of why.
+
+If you run both on permission prompts, you'll get two alerts. That's intentional in this setup - `PermissionRequest` plays a simple sound, `Notification` shows a macOS banner. Remove one if the double-alert is too much.
+
+### Hook walkthrough: permission-notify.sh
+
+A `PermissionRequest` hook that plays a system sound when Claude needs your approval.
+
+```bash
+#!/bin/bash
+# Play notification sound (non-blocking)
+afplay /System/Library/Sounds/Glass.aiff &
+
+exit 0
+```
+
+Exit 0 with no output means "show the normal permission dialog" - the hook just adds a sound on top. The `&` backgrounds `afplay` so the hook returns immediately.
+
+`PermissionRequest` hooks can do more than notify. They receive JSON on stdin with `tool_name`, `tool_input`, and `permission_suggestions`. To auto-approve, output JSON with `hookSpecificOutput`:
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PermissionRequest",
+    "decision": { "behavior": "allow" }
+  }
+}
+```
+
+To deny instead: `"behavior": "deny"` with an optional `"message"`. You can also modify the tool input before approval using `"updatedInput"`. This setup only uses the notification pattern - auto-approve is available but intentionally left out to keep the permission system intact.
+
+### Hook walkthrough: notification-alert.sh
+
+A `Notification` hook that sends a terminal bell and macOS notification banner whenever Claude needs attention.
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TITLE=$(echo "$INPUT" | jq -r '.title // "Claude Code"' 2>/dev/null)
+MSG=$(echo "$INPUT" | jq -r '.message // "Needs your attention"' 2>/dev/null)
+
+# Terminal bell (triggers dock badge in most terminals)
+printf '\a'
+
+# macOS notification banner (visible even behind other windows)
+osascript -e "display notification \"$MSG\" with title \"$TITLE\" sound name \"Ping\"" 2>/dev/null &
+
+exit 0
+```
+
+The terminal bell (`\a`) triggers a dock bounce or tab badge in most terminal emulators - useful when you've switched to another app. The `osascript` call creates a native macOS notification banner that appears in Notification Center, visible even when the terminal is behind other windows.
+
+The hook reads `title` and `message` from stdin JSON so the banner shows context-specific text (e.g., "Permission needed" vs "Claude Code is idle"). The `Notification` event fires on four types - use a matcher to filter:
+
+```json
+"Notification": [
+  {
+    "matcher": "permission_prompt|idle_prompt",
+    "hooks": [{ "type": "command", "command": "~/.claude/hooks/notification-alert.sh" }]
+  }
+]
+```
+
+Omit the matcher (as this setup does) to fire on all notification types.
+
+### Hook walkthrough: block-git-commit.sh
+
+The hook-as-policy-enforcement pattern. This is a `PreToolUse` hook on the `Bash` tool that prevents Claude (and its subagents) from running `git commit` commands. All code changes are staged but never committed - you commit manually when ready.
+
+```bash
+#!/bin/bash
+command=$(jq -r '.tool_input.command // empty' 2>/dev/null)
+
+if [[ "$command" =~ git[[:space:]]+(.*[[:space:]]+)?commit ]] || \
+   [[ "$command" =~ gsd-tools[^[:space:]]*[[:space:]]+commit ]]; then
+	echo "BLOCKED: Git commits are disabled." >&2
+	exit 2
+fi
+
+exit 0
+```
+
+The regex matches `git commit`, `git -C path commit`, and `gsd-tools.cjs commit` (the GSD framework's commit wrapper). Exit 2 blocks the Bash call entirely - Claude sees the error and skips the commit step.
+
+---
+
+### Files in this folder
+
+How to use this folder in Claude:
+
+1. Copy `hooks/` to `~/.claude/hooks/`
+2. Register hooks in `settings.json` by event/matcher
+3. Keep executable bits on scripts (`chmod +x`)
+
+| File | What it does |
+|------|--------------|
+| `block-git-commit.sh` | `PreToolUse` policy hook that blocks `git commit` and destructive Bash patterns. |
+| `check-code-quality.sh` | Deterministic `PreToolUse` quality gate for `Write`/`Edit`. |
+| `check-unfinished-tasks.sh` | `Stop` + `UserPromptSubmit` hook that warns/blocks on incomplete task state. |
+| `compact-restore.sh` | `SessionStart` restore hook that reloads pre-compaction saved state. |
+| `detect-perf-degradation.sh` | `PostToolUse` + `PostToolUseFailure` hook that detects reasoning loops and error spikes. |
+| `drift-review-stop.sh` | `Stop` hook that catches common cognitive-drift response patterns. |
+| `notification-alert.sh` | `Notification` hook for terminal/native attention alerts. |
+| `permission-notify.sh` | `PermissionRequest` hook that plays alert when approval is needed. |
+| `pre-compaction-preserve.sh` | `PreCompact` hook that saves session/project state before compaction. |
+| `remind-project-claude.sh` | `UserPromptSubmit` hook that emits actionable CLAUDE.md reminders. |
+| `session-cleanup.sh` | `SessionEnd` hook that removes session temp artifacts. |
+| `stop-dispatcher.sh` | Single `Stop` dispatcher that runs stop checks and returns one final decision. |
+| `stop-quality-check.sh` | `Stop` hook that blocks incomplete-work completion patterns. |
+| `stop-wrapper.sh` | JSON-safe wrapper that guarantees valid Stop-hook output shape. |
+| `track-modified-files.sh` | `PostToolUse` (`Write|Edit`) tracker for files modified this session. |
+| `track-tasks.sh` | `PostToolUse` (`TaskCreate|TaskUpdate`) tracker for task lifecycle state. |
+| `verify-before-stop.sh` | `UserPromptSubmit` advisory digest for compact, rate-limited verification reminders. |
+
+`README.md` in this folder is the operational guide you're reading now.
+
+**Note on matcher syntax:** Hook registration in `settings.json` uses regex matchers. A pipe (`|`) is standard regex OR, so `"Write|Edit"` matches both Write and Edit tool calls. This is documented behavior in the hooks reference matcher section.
+
+### Hook walkthrough: stop-quality-check.sh
+
+The hook-as-accountability pattern. This is a `Stop` hook that scans Claude's final message for signs of incomplete work before it finishes responding. It catches five patterns:
+
+1. **Deferred follow-ups** - "in a follow-up", "as a next step", "out of scope for now"
+2. **Rationalised pre-existing issues** - "pre-existing issue", "was already broken"
+3. **Listed problems without fixing** - "you may want to", "consider adding", TODO/FIXME/HACK
+4. **Success claims without evidence** - "all done", "should work now" with no mention of test/build output
+5. **"Too many issues" excuses** - "would require significant", "beyond what can be"
+
+```bash
+# Pattern 4: Claiming success without verification evidence
+if echo "$LAST_MSG" | grep -qiE '(all (done|set|good|fixed)|everything (works|is working|looks good)|should (work|be fine) now)' && \
+   ! echo "$LAST_MSG" | grep -qiE '(test|build|lint|verified|ran |pass|EXIT|output)'; then
+	ISSUES="${ISSUES}- Declared success without verification evidence\n"
+fi
+```
+
+When triggered, it blocks via `exit 2` and feeds the issues back - Claude sees the list and addresses them before finishing. A per-session flag prevents the hook from blocking twice (so it doesn't loop if Claude addresses the feedback but uses similar language in its follow-up).
+
+Stop handling in this setup is centralised through `stop-dispatcher.sh`. It runs the Stop checks in sequence and emits a single final decision, so Stop remains block-only and deterministic while non-blocking reminders are surfaced earlier via `UserPromptSubmit` hooks.
+
+### Hook walkthrough: detect-perf-degradation.sh
+
+The hook-as-early-warning pattern. This is a `PostToolUse` and `PostToolUseFailure` hook that tracks every tool call in a session log and watches for two degradation signals:
+
+- **Reasoning loops** - the same tool with the same input called 3+ times in the last 10 calls
+- **Error spikes** - 5+ tool failures in the last 10 calls
+
+```bash
+# Repeat detection: same tool + same input hash 3+ times in last 10
+REPEAT_COUNT=$(echo "$LAST_10" | awk -F'|' -v tool="$TOOL_NAME" -v hash="$INPUT_HASH" \
+	'$1 == tool && $2 == hash' | wc -l | tr -d ' ')
+if [ "$REPEAT_COUNT" -ge 3 ]; then
+	echo "PERF WARNING: Repeated identical call to ${TOOL_NAME} detected (${REPEAT_COUNT}x). Possible reasoning loop."
+fi
+```
+
+The hook is advisory (exit 0) - warnings appear as system reminders, not blocks. It only analyses every 5th entry to minimise overhead. Each tool call is logged as `tool_name|input_hash|status`, where the input hash is the first 8 characters of an MD5 of the tool input. This keeps the log compact while still catching exact duplicates.
+
+Both events (`PostToolUse` and `PostToolUseFailure`) feed into the same log, so the error rate calculation sees the full picture regardless of whether individual calls succeeded or failed.
+
+---
+

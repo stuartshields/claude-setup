@@ -153,6 +153,14 @@
             "command": "~/.claude/hooks/check-unfinished-tasks.sh"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/verify-before-stop.sh"
+          }
+        ]
       }
     ],
     "PreCompact": [

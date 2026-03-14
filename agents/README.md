@@ -1,0 +1,111 @@
+## Agents
+
+Rules apply to every conversation. But some tasks need a different personality entirely - a code reviewer that only reads and never writes, a security auditor that can use a cheaper model, a WordPress specialist that only loads PHP-related tools. Rules can't do that. Agents can.
+
+Agents are markdown files with YAML frontmatter that define specialist subagents. Claude can delegate tasks to them when the work matches. The agent runs with its own instructions, its own tool restrictions, and optionally its own model. It reports back when done.
+
+**Tip:** Run `/agents` to create agents interactively, or use `--agents` CLI flag for session-scoped agents.
+
+### Frontmatter fields
+
+| Field | What it does |
+|-------|-------------|
+| `name` | Lowercase-with-hyphens identifier. How you reference the agent. (Required) |
+| `description` | Tells Claude when to delegate to this agent. Quality matters - a vague description means missed delegations. (Required) |
+| `tools` | Comma-separated list of allowed tools. Omit to inherit all tools. |
+| `disallowedTools` | Tools to deny - removed from inherited or specified list. |
+| `model` | `sonnet`, `opus`, `haiku`, or `inherit`. Default: inherit. |
+| `permissionMode` | `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, or `plan`. Controls permission prompts. |
+| `maxTurns` | Limits agentic turns. Prevents runaway agents from looping. |
+| `skills` | Skills to load into the subagent's context at startup. |
+| `mcpServers` | MCP servers available to this subagent. |
+| `hooks` | Lifecycle hooks scoped to this subagent. |
+| `memory` | Persistent memory scope: `user`, `project`, or `local`. |
+| `background` | Set to `true` to always run as a background task. Default: `false`. |
+| `isolation` | Set to `worktree` to run in a temporary git worktree. |
+
+### Example: code-reviewer.md
+
+The clearest example of why you'd want an agent instead of a rule. The code reviewer needs to:
+
+1. Be read-only - it should never write or edit files, only report
+2. Run on `sonnet` (lighter model) since reviewing doesn't need the most capable model
+3. Have a 25-turn limit to prevent infinite review loops
+
+Here's its frontmatter:
+
+```yaml
+---
+name: code-reviewer
+description: General-purpose code reviewer. Examines code for logical errors, race conditions, edge cases, type mismatches, and CLAUDE.md compliance. Read-only - never modifies code. Works on specific files by default; supports git diff review when explicitly requested.
+tools: Read, Grep, Glob, Bash
+model: sonnet
+maxTurns: 25
+---
+```
+
+Four tools only: `Read`, `Grep`, `Glob`, `Bash`. No `Write`, no `Edit`. The model declaration (`sonnet`) makes every code review cheaper than if it ran on `opus`. The `maxTurns: 25` means it can do a thorough review without risking an infinite loop.
+
+A rule can say "never modify code when reviewing." An agent makes it structurally impossible.
+
+### Where agent files live
+
+This repo's `agents/` directory maps to `~/.claude/agents/`. These are **user-global agents** - available across every project.
+
+For **project-specific agents**, put them in `.claude/agents/` at the project root. Project agents are available only in that project. If you have a database migration specialist that only makes sense for one codebase, put it there rather than polluting your global agent list.
+
+### Rules vs agents: when to use which
+
+| Use a rule when... | Use an agent when... |
+|-------------------|---------------------|
+| It's a constraint that always applies | It's a task you'd delegate to a specialist |
+| "Always use tabs" | "Review this code for bugs" |
+| "Never skip tests" | "Audit this for security issues" |
+| "No console.log" | "Rewrite this as a WordPress plugin" |
+
+Rule of thumb: if it's a style preference or a guardrail → rule. If it's a distinct task with a different set of capabilities → agent.
+
+### New in recent releases
+
+A few agent-related features worth knowing about:
+
+**Permission modes** - Agents can specify a `permissionMode` to control how tool permissions are handled. `plan` mode lets the agent analyze without modifying files. `dontAsk` auto-denies tools unless pre-approved. `bypassPermissions` skips all prompts (for safe environments). The same five modes (`default`, `acceptEdits`, `plan`, `dontAsk`, `bypassPermissions`) are also available as a global `defaultMode` setting.
+
+**Agent teams** (experimental) - Multiple Claude Code instances coordinating on work. A team lead delegates, teammates work independently with shared task lists and direct messaging. Enabled via `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or settings. Higher token usage than single sessions. See the [agent teams docs](https://code.claude.com/docs/en/agent-teams).
+
+**PostToolUseFailure** - A hook event that fires after a tool call fails (companion to `PostToolUse` which fires on success). Cannot block since the failure already happened. Useful for logging or alerting on tool failures.
+
+**Plugin hooks** - Plugins can bundle their own hooks via a `hooks/hooks.json` file. When a plugin is enabled, its hooks merge with user and project hooks. This is a plugin-specific mechanism, not a standalone alternative to `settings.json` for regular hook configuration.
+
+---
+
+### Files in this folder
+
+How to use this folder in Claude:
+
+1. Copy `agents/` to `~/.claude/agents/`
+2. Run `/agents` to confirm discovery and invocation names
+3. Keep each agent focused and frontmatter-driven (`description`, `tools`, `model`, `maxTurns`, etc.)
+
+| File | What it does |
+|------|--------------|
+| `architect.md` | Deep architectural research and recommendation agent (decision docs, no implementation). |
+| `backend-builder.md` | Backend implementation specialist for routes, schemas, and server-side services. |
+| `cleanup.md` | Dead-code and cruft cleanup specialist. |
+| `code-reviewer.md` | Read-only reviewer for bugs, edge cases, and CLAUDE.md compliance. |
+| `frontend-builder.md` | Frontend implementation specialist for components/pages/features. |
+| `perf.md` | Performance audit specialist (runtime, bundle, rendering inefficiencies). |
+| `quick-edit.md` | Fast trivial-edit specialist with strict scope guardrails. |
+| `security.md` | Deep security audit specialist adapted to stack context. |
+| `simplify.md` | Complexity-reduction specialist for over-engineered code. |
+| `test-writer.md` | Test-writing specialist aligned with project test framework/patterns. |
+| `ui-review.md` | UI/UX review specialist for usability/accessibility/responsiveness. |
+| `wp.md` | Principal WordPress development specialist (architecture/hooks/REST/editor). |
+| `wp-perf.md` | WordPress performance specialist (queries, caching, CWV, DB optimization). |
+| `wp-security.md` | WordPress security specialist (sanitization, escaping, nonce/auth/REST risk). |
+
+`references/` contains supporting reference docs used by WordPress-specialized agents.
+
+`README.md` in this folder is the usage guide and frontmatter reference.
+
+
