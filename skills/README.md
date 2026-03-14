@@ -1,6 +1,5 @@
 ---
 title: Skills & Memory
-nav_order: 7
 ---
 
 ## Skills

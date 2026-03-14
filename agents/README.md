@@ -1,6 +1,5 @@
 ---
 title: Agents
-nav_order: 6
 ---
 
 ## Agents

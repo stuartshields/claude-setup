@@ -1,4 +1,4 @@
-remote_theme: just-the-docs/just-the-docs
+theme: jekyll-theme-cayman
 title: Claude Code Setup
 description: Global Claude Code configuration with rules, hooks, agents, and governance docs.
 url: https://stuartshields.github.io
@@ -14,23 +14,10 @@ kramdown:
 
 plugins:
   - jekyll-relative-links
-  - jekyll-remote-theme
 
 relative_links:
   enabled: true
   collections: true
-
-# just-the-docs config
-color_scheme: dark
-search_enabled: true
-heading_anchors: true
-
-aux_links:
-  "View on GitHub":
-    - "https://github.com/stuartshields/claude-setup"
-aux_links_new_tab: true
-
-footer_content: ""
 
 exclude:
   - ".claude/"

@@ -1,6 +1,5 @@
 ---
 title: Core Guide
-nav_order: 3
 ---
 
 ## CLAUDE.md

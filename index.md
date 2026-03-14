@@ -1,6 +1,5 @@
 ---
 title: Home
-nav_order: 1
 description: Global Claude Code configuration with rules, hooks, agents, and governance docs.
 ---
 

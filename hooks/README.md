@@ -1,6 +1,5 @@
 ---
 title: Hooks
-nav_order: 5
 ---
 
 ## Hooks
