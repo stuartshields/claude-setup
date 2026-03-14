@@ -21,8 +21,8 @@ for hook in "${HOOKS[@]}"; do
 	HOOK_PATH="${HOOK_DIR}/${hook}"
 	[ ! -x "$HOOK_PATH" ] && continue
 
-	# Run sub-hook: stderr passes through, stdout captured
-	OUTPUT=$(echo "$STDIN_DATA" | "$HOOK_PATH" 2>&2)
+	# Run sub-hook: capture both stdout and stderr for reason extraction
+	OUTPUT=$(echo "$STDIN_DATA" | "$HOOK_PATH" 2>&1)
 	EXIT_CODE=$?
 
 	# Skip empty output with clean exit
