@@ -16,15 +16,9 @@ fi
 
 [ -z "$SESSION_ID" ] && exit 0
 
-# Rate-limit advisory output to avoid chat noise.
-CACHE_FILE="/tmp/claude-verify-advisory-${SESSION_ID}.ts"
+# State-aware rate-limiting to avoid repeated advisory noise.
+CACHE_FILE="/tmp/claude-verify-advisory-${SESSION_ID}.state"
 NOW=$(date +%s)
-if [ -f "$CACHE_FILE" ]; then
-	LAST=$(cat "$CACHE_FILE" 2>/dev/null || echo "0")
-	if [ $((NOW - LAST)) -lt 60 ]; then
-		exit 0
-	fi
-fi
 
 cd "$CWD" || exit 0
 
@@ -51,7 +45,23 @@ if [ -f "$CLAUDE_MD" ] && [ "$CHANGED_COUNT" -gt 3 ]; then
 fi
 
 if [ -n "$NOTES" ]; then
-	echo "$NOW" > "$CACHE_FILE" 2>/dev/null
+	HAS_CLAUDE_CHECK=0
+	if [ -f "$CLAUDE_MD" ] && [ "$CHANGED_COUNT" -gt 3 ]; then
+		HAS_CLAUDE_CHECK=1
+	fi
+	STATE_KEY="${TOTAL_CHANGED}|${CHANGED_COUNT}|${HAS_CLAUDE_CHECK}"
+	LAST_TS="0"
+	LAST_KEY=""
+	if [ -s "$CACHE_FILE" ]; then
+		IFS='|' read -r LAST_TS LAST_KEY < "$CACHE_FILE"
+	fi
+
+	# Emit when state changes, or as a sparse reminder every 5 minutes.
+	if [ "$STATE_KEY" = "$LAST_KEY" ] && [ $((NOW - LAST_TS)) -lt 300 ]; then
+		exit 0
+	fi
+
+	echo "${NOW}|${STATE_KEY}" > "$CACHE_FILE" 2>/dev/null
 	echo "$NOTES"
 fi
 

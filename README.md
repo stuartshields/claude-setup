@@ -12,6 +12,9 @@ The structure maps directly to `~/.claude/`: `rules/` → `~/.claude/rules/`, `a
 - Moved `verify-before-stop.sh` from `Stop` to `UserPromptSubmit` - now emits a compact, rate-limited verification reminder before prompts instead of running build/test at finish time
 - Hardened task state tracking - removed fallback completion in `track-tasks.sh`; `TaskUpdate` now requires valid `taskId` mapping and persists mismatches for follow-up hooks
 - Updated `check-unfinished-tasks.sh` mismatch handling - warns on `UserPromptSubmit`, blocks on `Stop` until task mapping is corrected
+- Reduced `UserPromptSubmit` noise in `remind-project-claude.sh` - steady-state prompts stay quiet; reminders now emit only for actionable CLAUDE.md conditions and are sparsely repeated
+- Reduced `UserPromptSubmit` task reminder chatter in `check-unfinished-tasks.sh` - reminders now emit on task-state changes, explicit task pivots, or sparse heartbeat intervals
+- Updated `verify-before-stop.sh` advisory cadence - reminders are now state-aware and re-emit only on state changes (or sparse intervals), reducing repeated context injection
 
 ### 2026-03-13
 - Added `fix-indentation.sh` - PostToolUse hook that auto-converts leading spaces to tabs via `unexpand` after Write/Edit, eliminating wasted token cycles from repeated Write rejections
@@ -1094,7 +1097,7 @@ Hard violations (console.log, placeholders) block the write. Soft violations (in
 
 ### Build and Test Verification on Stop
 
-The `verify-before-stop.sh` logic now runs on `UserPromptSubmit` rather than `Stop`. Instead of running build/test at finish time, it emits a compact advisory reminder before prompts (rate-limited per session) when there are uncommitted changes, so Claude gets a verification nudge without making Stop noisy.
+The `verify-before-stop.sh` logic now runs on `UserPromptSubmit` rather than `Stop`. Instead of running build/test at finish time, it emits a compact advisory reminder before prompts when there are uncommitted changes. The reminder is state-aware and only re-emits on state changes (or sparse intervals), so Claude gets a verification nudge without repeated prompt noise.
 
 Stop itself stays block-only through `stop-dispatcher.sh`, which keeps finish-time decisions deterministic. Advisory guidance now belongs to prompt-time hooks; blocking remains reserved for true stop conditions.
 
