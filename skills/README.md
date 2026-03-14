@@ -47,7 +47,7 @@ Skills support 10 frontmatter fields:
 | `agent` | Which subagent to use when `context: fork` is set. |
 | `hooks` | Hooks scoped to this skill's lifecycle. |
 
-<details>
+<details markdown="1">
 <summary>Example: A debugging skill (SKILL.md)</summary>
 
 ```yaml

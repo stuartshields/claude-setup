@@ -35,7 +35,7 @@ Without these rules, Claude will frequently write speculative code, skip tests, 
 
 One pattern worth stealing: notice the `> Last verified: 2026-03-08` line in section 4. Claude Code features evolve quickly. When you state facts about tool features (loading order, settings keys, hook events), date them and link docs. That gives you a clear freshness signal and makes stale guidance obvious.
 
-<details>
+<details markdown="1">
 <summary>Full CLAUDE.md content</summary>
 
 ```markdown
@@ -306,7 +306,7 @@ The fix: don't put notification hooks in project settings. Keep them in personal
 
 Settings also control `claudeMdExcludes` (skip specific CLAUDE.md files) and settings precedence: Managed policy > CLI args > Local > Project > User. Array settings like `permissions.allow` merge across scopes rather than override - project-level allow rules stack on top of global ones.
 
-<details>
+<details markdown="1">
 <summary>Full settings.json</summary>
 
 ```json

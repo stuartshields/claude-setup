@@ -83,7 +83,7 @@ fi
 
 Rules are instructions. Hooks are enforcement. The rules say "no console.log" - the hook makes it impossible to accidentally ship one.
 
-<details>
+<details markdown="1">
 <summary>Full check-code-quality.sh script</summary>
 
 ```bash
