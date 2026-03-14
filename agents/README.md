@@ -65,6 +65,88 @@ For **project-specific agents**, put them in `.claude/agents/` at the project ro
 
 Rule of thumb: if it's a style preference or a guardrail → rule. If it's a distinct task with a different set of capabilities → agent.
 
+### Agent-scoped hooks
+
+Agents can define lifecycle hooks in their frontmatter. These hooks run only when the agent is active, enforcing constraints structurally rather than relying on prompt instructions alone.
+
+Two patterns demonstrated in this repo:
+
+**Command blocking** (`code-reviewer.md`) - A PreToolUse hook on `Bash` that regex-matches destructive commands (`rm`, `mv`, `git commit`, etc.) and exits with code 2 to block execution. A second matcher blocks `Write|Edit` entirely. This makes the "read-only" contract enforceable, not just advisory.
+
+```yaml
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: |
+            if echo "$TOOL_INPUT" | grep -qiE '^\s*(rm|mv|git\s+commit)'; then
+              echo "BLOCKED: read-only agent."
+              exit 2
+            fi
+          timeout: 5
+    - matcher: "Write|Edit"
+      hooks:
+        - type: command
+          command: |
+            echo "BLOCKED: read-only agent."
+            exit 2
+          timeout: 5
+```
+
+**Content validation** (`quick-edit.md`) - A PreToolUse hook on `Write|Edit` that counts lines in the tool input and blocks edits exceeding 50 lines. Enforces the "max 50 lines" escalation rule at the tool level.
+
+```yaml
+hooks:
+  PreToolUse:
+    - matcher: "Write|Edit"
+      hooks:
+        - type: command
+          command: |
+            line_count=$(echo "$TOOL_INPUT" | grep -c '')
+            if [ "$line_count" -gt 50 ]; then
+              echo "BLOCKED: Edit exceeds 50 lines."
+              exit 2
+            fi
+          timeout: 5
+```
+
+Hook syntax: `matcher` is a regex against tool names. `exit 2` blocks the tool call. `exit 0` allows it. `timeout` is in seconds.
+
+### Preloading skills
+
+The `skills` field loads skill content into the agent's context at startup. Unlike invoking a skill mid-conversation, preloading injects the full skill instructions before the agent begins work.
+
+```yaml
+skills:
+  - debug-wp
+```
+
+This is used on `wp.md` to preload the `debug-wp` debugging methodology. The tradeoff is context cost - every preloaded skill consumes tokens on every invocation, even when not needed. Only preload skills that are central to the agent's role.
+
+### Allowlist vs denylist tooling
+
+Two approaches to restricting an agent's tools:
+
+**Allowlist** (`tools`) - Explicitly lists every tool the agent can use. Agent can use ONLY these tools. Best when the agent has a narrow, well-defined role.
+
+```yaml
+tools: Read, Grep, Glob  # Only these three - nothing else
+```
+
+**Denylist** (`disallowedTools`) - Agent inherits all tools from the parent session, minus the listed ones. Best when the agent needs most tools but should be blocked from specific capabilities.
+
+```yaml
+disallowedTools: WebSearch, WebFetch  # Everything except these two
+```
+
+Used on `test-writer.md` - test writers should work with the codebase (Read, Write, Edit, Bash, Grep, Glob, and any future tools), but should never browse the web for test patterns. A denylist is more maintainable here than an allowlist that needs updating when new tools are added.
+
+**When to use which:**
+- Use `tools` (allowlist) for restrictive agents: code reviewers, auditors, read-only specialists
+- Use `disallowedTools` (denylist) for permissive agents that need "everything except X"
+- Don't use both on the same agent - pick one approach
+
 ### New in recent releases
 
 A few agent-related features worth knowing about:
@@ -87,22 +169,24 @@ How to use this folder in Claude:
 2. Run `/agents` to confirm discovery and invocation names
 3. Keep each agent focused and frontmatter-driven (`description`, `tools`, `model`, `maxTurns`, etc.)
 
-| File | What it does |
-|------|--------------|
-| `architect.md` | Deep architectural research and recommendation agent (decision docs, no implementation). |
-| `backend-builder.md` | Backend implementation specialist for routes, schemas, and server-side services. |
-| `cleanup.md` | Dead-code and cruft cleanup specialist. |
-| `code-reviewer.md` | Read-only reviewer for bugs, edge cases, and CLAUDE.md compliance. |
-| `frontend-builder.md` | Frontend implementation specialist for components/pages/features. |
-| `perf.md` | Performance audit specialist (runtime, bundle, rendering inefficiencies). |
-| `quick-edit.md` | Fast trivial-edit specialist with strict scope guardrails. |
-| `security.md` | Deep security audit specialist adapted to stack context. |
-| `simplify.md` | Complexity-reduction specialist for over-engineered code. |
-| `test-writer.md` | Test-writing specialist aligned with project test framework/patterns. |
-| `ui-review.md` | UI/UX review specialist for usability/accessibility/responsiveness. |
-| `wp.md` | Principal WordPress development specialist (architecture/hooks/REST/editor). |
-| `wp-perf.md` | WordPress performance specialist (queries, caching, CWV, DB optimization). |
-| `wp-security.md` | WordPress security specialist (sanitization, escaping, nonce/auth/REST risk). |
+| File | What it does | Notable features |
+|------|--------------|------------------|
+| `a11y.md` | Deep WCAG 2.2 accessibility auditor (semantic HTML, keyboard, ARIA, forms, contrast). | read-only |
+| `architect.md` | Deep architectural research and recommendation agent (decision docs, no implementation). | |
+| `backend-builder.md` | Backend implementation specialist for routes, schemas, and server-side services. | |
+| `cleanup.md` | Dead-code and cruft cleanup specialist. | |
+| `code-reviewer.md` | Read-only reviewer for bugs, edge cases, and CLAUDE.md compliance. | `hooks` (command blocking) |
+| `frontend-builder.md` | Frontend implementation specialist for components/pages/features. | |
+| `migration-reviewer.md` | Database migration safety reviewer (SQL, ORM, WordPress dbDelta). | read-only |
+| `perf.md` | Performance audit specialist (runtime, bundle, rendering inefficiencies). | |
+| `quick-edit.md` | Fast trivial-edit specialist with strict scope guardrails. | `hooks` (content validation) |
+| `security.md` | Deep security audit specialist adapted to stack context. | |
+| `simplify.md` | Complexity-reduction specialist for over-engineered code. | |
+| `test-writer.md` | Test-writing specialist aligned with project test framework/patterns. | `disallowedTools` |
+| `ui-review.md` | UI/UX review specialist for usability/accessibility/responsiveness. | |
+| `wp.md` | Principal WordPress development specialist (architecture/hooks/REST/editor). | `skills` (debug-wp) |
+| `wp-perf.md` | WordPress performance specialist (queries, caching, CWV, DB optimization). | |
+| `wp-security.md` | WordPress security specialist (sanitization, escaping, nonce/auth/REST risk). | |
 
 `references/` contains supporting reference docs used by WordPress-specialized agents.
 

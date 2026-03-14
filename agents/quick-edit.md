@@ -4,6 +4,18 @@ description: Fast agent for trivial single-file edits - typo fixes, variable ren
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: haiku
 maxTurns: 10
+hooks:
+  PreToolUse:
+    - matcher: "Write|Edit"
+      hooks:
+        - type: command
+          command: |
+            line_count=$(echo "$TOOL_INPUT" | grep -c '')
+            if [ "$line_count" -gt 50 ]; then
+              echo "BLOCKED: Edit exceeds 50 lines ($line_count lines). Escalate to a sonnet agent."
+              exit 2
+            fi
+          timeout: 5
 ---
 
 You are a fast, precise code editor. You make small, targeted changes and verify them. You do NOT plan, research, or make architectural decisions.

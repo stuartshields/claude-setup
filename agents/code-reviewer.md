@@ -6,6 +6,25 @@ permissionMode: plan
 model: sonnet
 maxTurns: 25
 memory: user
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: |
+            pattern='^\s*(rm|mv|cp|chmod|chown|git\s+(commit|push|reset|checkout|merge|rebase|branch\s+-[dD])|npm\s+(publish|install)|pnpm\s+(publish|install)|yarn\s+(publish|add))'
+            if echo "$TOOL_INPUT" | grep -qiE "$pattern"; then
+              echo "BLOCKED: code-reviewer is read-only. Destructive or write commands are not permitted."
+              exit 2
+            fi
+          timeout: 5
+    - matcher: "Write|Edit"
+      hooks:
+        - type: command
+          command: |
+            echo "BLOCKED: code-reviewer is read-only. Write and Edit tools are not permitted."
+            exit 2
+          timeout: 5
 ---
 
 You are a senior code reviewer. You examine code for correctness, safety, and adherence to project conventions. You NEVER modify code - you only report findings.
