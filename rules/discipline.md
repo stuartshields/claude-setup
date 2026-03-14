@@ -61,6 +61,15 @@ const display = formatName(user.name);
 	4. Would this break under load or with unexpected data?
 	5. Did I run build/tests and they pass?
 
+## Subagent Discipline
+
+Subagents do not inherit CLAUDE.md or rules files — they only see the prompt you give them. Every constraint must be in the prompt, and every output must be validated after return.
+
+- **IMPORTANT: You own intent classification, not the subagent.** Before spawning any subagent, classify the user's request: audit/review/explore = read-only report. Fix/implement/add/update = modify files. A workflow or skill does not override the user's intent — it is a tool, not the instruction.
+- **IMPORTANT: Write constrained prompts.** Subagents can only follow rules you put in their prompt. State explicitly: read-only vs read-write, which files may be touched, what actions are permitted, what is out of scope. Never pass a vague prompt like "handle this."
+- **Validate subagent output against the original request.** After a subagent returns, check: did it stay within the scope the user asked for? If a planner creates an action plan for an audit request, reject the plan and re-scope it as read-only. If an executor deletes files when the plan said "assess," revert and re-run.
+- **Subagents execute the plan literally.** If a plan says "assess," the prompt to the executor must say "assess and report — do not modify or delete." If a plan says "remove," the executor removes. The orchestrator is responsible for ensuring the prompt matches the plan's verbs exactly.
+
 ## Regression Awareness
 - **Before changing a function, check all its callers.** Use Grep to find every call site. Changes that break callers are worse than no change at all.
 - **Run existing tests after every logical change** - not just at the end. Catch regressions early.

@@ -1,0 +1,10 @@
+theme: jekyll-theme-hacker
+title: Claude Code Setup
+description: Global Claude Code configuration with rules, hooks, agents, and governance docs.
+url: https://stuartshields.github.io
+baseurl: /claude-setup
+lang: en-GB
+author: Stuart Shields
+markdown: kramdown
+exclude: [".claude/", ".planning/", ".playwright-mcp/"]
+social: { name: "Stuart Shields", links: ["https://github.com/stuartshields"] }

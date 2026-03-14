@@ -156,4 +156,13 @@ How to use this folder in Claude:
 
 `README.md` in this folder is the skill system guide you're reading now.
 
+---
+
+## Continue Reading
+
+- Runtime setup and instruction loading: [Core Guide](../docs/core-guide.md)
+- Specialist subagents: [Agents README](../agents/README.md)
+- Hook lifecycle automation: [Hooks README](../hooks/README.md)
+- Governance checklist: [Governance Review Template](../docs/governance-review-template.md)
+
 

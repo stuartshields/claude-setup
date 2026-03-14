@@ -4,6 +4,13 @@ description: Fast agent for trivial single-file edits - typo fixes, variable ren
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: haiku
 maxTurns: 10
+hooks:
+  PreToolUse:
+    - matcher: "Write|Edit"
+      hooks:
+        - type: command
+          command: "~/.claude/hooks/agent-guard-max-lines.sh"
+          timeout: 5
 ---
 
 You are a fast, precise code editor. You make small, targeted changes and verify them. You do NOT plan, research, or make architectural decisions.

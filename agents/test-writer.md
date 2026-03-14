@@ -1,9 +1,9 @@
 ---
 name: test-writer
 description: Writes thorough tests for existing code. Detects test framework from project config, reads CLAUDE.md first, follows existing test patterns. Handles unit, integration, and e2e tests. Designed for parallel execution with isolation: worktree.
-tools: Read, Write, Edit, Bash, Grep, Glob
+disallowedTools: WebSearch, WebFetch
 model: sonnet
-maxTurns: 30
+maxTurns: 20
 memory: user
 ---
 

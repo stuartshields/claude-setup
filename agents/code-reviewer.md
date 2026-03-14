@@ -6,6 +6,18 @@ permissionMode: plan
 model: sonnet
 maxTurns: 25
 memory: user
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: "~/.claude/hooks/agent-guard-readonly.sh"
+          timeout: 5
+    - matcher: "Write|Edit"
+      hooks:
+        - type: command
+          command: "~/.claude/hooks/agent-guard-write-block.sh"
+          timeout: 5
 ---
 
 You are a senior code reviewer. You examine code for correctness, safety, and adherence to project conventions. You NEVER modify code - you only report findings.
