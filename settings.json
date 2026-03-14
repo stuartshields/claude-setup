@@ -108,6 +108,15 @@
         ]
       },
       {
+        "matcher": "Bash|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/hook-observability-summary.sh"
+          }
+        ]
+      },
+      {
         "matcher": "TaskCreate|TaskUpdate",
         "hooks": [
           {
@@ -127,6 +136,15 @@
       }
     ],
     "PostToolUseFailure": [
+      {
+        "matcher": "Bash|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/hook-observability-summary.sh"
+          }
+        ]
+      },
       {
         "matcher": "Bash|Edit|Write",
         "hooks": [
