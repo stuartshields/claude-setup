@@ -8,4 +8,5 @@ Thumbs.db
 # Generated runtime logs and observability outputs
 logs/
 *.log
+docs/governance/audits/
 docs/governance/evidence/
