@@ -71,7 +71,7 @@ Agents can define lifecycle hooks in their frontmatter. These hooks run only whe
 
 Two patterns demonstrated in this repo:
 
-**Command blocking** (`code-reviewer.md`) - A PreToolUse hook on `Bash` that regex-matches destructive commands (`rm`, `mv`, `git commit`, etc.) and exits with code 2 to block execution. A second matcher blocks `Write|Edit` entirely. This makes the "read-only" contract enforceable, not just advisory.
+**Command blocking** (`code-reviewer.md`) - A PreToolUse hook on `Bash` that regex-matches destructive commands (`rm`, `mv`, `git commit`, etc.) and exits with code 2 to block execution. A second matcher blocks `Write|Edit` entirely. This makes the "read-only" contract enforceable, not just advisory. The logic lives in external scripts (`hooks/agent-guard-readonly.sh` and `hooks/agent-guard-write-block.sh`) to avoid fragile inline YAML.
 
 ```yaml
 hooks:
@@ -79,22 +79,16 @@ hooks:
     - matcher: "Bash"
       hooks:
         - type: command
-          command: |
-            if echo "$TOOL_INPUT" | grep -qiE '^\s*(rm|mv|git\s+commit)'; then
-              echo "BLOCKED: read-only agent."
-              exit 2
-            fi
+          command: "~/.claude/hooks/agent-guard-readonly.sh"
           timeout: 5
     - matcher: "Write|Edit"
       hooks:
         - type: command
-          command: |
-            echo "BLOCKED: read-only agent."
-            exit 2
+          command: "~/.claude/hooks/agent-guard-write-block.sh"
           timeout: 5
 ```
 
-**Content validation** (`quick-edit.md`) - A PreToolUse hook on `Write|Edit` that counts lines in the tool input and blocks edits exceeding 50 lines. Enforces the "max 50 lines" escalation rule at the tool level.
+**Content validation** (`quick-edit.md`) - A PreToolUse hook on `Write|Edit` that counts lines in the tool input and blocks edits exceeding 50 lines. Enforces the "max 50 lines" escalation rule at the tool level. Logic in `hooks/agent-guard-max-lines.sh`.
 
 ```yaml
 hooks:
@@ -102,16 +96,11 @@ hooks:
     - matcher: "Write|Edit"
       hooks:
         - type: command
-          command: |
-            line_count=$(echo "$TOOL_INPUT" | grep -c '')
-            if [ "$line_count" -gt 50 ]; then
-              echo "BLOCKED: Edit exceeds 50 lines."
-              exit 2
-            fi
+          command: "~/.claude/hooks/agent-guard-max-lines.sh"
           timeout: 5
 ```
 
-Hook syntax: `matcher` is a regex against tool names. `exit 2` blocks the tool call. `exit 0` allows it. `timeout` is in seconds.
+Hook syntax: `matcher` is a regex against tool names. `exit 2` blocks the tool call. `exit 0` allows it. `timeout` is in seconds. Prefer external scripts over inline `command: |` blocks — inline YAML is fragile and a parse error silently breaks enforcement.
 
 ### Preloading skills
 

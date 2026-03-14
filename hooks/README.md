@@ -279,6 +279,9 @@ How to use this folder in Claude:
 
 | File | What it does |
 |------|--------------|
+| `agent-guard-max-lines.sh` | Agent `PreToolUse` hook that blocks `Write`/`Edit` exceeding 50 lines. Used by `quick-edit` agent. |
+| `agent-guard-readonly.sh` | Agent `PreToolUse` hook that blocks destructive Bash commands. Used by `code-reviewer` agent. |
+| `agent-guard-write-block.sh` | Agent `PreToolUse` hook that blocks `Write`/`Edit` entirely. Used by `code-reviewer` agent. |
 | `block-git-commit.sh` | `PreToolUse` policy hook that blocks `git commit` and destructive Bash patterns. |
 | `check-code-quality.sh` | Deterministic `PreToolUse` quality gate for `Write`/`Edit`. |
 | `check-unfinished-tasks.sh` | `Stop` + `UserPromptSubmit` hook that warns/blocks on incomplete task state. |
@@ -292,7 +295,6 @@ How to use this folder in Claude:
 | `session-cleanup.sh` | `SessionEnd` hook that removes session temp artifacts. |
 | `stop-dispatcher.sh` | Single `Stop` dispatcher that runs stop checks and returns one final decision. |
 | `stop-quality-check.sh` | `Stop` hook that blocks incomplete-work completion patterns. |
-| `stop-wrapper.sh` | JSON-safe wrapper that guarantees valid Stop-hook output shape. |
 | `track-modified-files.sh` | `PostToolUse` (`Write|Edit`) tracker for files modified this session. |
 | `track-tasks.sh` | `PostToolUse` (`TaskCreate|TaskUpdate`) tracker for task lifecycle state. |
 | `verify-before-stop.sh` | `UserPromptSubmit` advisory digest for compact, rate-limited verification reminders. |

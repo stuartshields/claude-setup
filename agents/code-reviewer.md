@@ -11,19 +11,12 @@ hooks:
     - matcher: "Bash"
       hooks:
         - type: command
-          command: |
-            pattern='^\s*(rm|mv|cp|chmod|chown|git\s+(commit|push|reset|checkout|merge|rebase|branch\s+-[dD])|npm\s+(publish|install)|pnpm\s+(publish|install)|yarn\s+(publish|add))'
-            if echo "$TOOL_INPUT" | grep -qiE "$pattern"; then
-              echo "BLOCKED: code-reviewer is read-only. Destructive or write commands are not permitted."
-              exit 2
-            fi
+          command: "~/.claude/hooks/agent-guard-readonly.sh"
           timeout: 5
     - matcher: "Write|Edit"
       hooks:
         - type: command
-          command: |
-            echo "BLOCKED: code-reviewer is read-only. Write and Edit tools are not permitted."
-            exit 2
+          command: "~/.claude/hooks/agent-guard-write-block.sh"
           timeout: 5
 ---
 

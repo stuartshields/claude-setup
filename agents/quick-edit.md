@@ -9,12 +9,7 @@ hooks:
     - matcher: "Write|Edit"
       hooks:
         - type: command
-          command: |
-            line_count=$(echo "$TOOL_INPUT" | grep -c '')
-            if [ "$line_count" -gt 50 ]; then
-              echo "BLOCKED: Edit exceeds 50 lines ($line_count lines). Escalate to a sonnet agent."
-              exit 2
-            fi
+          command: "~/.claude/hooks/agent-guard-max-lines.sh"
           timeout: 5
 ---
 
