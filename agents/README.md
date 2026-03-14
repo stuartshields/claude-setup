@@ -212,8 +212,16 @@ How to use this folder in Claude:
 
 ## Continue Reading
 
-- Runtime setup and loading model: [Core Guide](../docs/core-guide.md)
-- Hook enforcement and lifecycle events: [Hooks README](../hooks/README.md)
-- Skills and memory model: [Skills README](../skills/README.md)
+[Previous: Hooks](../hooks/README.md) | [Next: Skills & Memory](../skills/README.md)
+
+## Quick Links
+
+- [Home](../index.md)
+- [Start Here](../docs/start-here.md)
+- [Core Guide](../docs/core-guide.md)
+- [Governance Workflow](../docs/governance-workflow.md)
+- [Rules](../rules/README.md)
+- [Hooks](../hooks/README.md)
+- [Skills & Memory](../skills/README.md)
 
 
