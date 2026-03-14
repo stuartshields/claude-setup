@@ -39,4 +39,7 @@ exclude:
   - "CLAUDE.md"
   - "CHANGELOG.md"
   - "docs/governance-review-template.md"
+  - "docs/governance/"
+  - "README.md"
+  - "CONTRIBUTING.md"
 social: { name: "Stuart Shields", links: ["https://github.com/stuartshields"] }

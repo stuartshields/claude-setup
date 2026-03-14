@@ -268,7 +268,6 @@ Hooks connect to lifecycle events in `settings.json`. Each event takes an array 
 
 ## Continue Reading
 
-- Governance checklist: [Governance Review Template](governance-review-template.md)
 - Hook lifecycle and examples: [Hooks README](../hooks/README.md)
 - Agent frontmatter and usage: [Agents README](../agents/README.md)
 - Skills and memory guide: [Skills README](../skills/README.md)
@@ -618,8 +617,8 @@ More at: [github.com/gsd-build/get-shit-done](https://github.com/gsd-build/get-s
 The fastest path: clone, copy, restart.
 
 ```bash
-git clone https://github.com/shieldsstuart/project-claude-setup
-cp -r project-claude-setup/. ~/.claude/
+git clone https://github.com/stuartshields/claude-setup
+cp -r claude-setup/. ~/.claude/
 ```
 
 Then adapt it. The rules are opinionated - they reflect how I work. Read through each one in `rules/` and remove or modify anything that doesn't fit your style. If you don't work with WordPress, delete `php-wordpress.md`. If you prefer a different SQL library, update the parameterized query examples in `security.md`.
