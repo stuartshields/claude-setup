@@ -3,12 +3,12 @@
 # Fires on: permission_prompt, idle_prompt, auth_success, elicitation_dialog.
 # Cannot block or modify notifications.
 
-TYPE=$(jq -r '.notification_type // "attention"')
+IFS=$'\t' read -r TITLE MSG < <(jq -r '[.title // "Claude Code", .message // "Needs your attention"] | @tsv')
 
 # Terminal bell
 printf '\a'
 
 # macOS notification
-osascript -e "display notification \"Claude Code: ${TYPE}\" with title \"Claude Code\" sound name \"Ping\"" 2>/dev/null &
+osascript -e "display notification \"${MSG}\" with title \"${TITLE}\" sound name \"Ping\"" 2>/dev/null &
 
 exit 0

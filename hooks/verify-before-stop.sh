@@ -38,18 +38,8 @@ if [ "$TOTAL_CHANGED" -gt 0 ]; then
 	NOTES="${NOTES}VERIFICATION: ${TOTAL_CHANGED} uncommitted file(s). Run project build/test/lint before finishing. "
 fi
 
-CLAUDE_MD="$PROJECT_ROOT/CLAUDE.md"
-[ ! -f "$CLAUDE_MD" ] && CLAUDE_MD="$PROJECT_ROOT/.claude/CLAUDE.md"
-if [ -f "$CLAUDE_MD" ] && [ "$CHANGED_COUNT" -gt 3 ]; then
-	NOTES="${NOTES}CLAUDE.md CHECK: ${CHANGED_COUNT} modified file(s) this session. Confirm whether project conventions should be updated. "
-fi
-
 if [ -n "$NOTES" ]; then
-	HAS_CLAUDE_CHECK=0
-	if [ -f "$CLAUDE_MD" ] && [ "$CHANGED_COUNT" -gt 3 ]; then
-		HAS_CLAUDE_CHECK=1
-	fi
-	STATE_KEY="${TOTAL_CHANGED}|${CHANGED_COUNT}|${HAS_CLAUDE_CHECK}"
+	STATE_KEY="${TOTAL_CHANGED}"
 	LAST_TS="0"
 	LAST_KEY=""
 	if [ -s "$CACHE_FILE" ]; then

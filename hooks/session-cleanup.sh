@@ -15,13 +15,18 @@ rm -f "/tmp/claude-ctx-${SESSION_ID}"*.json \
 	"/tmp/claude-precompact-${SESSION_ID}.txt" \
 	"/tmp/claude-tasks-${SESSION_ID}.json" \
 	"/tmp/claude-task-stop-${SESSION_ID}.count" \
+	"/tmp/claude-task-state-mismatch-${SESSION_ID}.txt" \
+	"/tmp/claude-task-mismatch-prompt-${SESSION_ID}.ts" \
+	"/tmp/claude-task-prompt-${SESSION_ID}.state" \
 	"/tmp/claude-drift-${SESSION_ID}" \
 	"/tmp/claude-drift-reviewed-${SESSION_ID}" \
 	"/tmp/claude-compacted-${SESSION_ID}" \
-	"/tmp/claude-perf-${SESSION_ID}.log" 2>/dev/null
+	"/tmp/claude-perf-${SESSION_ID}.log" \
+	"/tmp/claude-verify-advisory-${SESSION_ID}.state" \
+	"/tmp/claude-quality-checked-${SESSION_ID}" 2>/dev/null
 
 if [ -n "$PROJECT_HASH" ]; then
-	rm -f "/tmp/claude-remind-${PROJECT_HASH}" 2>/dev/null
+	rm -f "/tmp/claude-remind-${PROJECT_HASH}-${SESSION_ID}.state" 2>/dev/null
 fi
 
 # Rotate hooks.log to prevent unbounded growth (issue #16047)

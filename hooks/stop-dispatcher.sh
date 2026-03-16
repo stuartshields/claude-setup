@@ -8,6 +8,12 @@
 HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
 STDIN_DATA=$(cat)
 
+# Official loop-prevention: skip if Claude is already in forced-continuation mode
+if echo "$STDIN_DATA" | jq -e '.stop_hook_active == true' >/dev/null 2>&1; then
+	echo '{"decision":"approve"}'
+	exit 0
+fi
+
 BLOCK_OUTPUT=""
 
 # Sub-hooks to run in order
