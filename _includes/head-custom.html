@@ -2,4 +2,48 @@
 	.main-content {
 		max-width: 64rem;
 	}
+
+	/* Heading anchors */
+	.main-content h1,
+	.main-content h2,
+	.main-content h3,
+	.main-content h4,
+	.main-content h5,
+	.main-content h6 {
+		position: relative;
+	}
+
+	.main-content .heading-anchor {
+		opacity: 0;
+		text-decoration: none;
+		margin-left: 0.25em;
+		color: #aaa;
+		transition: opacity 0.2s;
+	}
+
+	.main-content h1:hover .heading-anchor,
+	.main-content h2:hover .heading-anchor,
+	.main-content h3:hover .heading-anchor,
+	.main-content h4:hover .heading-anchor,
+	.main-content h5:hover .heading-anchor,
+	.main-content h6:hover .heading-anchor {
+		opacity: 1;
+	}
+
+	.main-content .heading-anchor:hover {
+		color: #fff;
+	}
 </style>
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+		const selectors = 'h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]';
+		document.querySelectorAll(`.main-content ${selectors}`).forEach(heading => {
+			const link = document.createElement('a');
+			link.href = `#${heading.id}`;
+			link.className = 'heading-anchor';
+			link.setAttribute('aria-label', `Link to ${heading.textContent}`);
+			link.textContent = '#';
+			heading.appendChild(link);
+		});
+	});
+</script>
