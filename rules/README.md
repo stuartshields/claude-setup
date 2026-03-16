@@ -16,6 +16,15 @@ How to use this folder in Claude:
 
 The current rules here are split into always-loaded and conditional files. That keeps enforcement strict without wasting context on irrelevant stacks.
 
+### Design principles (v2026.3)
+
+These rules follow community-validated patterns for instruction compliance:
+
+- **Instruction budget awareness.** Always-loaded rules total ~190 lines (down from ~310). Frontier LLMs reliably follow 150-200 instructions; beyond that, compliance degrades linearly.
+- **Positive framing.** Rules tell Claude what TO do, not what to avoid. Flipping negative rules to positive equivalents cuts violations by roughly half.
+- **Deduplication.** Each rule lives in exactly one file. Cross-cutting concepts (e.g., "tests pass but code has bugs") are not repeated across files.
+- **Primacy/recency ordering.** Most-violated rules sit at the top and bottom of each file to exploit attention bias.
+
 ### Files in this folder
 
 | File | What it does |

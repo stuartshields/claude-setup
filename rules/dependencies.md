@@ -2,14 +2,13 @@
 
 ## Hallucinated Reference Prevention
 - **Verify before referencing.** For any URL, package, CLI tool, or API endpoint not already in the codebase, verify it exists (WebSearch, `npm search`, or ask the user) BEFORE writing it.
-- Never trust names or URLs that "sound right" - validate they exist.
-- If you don't know the real URL, ask the user. Never invent a plausible-looking link.
-- If a package doesn't exist, ask the user instead of inventing alternatives.
+- Validate names and URLs exist — "sounds right" is not verification.
+- Ask the user if you don't know the real URL.
 
 ## Dependency Hygiene
-- Never suggest new dependencies without asking first.
+- **Ask before suggesting any new dependency.**
 - Follow the project's dependency style (loose, tight, pinned).
-- Respect lock file constraints - don't suggest conflicting versions.
+- Respect lock file constraints.
 - Run `npm audit` / `pnpm audit` before deployment. For each finding:
 	1. Check if the affected code path is actually used.
 	2. If yes, upgrade or find alternative. If no, document why it's acceptable.
