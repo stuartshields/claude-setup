@@ -2,9 +2,12 @@
 # PostToolUse hook (matcher: TaskCreate|TaskUpdate)
 # Maintains a task state file so other hooks can detect unfinished work.
 
-INPUT=$(cat)
-SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
-TOOL=$(echo "$INPUT" | jq -r '.tool_name // empty')
+# Buffer stdin for multi-field extraction (TaskCreate needs subject + response id)
+TMPINPUT=$(mktemp)
+cat > "$TMPINPUT"
+trap 'rm -f "$TMPINPUT"' EXIT
+
+IFS=$'\t' read -r SESSION_ID TOOL < <(jq -r '[.session_id // "", .tool_name // ""] | @tsv' < "$TMPINPUT")
 
 [ -z "$SESSION_ID" ] && exit 0
 
@@ -13,9 +16,9 @@ MISMATCH_STATE="/tmp/claude-task-state-mismatch-${SESSION_ID}.txt"
 
 case "$TOOL" in
 	TaskCreate)
-		SUBJECT=$(echo "$INPUT" | jq -r '.tool_input.subject // "unknown task"')
+		SUBJECT=$(jq -r '.tool_input.subject // "unknown task"' < "$TMPINPUT")
 		# Use tool_response.id if available, otherwise fall back to sequential
-		TASK_ID=$(echo "$INPUT" | jq -r '.tool_response.id // empty')
+		TASK_ID=$(jq -r '.tool_response.id // empty' < "$TMPINPUT")
 		if [ -z "$TASK_ID" ]; then
 			if [ -s "$STATE" ] && jq -e . "$STATE" >/dev/null 2>&1; then
 				TASK_ID=$(($(jq 'length' "$STATE") + 1))
@@ -32,8 +35,8 @@ case "$TOOL" in
 		fi
 		;;
 	TaskUpdate)
-		STATUS=$(echo "$INPUT" | jq -r '.tool_input.status // empty')
-		TASK_ID=$(echo "$INPUT" | jq -r '.tool_input.taskId // empty')
+		STATUS=$(jq -r '.tool_input.status // empty' < "$TMPINPUT")
+		TASK_ID=$(jq -r '.tool_input.taskId // empty' < "$TMPINPUT")
 		if [ -s "$STATE" ] && { [ "$STATUS" = "completed" ] || [ "$STATUS" = "deleted" ]; }; then
 			# Require exact task id mapping to preserve task-state integrity.
 			if jq -e --arg id "$TASK_ID" 'has($id)' "$STATE" >/dev/null 2>&1; then

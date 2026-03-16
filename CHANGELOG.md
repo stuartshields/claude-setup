@@ -2,6 +2,15 @@
 
 ## 2026-03-16
 
+- Audited all custom hooks against community best practices (skipping GSD-managed hooks)
+- Fixed `session-cleanup.sh` — added 5 missing `/tmp/claude-*` cleanup patterns and fixed glob for remind state files
+- Added `stop_hook_active` guard to `stop-dispatcher.sh` — uses official loop-prevention mechanism instead of relying solely on custom flag files
+- Rate-limited `hook-observability-summary.sh` — summary markdown now rebuilds every 10th event instead of every tool call
+- Standardized stdin parsing to single-jq `@tsv` pattern in `hook-observability-summary.sh`, `track-modified-files.sh`, and `track-tasks.sh` — avoids buffering multi-MB PostToolUse payloads
+- Removed duplicate CLAUDE.md reminder from `verify-before-stop.sh` — `remind-project-claude.sh` now owns that check exclusively
+- Fixed `notification-alert.sh` to parse `title` and `message` from stdin JSON instead of hardcoding notification text
+- Reverted tab enforcement in `check-code-quality.sh` to blocking (exit 2) — removed references to `fix-indentation.sh` which was never deployed
+- Updated `hooks/README.md` — removed `fix-indentation.sh` walkthrough, updated code snippets to match deployed versions
 - Overhauled all 8 always-loaded rule files for instruction compliance, based on community best practices audit
 - Reduced always-loaded rule surface from ~310 lines to ~190 lines (38% reduction) while preserving all substance
 - Deduplicated "Tests Pass But Code Has Bugs" (was in both `testing.md` and `debugging.md`, now only in `testing.md`)

@@ -1,7 +1,3 @@
----
-title: Hooks
----
-
 ## Hooks
 
 Rules tell Claude what to do. But Claude doesn't verify its own work automatically. It won't check code quality before writing a file, or warn you before stopping with unfinished tasks. Hooks solve that.
@@ -52,7 +48,7 @@ Hooks support four types: `command` (shell scripts, shown in all examples above)
 
 ### Hook walkthrough: check-code-quality.sh
 
-The hook-as-quality-gate pattern. This is a `PreToolUse` hook that fires before every `Write` or `Edit` tool call. Hard violations (console.log, placeholder comments) exit 2 and block the write. Soft violations (space indentation) emit a non-blocking warning - the companion `fix-indentation.sh` PostToolUse hook auto-corrects spaces to tabs after the write, so no tokens are wasted on rejected retries.
+The hook-as-quality-gate pattern. This is a `PreToolUse` hook that fires before every `Write` or `Edit` tool call. All violations (space indentation, console.log, placeholder comments) exit 2 and block the write, forcing Claude to rewrite with the correct style.
 
 Here's the core of how it works:
 
@@ -82,95 +78,12 @@ fi
 
 Rules are instructions. Hooks are enforcement. The rules say "no console.log" - the hook makes it impossible to accidentally ship one.
 
-<details markdown="1">
+<details>
 <summary>Full check-code-quality.sh script</summary>
 
-```bash
-#!/bin/bash
-# Deterministic code quality gate for Write/Edit tool calls.
-# Replaces the Stop prompt hook - no LLM, no JSON validation errors.
-
-TMPINPUT=$(mktemp)
-TMPCODE=$(mktemp)
-trap 'rm -f "$TMPINPUT" "$TMPCODE"' EXIT
-
-cat > "$TMPINPUT"
-
-FILE_PATH=$(jq -r '.tool_input.file_path // empty' < "$TMPINPUT")
-
-# Only check code files
-case "$FILE_PATH" in
-	*.js|*.mjs|*.ts|*.tsx|*.jsx|*.py|*.css|*.html|*.sql|*.go|*.rs|*.php) ;;
-	*) exit 0 ;;
-esac
-
-TOOL=$(jq -r '.tool_name' < "$TMPINPUT")
-
-if [ "$TOOL" = "Write" ]; then
-	jq -r '.tool_input.content // empty' < "$TMPINPUT" > "$TMPCODE"
-elif [ "$TOOL" = "Edit" ]; then
-	jq -r '.tool_input.new_string // empty' < "$TMPINPUT" > "$TMPCODE"
-else
-	exit 0
-fi
-
-[ ! -s "$TMPCODE" ] && exit 0
-
-ERRORS=""
-
-# Tabs not spaces - non-blocking warning (fix-indentation.sh auto-corrects via PostToolUse).
-if [ "$TOOL" = "Write" ]; then
-	if grep -Eq '^ ' "$TMPCODE"; then
-		NONBLOCKING_NOTES="${NONBLOCKING_NOTES}INDENTATION: Space indentation detected - use tabs. File will be auto-corrected. "
-	fi
-fi
-
-# No console.log in JS/TS
-case "$FILE_PATH" in
-	*.js|*.mjs|*.ts|*.tsx|*.jsx)
-		if grep -q 'console\.log(' "$TMPCODE"; then
-			ERRORS="${ERRORS}console.log() found - remove or use console.error. "
-		fi
-		;;
-esac
-
-# No placeholder comments
-if grep -Eq '//\s*\.\.\.\s*$' "$TMPCODE"; then
-	ERRORS="${ERRORS}Placeholder comment '// ...' found - write real code. "
-fi
-if grep -Eiq '//\s*rest of' "$TMPCODE"; then
-	ERRORS="${ERRORS}Placeholder comment '// rest of...' found - write real code. "
-fi
-
-if [ -n "$ERRORS" ]; then
-	echo "$ERRORS" >&2
-	exit 2
-fi
-
-exit 0
-```
+See the full script at [`check-code-quality.sh`](check-code-quality.sh). The deployed version also includes non-blocking security-sensitive file detection and dependency verification for JS/TS imports.
 
 </details>
-
-### Hook walkthrough: fix-indentation.sh
-
-A `PostToolUse` hook that fires after every `Write` or `Edit` on code files. It detects leading spaces, determines the indent width, and runs `unexpand` to convert them to tabs. This exists because Claude's model output defaults to spaces - instead of blocking writes and burning tokens on retries (29 rejections across 12 sessions in practice), the file gets silently corrected.
-
-```bash
-# Skip if no leading spaces
-grep -qE '^ ' "$FILE_PATH" || exit 0
-
-# Detect indent width: smallest non-zero leading space count
-INDENT=$(grep -oE '^ +' "$FILE_PATH" | awk '{print length}' | sort -nu | head -1)
-[ -z "$INDENT" ] || [ "$INDENT" -lt 2 ] && exit 0
-
-# Convert leading spaces to tabs
-unexpand -t "$INDENT" "$FILE_PATH" > "${FILE_PATH}.unexpand.tmp" && mv "${FILE_PATH}.unexpand.tmp" "$FILE_PATH"
-```
-
-This pairs with the `check-code-quality.sh` PreToolUse hook, which now emits a non-blocking warning instead of blocking. Claude still gets feedback to use tabs (so it learns within the session), but the file is correct either way.
-
-The `style.md` rule also covers the Edit tool side of the problem - a [known Claude Code bug](https://github.com/anthropics/claude-code/issues/11447) where the Read tool shows tabs as visual spaces, then Edit fails because `old_string` has spaces but the file has tabs. The rule instructs Claude to use literal tab characters and never fall back to sed/awk/python3 workarounds.
 
 ### Alerting: when Claude needs your attention
 
@@ -215,15 +128,13 @@ A `Notification` hook that sends a terminal bell and macOS notification banner w
 
 ```bash
 #!/bin/bash
-INPUT=$(cat)
-TITLE=$(echo "$INPUT" | jq -r '.title // "Claude Code"' 2>/dev/null)
-MSG=$(echo "$INPUT" | jq -r '.message // "Needs your attention"' 2>/dev/null)
+IFS=$'\t' read -r TITLE MSG < <(jq -r '[.title // "Claude Code", .message // "Needs your attention"] | @tsv')
 
 # Terminal bell (triggers dock badge in most terminals)
 printf '\a'
 
 # macOS notification banner (visible even behind other windows)
-osascript -e "display notification \"$MSG\" with title \"$TITLE\" sound name \"Ping\"" 2>/dev/null &
+osascript -e "display notification \"${MSG}\" with title \"${TITLE}\" sound name \"Ping\"" 2>/dev/null &
 
 exit 0
 ```
@@ -261,6 +172,15 @@ exit 0
 ```
 
 The regex matches `git commit`, `git -C path commit`, and `gsd-tools.cjs commit` (the GSD framework's commit wrapper). Exit 2 blocks the Bash call entirely - Claude sees the error and skips the commit step.
+
+---
+
+## Continue Reading
+
+- Configuration and loading model: [Core Guide](../docs/core-guide.md)
+- Governance and audit workflow: [Governance Review Template](../docs/governance-review-template.md)
+- Specialist subagents: [Agents README](../agents/README.md)
+- Skills and memory system: [Skills README](../skills/README.md)
 
 ---
 
@@ -341,18 +261,4 @@ The hook is advisory (exit 0) - warnings appear as system reminders, not blocks.
 Both events (`PostToolUse` and `PostToolUseFailure`) feed into the same log, so the error rate calculation sees the full picture regardless of whether individual calls succeeded or failed.
 
 ---
-
-## Continue Reading
-
-[Previous: Rules](../rules/README.md) | [Next: Agents](../agents/README.md)
-
-## Quick Links
-
-- [Home](../index.md)
-- [Start Here](../docs/start-here.md)
-- [Core Guide](../docs/core-guide.md)
-- [Governance Workflow](../docs/governance-workflow.md)
-- [Rules](../rules/README.md)
-- [Agents](../agents/README.md)
-- [Skills & Memory](../skills/README.md)
 

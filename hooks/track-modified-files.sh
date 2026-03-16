@@ -2,11 +2,10 @@
 # PostToolUse hook (Write|Edit): tracks files modified during this session.
 # Consumed by drift-review-stop.sh (Stop) and compact-restore.sh (compaction checkpoint).
 
-INPUT=$(cat)
-SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
-[ -z "$SESSION_ID" ] && exit 0
+# Single jq call — avoid buffering full PostToolUse payload
+IFS=$'\t' read -r SESSION_ID FILE_PATH < <(jq -r '[.session_id // "", .tool_input.file_path // .tool_input.path // ""] | @tsv')
 
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // empty')
+[ -z "$SESSION_ID" ] && exit 0
 [ -z "$FILE_PATH" ] && exit 0
 
 TRACK_FILE="/tmp/claude-drift-${SESSION_ID}"
