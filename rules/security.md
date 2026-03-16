@@ -1,27 +1,16 @@
 # Security (Always-On)
 
-These rules apply to ALL coding, not just security audits. The `security` agent does deep audits on demand - these are the baseline patterns to follow in every session.
+Baseline patterns for every session. Use the `security` agent for deep audits.
 
 ## Input Validation
-- **Never trust external input** (`req.query`, `req.body`, `params`, headers, cookies).
-- Validate: presence (not null/undefined), type (string/number/boolean), bounds (length, range, enum).
+- **Validate all external input** (`req.query`, `req.body`, params, headers, cookies): presence, type, bounds.
 - Sanitize before database or display.
 
-## SQL Injection Prevention
-- **ALWAYS use parameterized queries.** No exceptions, in any language or ORM.
-	- D1/SQLite: `db.prepare("SELECT * FROM cafes WHERE city = ?").bind(city).all()`
-	- WordPress: `$wpdb->prepare("SELECT * FROM %i WHERE city = %s", $table, $city)`
-	- Any other stack: use the equivalent parameterized query API - never interpolate user input into SQL strings.
-- Never construct SQL via string concatenation or template literals with user input.
-
-## XSS Prevention
-- **General principle:** Never insert unsanitized user content into HTML. Use the framework's default escaping mechanism.
-	- Vue: `v-text` or `{{ variable }}`. Never `v-html` unless sanitized with DOMPurify.
-	- PHP/WordPress: `esc_html()`, `esc_attr()`, `esc_url()`, `wp_kses()` - every output, every time.
-	- Any other stack: use the equivalent auto-escaping or sanitisation API.
-- Validate URLs: only allow `/`, `http://`, `https://`, `mailto:`. Never allow `javascript:` URLs.
+## Injection Prevention
+- **Use parameterized queries for all SQL.** No string concatenation or template literals with user input.
+- **Use the framework's escaping mechanism for all output.** Vue: `{{ }}` or `v-text`. PHP: `esc_html()`. Never raw `v-html` without DOMPurify.
+- **Validate URLs:** allow only `/`, `http://`, `https://`, `mailto:`. Block `javascript:` scheme.
 
 ## Secrets
-- Never log secrets (`API_KEY`, `SECRET`, `TOKEN`, `PASSCODE`, `PASSWORD`).
-- Never hardcode secrets in source - use environment bindings.
-- If a session accidentally exposes a secret, warn the user to rotate it immediately.
+- **Keep secrets in environment bindings.** Never log or hardcode `API_KEY`, `SECRET`, `TOKEN`, `PASSWORD`.
+- Warn the user to rotate immediately if a secret is accidentally exposed.

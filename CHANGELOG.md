@@ -1,11 +1,21 @@
----
-layout: default
-title: Changelog
----
-
 # Changelog
 
+## 2026-03-16
+
+- Overhauled all 8 always-loaded rule files for instruction compliance, based on community best practices audit
+- Reduced always-loaded rule surface from ~310 lines to ~190 lines (38% reduction) while preserving all substance
+- Deduplicated "Tests Pass But Code Has Bugs" (was in both `testing.md` and `debugging.md`, now only in `testing.md`)
+- Deduplicated SQL injection and XSS rules (generic principles in `security.md`, WP-specific implementations stay in `php-wordpress.md`)
+- Flipped ~20 negatively-framed rules to positive directives (research shows ~50% compliance improvement)
+- Compressed "Resolving the Tension" teaching material in `discipline.md` from 18 lines to 3
+- Merged "No Victory Declarations" into "Verify Before Declaring Done" in `discipline.md`
+- Removed redundant code examples where the directive is clear without them
+- Reordered rules within each file: most-violated rules at top and bottom (primacy/recency bias)
+- Added design principles section to `rules/README.md` documenting the instruction budget approach
+- No changes to conditional rules (`environment.md`, `php-wordpress.md`, `ui-ux.md`) - already well-scoped
+
 ## 2026-03-14
+
 - Added `hook-observability-summary.sh` - PostToolUse/PostToolUseFailure hook that writes a per-session hook outcome summary to `docs/hook-observability-summary.md` in `~/.claude`
 - Added governance controls for Hook Observability Summary and Memory Governance in `docs/governance/template.md`
 - Reorganized governance docs under `docs/governance/` with `template.md`, `audits/`, and `evidence/` for easier handling
@@ -20,6 +30,7 @@ title: Changelog
 - Updated `verify-before-stop.sh` advisory cadence - reminders are now state-aware and re-emit only on state changes (or sparse intervals), reducing repeated context injection
 
 ## 2026-03-13
+
 - Added `fix-indentation.sh` - PostToolUse hook that auto-converts leading spaces to tabs via `unexpand` after Write/Edit, eliminating wasted token cycles from repeated Write rejections
 - Changed tab enforcement in `check-code-quality.sh` from blocking (exit 2) to non-blocking warning - the PostToolUse hook handles the fix automatically
 - Added "Tab Handling for Edit Tool" rule to `style.md` - explicit directives for using literal tab characters in `old_string`/`new_string`, with a ban on sed/awk/python3 fallbacks (addresses known Claude Code bugs [#11447](https://github.com/anthropics/claude-code/issues/11447), [#25913](https://github.com/anthropics/claude-code/issues/25913), [#26996](https://github.com/anthropics/claude-code/issues/26996))
@@ -30,9 +41,10 @@ title: Changelog
 - All Stop hooks now wrapped with `stop-wrapper.sh` for reliable JSON output
 - Added `PostToolUseFailure` event to hook configuration (fires `detect-perf-degradation.sh` on tool failures)
 - Added Figma plugin (`figma@claude-plugins-official`) to enabledPlugins
-- Updated CLAUDE.md "Plan First" rule - action-type routing (investigate vs implement) replaces the blanket "> 2 files" plan gate
+- Updated CLAUDE.md "Plan First" rule - action-type routing (investigate vs implement) replaces the blanket "&gt; 2 files" plan gate
 
 ## 2026-03-09
+
 - Added Figma MCP rule enforcing tool-based design extraction (`get_design_context`, `get_screenshot`, `get_variable_defs`) over assumptions. Includes required tool call sequence, design token mapping, Code Connect support, and visual verification loop.
 - Added Playwright MCP rule for browser automation best practices (`browser_snapshot` vs `browser_take_screenshot`, Figma comparison workflow, form interactions, debugging, token efficiency)
 - Expanded block-git-commit hook to block destructive Bash commands (rm -rf, filesystem destruction, recursive permission changes) and data exfiltration (curl/wget POST)
@@ -50,7 +62,9 @@ title: Changelog
 - Added AGENTS.md context to CLAUDE.md section (what it is, how it relates, symlink workaround)
 
 ## 2026-03-08
+
 - Updated loading order, hook events, agent frontmatter, skills section, and new concepts to match current official docs
 
 ## 2026-03-04
+
 - Initial release - rules, hooks, agents, settings, skills, GSD

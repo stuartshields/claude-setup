@@ -1,8 +1,3 @@
----
-layout: default
-title: Contributing
----
-
 # Contributing
 
 Thanks for taking the time to contribute.
@@ -34,7 +29,7 @@ This repo mirrors my `~/.claude/` setup, so changes should stay focused, practic
 
 ## Docs Linking Standard
 
-When adding a new doc, include a small navigation block at the bottom so readers can continue without jumping back to root docs.
+When adding a new doc, include a small navigation block at the bottom so readers can continue without jumping back to root docs. 
 
 Use one of these headings:
 
