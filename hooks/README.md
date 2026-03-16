@@ -48,7 +48,7 @@ Hooks support four types: `command` (shell scripts, shown in all examples above)
 
 ### Hook walkthrough: check-code-quality.sh
 
-The hook-as-quality-gate pattern. This is a `PreToolUse` hook that fires before every `Write` or `Edit` tool call. All violations (space indentation, console.log, placeholder comments) exit 2 and block the write, forcing Claude to rewrite with the correct style.
+The hook-as-quality-gate pattern. This is a `PreToolUse` hook that fires before every `Write` or `Edit` tool call. All violations (space indentation, trailing whitespace, console.log, debugger statements, placeholder comments) exit 2 and block the write, forcing Claude to rewrite with the correct style. The indentation check uses a smart-tabs heuristic (inspired by ESLint's `no-mixed-spaces-and-tabs` and editorconfig-checker) that allows spaces for docblock continuation (`* @param`) and alignment after tabs, while blocking pure space indentation.
 
 Here's the core of how it works:
 
@@ -77,6 +77,8 @@ fi
 ```
 
 Rules are instructions. Hooks are enforcement. The rules say "no console.log" - the hook makes it impossible to accidentally ship one.
+
+**Why PreToolUse instead of a formatter?** Most setups I've seen run Prettier or Biome in a PostToolUse hook - the formatter fixes the file *after* it's already been written. That works, but bad code hits your filesystem first and gets patched after the fact. I'd rather block the write entirely so the file is never wrong. The tradeoff is a shell regex isn't a parser, so the indentation check uses a smart-tabs heuristic instead of a blunt "any leading space = error" pattern. Codex users hit the [same tabs-vs-spaces problem](https://community.openai.com/t/codex-using-tabs-vs-spaces/1285572) but their hook engine can't do pre-write blocking. This pattern only works in Claude Code.
 
 <details>
 <summary>Full check-code-quality.sh script</summary>

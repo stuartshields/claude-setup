@@ -29,16 +29,30 @@ esac
 ERRORS=""
 NONBLOCKING_NOTES=""
 
-# Tabs not spaces — blocking error.
-if grep -Eq '^ ' "$TMPCODE"; then
-	ERRORS="${ERRORS}INDENTATION: Space indentation detected — rewrite using tabs. "
+# Smart indentation check (ESLint smart-tabs / editorconfig-checker heuristic).
+# Allows: docblock continuation ( * ...), smart tabs (tab+spaces for alignment).
+# Flags: pure space indentation (spaces as sole indent mechanism).
+if grep -Eq '^ +[^*[:space:]]' "$TMPCODE"; then
+	# Space-indented non-docblock lines exist — check if tabs are also present.
+	# If yes, spaces are likely alignment (smart tabs) — allow it.
+	if ! grep -q '^\t' "$TMPCODE"; then
+		ERRORS="${ERRORS}INDENTATION: Space indentation detected — rewrite using tabs. "
+	fi
 fi
 
-# No console.log in JS/TS
+# Trailing whitespace — blocking error.
+if grep -Eq '[[:space:]]$' "$TMPCODE"; then
+	ERRORS="${ERRORS}TRAILING WHITESPACE: Remove trailing spaces/tabs from line endings. "
+fi
+
+# No console.log or debugger in JS/TS
 case "$FILE_PATH" in
 	*.js|*.mjs|*.ts|*.tsx|*.jsx)
 		if grep -q 'console\.log(' "$TMPCODE"; then
 			ERRORS="${ERRORS}console.log() found — remove or use console.error. "
+		fi
+		if grep -Eq '^\s*debugger\s*;?\s*$' "$TMPCODE"; then
+			ERRORS="${ERRORS}debugger statement found — remove before shipping. "
 		fi
 		;;
 esac
