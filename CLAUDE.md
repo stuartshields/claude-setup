@@ -5,7 +5,7 @@
 - **"Trace"** or **"/trace"**: Perform a deep-trace audit per the debugging rules in `~/.claude/rules/debugging.md`.
 
 ## 1. MANDATORY WORKFLOW
-- **Plan First**: If the user asks to **investigate, review, audit, or explore** — report findings and wait for direction. Do not modify files. This applies even when routing through workflows or subagents — an audit routed through a planning workflow still produces a read-only report, not an action plan. If the user asks to **fix, implement, add, or update** — execute directly. Only gate on a `<plan>` when the scope is genuinely unclear (not when you've already identified the changes). See Complexity Routing below for file-count thresholds.
+- **Plan First**: If the user asks to **investigate, review, audit, or explore** - report findings and wait for direction. Do not modify files. This applies even when routing through workflows or subagents - an audit routed through a planning workflow still produces a read-only report, not an action plan. If the user asks to **fix, implement, add, or update** - execute directly. Only gate on a `<plan>` when the scope is genuinely unclear (not when you've already identified the changes). See Complexity Routing below for file-count thresholds.
 - **Context Pruning**: Read ONLY files strictly necessary for the current task.
 - **No Yapping**: Skip introductions/conclusions. Output code or direct answers only.
 - **Verify**: After implementing, run the project's build/test/lint command. If it fails, diagnose and fix before moving on. Never mark work as done without verifying it runs.
@@ -23,6 +23,11 @@
 	2. Keep only project-specific conventions.
 	3. Standardize indents to Tabs.
 
-## 3. STYLE DEFAULTS
+## 3. RESEARCH SOURCES
+- **Track external research per project.** When WebSearch/WebFetch informs a decision (library choice, architecture pattern, bug fix, API usage), append the source URL and a one-line summary to `.planning/SOURCES.md` in the project root.
+- **Create `.planning/SOURCES.md` on first use.** Group by topic. Keep entries concise: `- [Title](URL) - why it was relevant`.
+- **Check existing sources first.** Before researching a topic, read `.planning/SOURCES.md` if it exists - the answer may already be documented from a prior session.
+
+## 4. STYLE DEFAULTS
 - **JavaScript**: ES6+ only. Use ES Modules (`import`/`export`), arrow functions, `const`/`let` (never `var`), template literals, destructuring, async/await. No CommonJS (`require`/`module.exports`).
 - **CSS**: TailwindCSS v4 with the TailwindCSS CLI (`@tailwindcss/cli`). CSS-first config (`@theme` in `input.css`), no `tailwind.config.js`.

@@ -3,13 +3,15 @@ name: qa-check
 description: Auto-detects the project's tech stack, then audits for Accessibility, Performance, and Code Quality. Works across WordPress/PHP, Python, Node/JS, and static web projects.
 disable-model-invocation: true
 allowed-tools: Read, Grep, Glob
+context: fork
+agent: Explore
 ---
 
 # Skill: qa-check (Global)
 
 ## When to Use
 
-Run `/qa-check` on any web project to audit for Accessibility (WCAG 2.1 AA), Performance, and Code Quality issues. This skill auto-detects the tech stack and adapts its checks accordingly.
+Run `/qa-check` on any web project to audit for Accessibility (WCAG 2.2 AA), Performance, and Code Quality issues. This skill auto-detects the tech stack and adapts its checks accordingly.
 
 Use `$ARGUMENTS` to scope the audit to a specific directory or file pattern (e.g., `/qa-check src/components/`). If empty, audit the entire project.
 
@@ -61,9 +63,9 @@ Also scan: all `*.css` files, all `*.js` or `*.ts` files in source directories, 
 
 ---
 
-### Pillar 1: Accessibility (WCAG 2.1 AA)
+### Pillar 1: Accessibility (WCAG 2.2 AA)
 
-**Goal:** Confirm output pages meet WCAG 2.1 AA requirements. These checks apply to all stacks - scan every file that produces HTML output.
+**Goal:** Confirm output pages meet WCAG 2.2 AA requirements. These checks apply to all stacks - scan every file that produces HTML output.
 
 | # | Check | What to Look For |
 |---|---|---|

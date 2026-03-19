@@ -16,8 +16,8 @@ Here's the section I rely on most - the workflow rules:
 
 ```markdown
 ## 1. MANDATORY WORKFLOW
-- **Plan First**: If the user asks to investigate, review, or explore — report findings
-  and wait for direction. If the user asks to fix, implement, add, or update — execute
+- **Plan First**: If the user asks to investigate, review, or explore - report findings
+  and wait for direction. If the user asks to fix, implement, add, or update - execute
   directly. Only gate on a `<plan>` when the scope is genuinely unclear.
 - **Test First**: If the project has tests, write or update a failing test BEFORE implementing.
 - **Context Pruning**: Read ONLY files strictly necessary for the current task.
@@ -45,7 +45,7 @@ One pattern worth stealing: notice the `> Last verified: 2026-03-08` line in sec
 - **"Trace"** or **"/trace"**: Perform a deep-trace audit per the debugging rules in `~/.claude/rules/debugging.md`.
 
 ## 1. MANDATORY WORKFLOW
-- **Plan First**: If the user asks to **investigate, review, or explore** — report findings and wait for direction. If the user asks to **fix, implement, add, or update** — execute directly. Only gate on a `<plan>` when the scope is genuinely unclear (not when you've already identified the changes). See Complexity Routing below for file-count thresholds.
+- **Plan First**: If the user asks to **investigate, review, or explore** - report findings and wait for direction. If the user asks to **fix, implement, add, or update** - execute directly. Only gate on a `<plan>` when the scope is genuinely unclear (not when you've already identified the changes). See Complexity Routing below for file-count thresholds.
 - **Test First**: If the project has tests, write or update a failing test BEFORE implementing. Run the test to confirm it fails, then implement, then run again to confirm it passes.
 - **Context Pruning**: Read ONLY files strictly necessary for the current task.
 - **No Yapping**: Skip introductions/conclusions. Output code or direct answers only.
@@ -65,14 +65,16 @@ One pattern worth stealing: notice the `> Last verified: 2026-03-08` line in sec
 	2. Keep only project-specific conventions.
 	3. Standardize indents to Tabs.
 
-## 3. STYLE DEFAULTS
-- **Indents**: Tabs.
+## 3. RESEARCH SOURCES
+- **Track external research per project.** When WebSearch/WebFetch informs a decision (library choice, architecture pattern, bug fix, API usage), append the source URL and a one-line summary to `.planning/SOURCES.md` in the project root.
+- **Create `.planning/SOURCES.md` on first use.** Group by topic. Keep entries concise: `- [Title](URL) - why it was relevant`.
+- **Check existing sources first.** Before researching a topic, read `.planning/SOURCES.md` if it exists - the answer may already be documented from a prior session.
+
+## 4. STYLE DEFAULTS
 - **JavaScript**: ES6+ only. Use ES Modules (`import`/`export`), arrow functions, `const`/`let` (never `var`), template literals, destructuring, async/await. No CommonJS (`require`/`module.exports`).
 - **CSS**: TailwindCSS v4 with the TailwindCSS CLI (`@tailwindcss/cli`). CSS-first config (`@theme` in `input.css`), no `tailwind.config.js`.
-- **Cleanliness**: No trailing whitespace, no `console.log`, no "just-in-case" try/catch.
-- **Simplicity**: Prefer the fewest lines of code. No new dependencies without asking.
 
-## 4. CLAUDE.MD FEATURES
+## 5. CLAUDE.MD FEATURES
 > Last verified: 2026-03-09. Official docs: https://code.claude.com/docs/en/memory
 
 - **Loading order** (highest priority first): Managed policy > Local (`CLAUDE.local.md`) > Project (`./CLAUDE.md` or `./.claude/CLAUDE.md`) > User (`~/.claude/CLAUDE.md`)
@@ -81,13 +83,13 @@ One pattern worth stealing: notice the `> Last verified: 2026-03-08` line in sec
 - **`claudeMdExcludes`**: Settings key to skip specific CLAUDE.md files (useful for monorepos).
 - **Rules with `paths` frontmatter**: Only loaded when working with matching files. Rules without `paths` load every session.
 
-## 5. EXTENDED RULES
+## 6. EXTENDED RULES
 Rules auto-loaded from `~/.claude/rules/`:
-- **Always loaded**: architecture, style, security, verification, testing, debugging, dependencies, discipline
-- **Conditional** (loaded when working with matching files): ui-ux, environment, php-wordpress
+- **Always loaded**: debugging, dependencies, discipline, security, style
+- **Conditional** (loaded when working with matching files): architecture, environment, harness-maintenance, php-wordpress, testing, ui-ux
 ```
 
-*Last synced with CLAUDE.md: 2026-03-13*
+*Last synced with CLAUDE.md: 2026-03-20*
 
 </details>
 
@@ -140,18 +142,15 @@ The rules in this repo import automatically because the [CLAUDE.md](#claudemd) `
 
 ### Always-loaded rules
 
-These 8 files load every session, regardless of what project you're working on:
+These 5 files load every session (~76 bullet points total). With the system prompt's ~50 instructions, total is ~139 - under the ~150 ceiling where compliance degrades:
 
 | File | What problem it solves |
 |------|----------------------|
-| `architecture.md` | Prevents God Files - enforces the 200-line rule, atomic responsibility, and directory mapping |
-| `debugging.md` | Stops guessing - requires tracing data flow before proposing any fix |
+| `debugging.md` | Stops guessing - 4-step framework (Reproduce → Isolate → Fix → Validate), anti-loop protocol, hypothesis-driven investigation |
 | `dependencies.md` | Blocks hallucinated packages and unvetted dependencies from entering the codebase |
-| `discipline.md` | Prevents scope creep, bonus refactors, TODO placeholders, and over-engineered abstractions |
+| `discipline.md` | Prevents scope creep, incomplete implementations, simplicity-pivot avoidance, and bonus refactors. Includes hook awareness and verification checklist |
 | `security.md` | Enforces parameterized queries, input validation, and XSS prevention on every coding task |
-| `style.md` | Enforces tabs, clean code, no truncated snippets - no "// ... rest of code" shortcuts |
-| `testing.md` | Enforces test-first workflow with failing tests before implementation, AAA pattern |
-| `verification.md` | Requires running build/test after every change - never assume success from a clean write |
+| `style.md` | Enforces tabs and clean code |
 
 Here's a taste of what a rule file looks like - this is the SQL injection section from `security.md`:
 
@@ -190,19 +189,18 @@ paths:
 ---
 ```
 
-The five conditional rules in this repo and what triggers each:
+The six conditional rules in this repo and what triggers each:
 
 | File | Triggers on |
 |------|------------|
+| `architecture.md` | Code files (`.js`, `.ts`, `.py`, `.php`, `.go`, `.rs`, etc.) |
 | `environment.md` | `.env`, Docker, deployment config, `package.json`, `tsconfig`, `wrangler` |
-| `figma.md` | CSS, SCSS, HTML, JSX, TSX, Vue, PHP, component/block/template directories |
-| `playwright.md` | CSS, SCSS, HTML, JSX, TSX, Vue, test/spec/e2e files, component/page/view directories |
+| `harness-maintenance.md` | `~/.claude/` harness files (rules, hooks, agents, skills, settings) |
 | `php-wordpress.md` | `.php` files, `wp-config.php`, `composer.json`, `phpunit.xml` |
+| `testing.md` | Code files and test files (`*.test.*`, `*.spec.*`, `__tests__/`) |
 | `ui-ux.md` | Component files, CSS, layout files |
 
-The Figma rule enforces using Figma MCP tools (`get_design_context`, `get_screenshot`, `get_metadata`, `get_variable_defs`) instead of guessing at design specs. When Claude reads a CSS or component file while a Figma URL is in context, this rule requires it to call the actual Figma API for measurements, colors, spacing, and visual verification before writing any code. The rule exists because without it, Claude tends to assume what a design looks like rather than fetching the actual specs, which leads to subtle but persistent visual bugs.
-
-The Playwright rule enforces proper usage of the Playwright MCP's browser automation tools. It establishes that `browser_snapshot` (accessibility tree) should be the default for understanding page state and planning actions, while `browser_take_screenshot` is reserved for visual verification. The rule includes a Figma comparison workflow: capture the Figma design screenshot, navigate to the implementation, resize the viewport to match, take a browser screenshot, and compare until visual parity is achieved. It also covers form interaction patterns, debugging with console/network tools, and token efficiency for large pages.
+The `harness-maintenance.md` rule is notable - it only loads when you're editing `~/.claude/` files (rules, hooks, agents, skills, settings). It enforces a research-first protocol: always validate with external sources (WebSearch/WebFetch) before modifying harness files, check the system prompt for duplicates, count instruction budget, and track source URLs. This prevents drift from stale training data assumptions.
 
 Key insight from testing: conditional rules trigger on **file-read, not tool-use**. Claude reads a `.php` file → PHP rules load. Claude hasn't read any `.php` files in the session → PHP rules stay unloaded. If you're debugging why a conditional rule isn't firing, check whether Claude has actually read a matching file yet.
 
@@ -442,6 +440,31 @@ Out of the box, Claude Code reads your CLAUDE.md, runs tools, and follows instru
 
 Everything below is implemented through the rules, hooks, and agents in this repo. None of it requires external tools or plugins (except GSD, which is optional).
 
+### Debugging Without Loops
+
+Claude's default debugging approach is to try the shortest fix first - which is wrong about half the time. When it fails, it tries a variation of the same wrong approach instead of stepping back to rethink. Three system prompt directives compound into this behavior: "try the simplest approach first" + "keep solutions simple" + "consider alternative approaches when blocked." Together they make Claude pivot away from correct-but-harder fixes toward easy workarounds.
+
+The `debugging.md` rules counteract this with a strict 4-step framework:
+
+1. **Reproduce** - run the faulty scenario, note the exact error
+2. **Isolate** - narrow down the failing component (80% of bugs live in the 20% of code recently modified)
+3. **Fix** - apply the targeted change, touching only the files the bug is in - but touching all of them
+4. **Validate** - run the full test suite, confirm the fix AND no regressions
+
+The anti-loop protocol is the part that actually changed behavior: each retry must use a different *diagnosis*, not just a different fix variation. After 2 failed attempts, Claude stops and asks for context instead of trying a third variation. If fixing A breaks B and fixing B breaks A, the rule explicitly says "the problem is contradictory constraints or a wrong mental model - not a code issue."
+
+### Complete Implementations, Not Shortcuts
+
+Claude has a documented tendency to implement the easy parts and silently skip the hard parts ([GitHub #24129](https://github.com/anthropics/claude-code/issues/24129)). It reads requirements fully but deliberately skips harder tasks to optimize for speed.
+
+The `discipline.md` rules tackle this from two angles:
+
+**"Complete Implementations Come First"** sits at the top of the file (primacy bias - highest attention weight). It says: implement every function body, every route handler, every component. "Minimal" means no extras - it does not mean skip the hard parts.
+
+**"Do Not Pivot to Avoid Hard Work"** catches the specific failure pattern. When Claude says "actually, let me step back - the simplest approach that avoids rebuilding..." it's not being pragmatic. It's retreating from the correct fix because the work is harder than expected. The rule makes this explicit: if you catch yourself saying "let me step back" or "actually, a simpler approach," ask whether you're pivoting because the approach is wrong or because it's harder. If harder, continue.
+
+Both rules are duplicated at the bottom of the file (recency bias) so they get attention at both ends of the instruction window. This is deliberate - [research shows](https://dev.to/docat0209/5-patterns-that-make-claude-code-actually-follow-your-rules-44dh) that rules in the middle of a file get the least attention weight.
+
 ### Test-Driven Development
 
 Claude's default behaviour is implementation-first: write the code, then write tests that confirm it works. This is backwards - tests written after seeing the implementation tend to test what the code *does*, not what it *should do*. The result: tests pass, but the code has bugs.
@@ -454,21 +477,25 @@ This setup enforces a strict TDD cycle through `rules/testing.md`:
 4. **Run the full suite** to catch regressions
 5. **Mutation check** - mentally break the implementation (swap `>` for `>=`, remove a guard). If tests still pass, they're not testing what they claim
 
-The rule also addresses the most common AI testing failure: **over-mocking**. Every mock is an assumption about how the real dependency behaves. If the assumption is wrong, the test passes and production breaks. The rule limits mocks to things you genuinely can't control (network, time, third-party APIs) and flags any test with more than 3 mocks as a design smell.
+The rule also addresses the most common AI testing failure: **over-mocking**. Every mock is an assumption about how the real dependency behaves. If the assumption is wrong, the test passes and production breaks. The rule limits mocks to things you genuinely can't control (network, time, third-party APIs) and suggests reconsidering the design if a test needs 3+ mocks.
+
+A less obvious problem: Claude tests what's easiest, not what matters most. [One real-world case](https://christophermeiklejohn.com/ai/claude/2026/03/08/claude-tested-everything-except-the-one-thing-that-mattered.html) had 154 tests across 17 files, but the app's core feature (posting) was completely untested. The rule now says "test the core user-facing behavior first, before edge cases" to counteract this.
+
+The rule also changed "one assertion per test" to "one behavior per test" - multiple assertions are fine if they verify the same behavior. The old wording caused unnecessary test file bloat for integration tests.
 
 When users report bugs despite passing tests, the rule explicitly states: *the tests are wrong, not the user.* Claude is instructed to stop re-running the same tests and instead write a new test that reproduces the exact reported scenario.
 
 ### Deterministic Code Quality Gates
 
-CLAUDE.md rules are advisory - Claude can ignore them under pressure, especially as context fills up. Hooks are deterministic. This setup uses `PreToolUse` hooks on `Edit|Write` that catch violations, plus a `PostToolUse` hook that auto-fixes indentation:
+CLAUDE.md rules are advisory - Claude can ignore them under pressure, especially as context fills up. Hooks are deterministic. This setup uses `PreToolUse` hooks on `Edit|Write` that catch violations before they reach the filesystem:
 
-- **Tab enforcement** - spaces trigger a non-blocking warning (PreToolUse), then `fix-indentation.sh` auto-converts to tabs (PostToolUse). This replaced a blocking approach that caused 29 wasted API round-trips across 12 sessions and led Claude to bypass the hook via `python3`.
+- **Tab enforcement** - space indentation blocked (exit 2), forces rewrite with tabs
 - **No console.log** - blocked in JS/TS files (exit 2)
-- **No placeholder comments** - `// ...` and `// rest of...` are rejected with "write real code" (exit 2)
-- **Security-sensitive file detection** - when editing auth, session, or crypto files, injects a security reminder into context
-- **Dependency verification** - checks imported packages exist in `package.json`
+- **No placeholder comments or stubs** - `// ...`, `// rest of...`, `// TODO: implement`, `// placeholder`, `// stub`, `throw new Error('not implemented')`, and Python `pass # todo` are all rejected with "write real code" (exit 2)
+- **Security-sensitive file detection** - when editing auth, session, or crypto files, injects a security reminder into context (non-blocking)
+- **Dependency verification** - checks imported packages exist in `package.json` (non-blocking)
 
-Hard violations (console.log, placeholders) block the write. Soft violations (indentation) get auto-corrected so no tokens are wasted.
+The stub detection is worth explaining. Claude has a known tendency to write function signatures with placeholder bodies - `// TODO: implement this` or `throw new Error('not implemented')`. The rule in `discipline.md` says "implement every function body." The hook in `check-code-quality.sh` makes it mechanically impossible to ship a stub. If you've read the research on why prose rules get ignored (instruction-following degrades past ~150 rules), hooks are how you enforce the ones that matter most.
 
 ### Build and Test Verification on Stop
 
@@ -493,7 +520,7 @@ Claude produces generic-looking UI by default - centered layouts, default shadow
 - **8pt grid** - all spacing in multiples of 8px (4px for tight spots)
 - **Anti-AI polish** - empty states instead of blank screens, loading skeletons, toast notifications
 - **Rich grays** - no pure black or white; use slate-900 and similar
-- **Accessibility baseline** - semantic HTML, aria-labels, AA contrast, keyboard navigation
+- **Accessibility baseline** - semantic HTML, accessible names (prefer native HTML over `aria-label` per [W3C First Rule of ARIA](https://www.w3.org/TR/using-aria/)), AA contrast, keyboard navigation
 - **Micro-interactions** - hover/active states, transitions using whatever animation library is installed
 
 ### Manual Commit Control and Destructive Command Blocking
@@ -512,7 +539,7 @@ When Claude's context window fills up, compaction summarises the conversation an
 
 ### Specialised Agents
 
-Beyond the default Agent tool, this setup defines 14 custom agents for specific domains. Some notable ones that go beyond what Claude does on its own:
+Beyond the default Agent tool, this setup defines 17 custom agents for specific domains. Some notable ones that go beyond what Claude does on its own:
 
 | Agent | What it adds |
 |-------|-------------|
@@ -520,9 +547,35 @@ Beyond the default Agent tool, this setup defines 14 custom agents for specific 
 | `simplify` | Finds over-engineering and suggests concrete simplifications |
 | `perf` | Runtime bottlenecks, bundle bloat, unnecessary network requests |
 | `wp` / `wp-perf` / `wp-security` | WordPress-specific expertise following Human Made and 10up standards |
+| `architect` | Persistent memory (`memory: user`) - retains architectural decisions across sessions |
 | `code-reviewer` | Read-only (`permissionMode: plan`), persistent memory across sessions (`memory: user`) |
 | `test-writer` | Persistent memory (`memory: user`) - learns your test patterns across projects |
-| `frontend-builder` / `backend-builder` | Run in isolated worktrees for parallel execution |
+| `frontend-builder` / `backend-builder` | `maxTurns: 30`, run in isolated worktrees for parallel execution |
+| `simplify` | Upgraded to `model: sonnet` - proving behavioral equivalence requires deeper reasoning |
+
+### Instruction Budget Management
+
+This is easy to miss: Claude Code has a finite instruction budget. The system prompt takes ~50 instruction slots. Your always-loaded rules add more. [Research](https://dev.to/minatoplanb/i-wrote-200-lines-of-rules-for-claude-code-it-ignored-them-all-4639) shows that past ~150 total instructions, compliance degrades linearly - "double the instructions, halve the compliance."
+
+This setup manages the budget by:
+- **Keeping always-loaded rules lean** - 5 files, ~76 bullet points. With the system prompt, total is ~139.
+- **Scoping aggressively** - `testing.md` and `architecture.md` used to load every session. Now they only load when you're working with code files. That saved 30 bullet points from sessions where they weren't relevant (editing config, writing shell scripts).
+- **Deleting system prompt duplicates** - rules like "add error handling only for scenarios that can actually occur" already exist in Claude's system prompt. Restating them wastes a slot. We removed 4 such duplicates.
+- **Merging small files** - `verification.md` had 7 bullets, 4 of which duplicated other files. The unique parts (hook awareness) moved into `discipline.md`. One fewer file to load.
+
+The `harness-maintenance.md` rule (only loaded when editing `~/.claude/` files) includes a budget check step: count always-on bullets before adding new rules. If you're near 100, scope or consolidate before adding.
+
+### Research-First Harness Changes
+
+Training data gets stale. Claude Code updates frequently, and what was true about hook behavior or system prompt directives three months ago may not be true now. The `harness-maintenance.md` rule enforces external validation before making changes to rules, hooks, agents, or skills.
+
+The protocol:
+1. **WebSearch/WebFetch for external validation** - don't rely on training data for behavioral claims
+2. **Check the [system prompt repo](https://github.com/Piebald-AI/claude-code-system-prompts)** - understand what the system prompt already says, so you don't duplicate it
+3. **Check [known issues](https://github.com/anthropics/claude-code/issues)** - model-level behavioral patterns are documented there
+4. **Check existing research** - a prior session may have already found the answer
+
+After changes, source URLs go into a reference file so future sessions can re-validate decisions without re-researching from scratch. The CLAUDE.md also tracks external research per-project in `.planning/SOURCES.md` - same principle, project-level instead of harness-level.
 
 ### Hardening (Optional)
 
@@ -530,7 +583,7 @@ This setup is opinionated but not locked down. If you want to go further, here a
 
 **Block all outbound network access.** The `block-git-commit.sh` hook blocks `curl`/`wget` with POST data, but doesn't block GET requests or `WebFetch`. For stricter environments, add `WebFetch` and `Bash(curl *)` to the `permissions.deny` array in `settings.json`, or use `/sandbox` for OS-level network isolation. Trade-off: Claude can't fetch docs or check URLs.
 
-**Prune CLAUDE.md aggressively.** Community consensus is that CLAUDE.md instructions are suggestions, not contracts - and instruction-following quality degrades as line count increases. This repo's CLAUDE.md is 47 lines (well under the ~100-line ceiling). If you extend it, regularly ask: "Would removing this line cause Claude to make mistakes?" If not, cut it. Anything you can enforce via a hook, enforce via a hook instead.
+**Prune CLAUDE.md aggressively.** Community consensus is that CLAUDE.md instructions are suggestions, not contracts - and instruction-following quality degrades as line count increases. This repo's CLAUDE.md is 32 lines (well under the ~100-line ceiling). The always-on rules add ~76 bullet points. With the system prompt's ~50, total is ~139 against a ~150 ceiling. If you extend it, regularly ask: "Would removing this line cause Claude to make mistakes?" If not, cut it. Anything you can enforce via a hook, enforce via a hook instead.
 
 **Restrict MCP server access.** If you use MCP servers, explicitly allowlist trusted ones rather than enabling all project servers. In `settings.json`:
 

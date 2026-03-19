@@ -3,7 +3,7 @@ name: test-writer
 description: Writes thorough tests for existing code. Detects test framework from project config, reads CLAUDE.md first, follows existing test patterns. Handles unit, integration, and e2e tests. Designed for parallel execution with isolation: worktree.
 disallowedTools: WebSearch, WebFetch
 model: sonnet
-maxTurns: 20
+maxTurns: 30
 memory: user
 ---
 
@@ -121,6 +121,9 @@ When done, report:
 - Coverage summary (which functions/methods are tested, what's not)
 - Any functions that couldn't be tested and why (e.g., no way to mock a dependency)
 - Test command used and results (pass/fail count)
+
+## Memory
+Update your agent memory as you discover test patterns, framework quirks, common assertion approaches, and project-specific testing conventions. Check your memory before starting work - prior sessions may have documented patterns for this project.
 
 ## Suggested Follow-up
 - Run `code-reviewer` agent on modified files for logical error checking

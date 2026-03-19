@@ -57,12 +57,24 @@ case "$FILE_PATH" in
 		;;
 esac
 
-# No placeholder comments
+# No placeholder comments or stub implementations
 if grep -Eq '//\s*\.\.\.\s*$' "$TMPCODE"; then
 	ERRORS="${ERRORS}Placeholder comment '// ...' found — write real code. "
 fi
 if grep -Eiq '//\s*rest of' "$TMPCODE"; then
 	ERRORS="${ERRORS}Placeholder comment '// rest of...' found — write real code. "
+fi
+if grep -Eiq '//\s*(TODO|FIXME|HACK|XXX):?\s*(implement|add|finish|complete|fill|wire)' "$TMPCODE"; then
+	ERRORS="${ERRORS}TODO stub found — implement the logic instead of leaving a TODO. "
+fi
+if grep -Eiq '(#|//|/\*)\s*(placeholder|stub|skeleton|not yet implemented|left as exercise)' "$TMPCODE"; then
+	ERRORS="${ERRORS}Stub/placeholder comment found — write the real implementation. "
+fi
+if grep -Eq 'throw new Error\(['\''"]not implemented' "$TMPCODE"; then
+	ERRORS="${ERRORS}'throw not implemented' found — write the real implementation. "
+fi
+if grep -Eq 'pass\s*#\s*(todo|fixme|implement|stub)' "$TMPCODE"; then
+	ERRORS="${ERRORS}Python pass stub found — implement the logic. "
 fi
 
 if [ -n "$ERRORS" ]; then

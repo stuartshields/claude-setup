@@ -11,7 +11,7 @@ This repo includes four skills:
 - `debug-wp` - WordPress debugging workflow: isolate, trace, reproduce, fix
 - `figma` - Figma MCP workflow for design extraction before implementation
 - `playwright` - Playwright MCP browser automation and verification workflow
-- `qa-check` - Quality assurance checklist for before-you-ship reviews
+- `qa-check` - Quality assurance checklist for before-you-ship reviews (runs in forked context via Explore agent)
 
 Directory structure:
 
@@ -156,7 +156,7 @@ How to use this folder in Claude:
 | `debug-wp/SKILL.md` | Structured WordPress debugging interview and ranked remediation workflow. |
 | `figma/SKILL.md` | Figma MCP workflow for extracting design context/screenshots/variables before coding. |
 | `playwright/SKILL.md` | Playwright MCP workflow for snapshot-first interaction, form automation, and visual/debug checks. |
-| `qa-check/SKILL.md` | Multi-stack QA audit workflow (accessibility, performance, code quality). |
+| `qa-check/SKILL.md` | Multi-stack QA audit workflow (WCAG 2.2 AA accessibility, performance, code quality). Runs in forked Explore context. |
 
 `README.md` in this folder is the skill system guide you're reading now.
 
