@@ -4,6 +4,8 @@ title: Agents
 
 ## Agents
 
+> **TL;DR:** 17 custom agents for specific domains. Read-only agents (code-reviewer, a11y, security) are structurally blocked from writing files. Builder agents (frontend, backend) run in worktrees with `maxTurns: 30`. The architect, code-reviewer, and test-writer persist memory across sessions. The simplify agent runs on sonnet (not haiku) because proving behavioral equivalence needs deeper reasoning.
+
 Rules apply to every conversation. But some tasks need a different personality entirely - a code reviewer that only reads and never writes, a security auditor that can use a cheaper model, a WordPress specialist that only loads PHP-related tools. Rules can't do that. Agents can.
 
 Agents are markdown files with YAML frontmatter that define specialist subagents. Claude can delegate tasks to them when the work matches. The agent runs with its own instructions, its own tool restrictions, and optionally its own model. It reports back when done.

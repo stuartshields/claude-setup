@@ -4,6 +4,8 @@ title: Skills & Memory
 
 ## Skills
 
+> **TL;DR:** 4 skills - `/debug-wp` (WordPress debugging interview), `/figma` (Figma MCP design-to-code), `/playwright` (browser automation), `/qa-check` (multi-stack QA audit). Skills run in the main context by default. `qa-check` uses `context: fork` so its verbose output doesn't pollute your conversation.
+
 Skills are reusable task templates with step-by-step instructions. They differ from agents: agents are delegatable specialists (a different "person" doing the work), skills are more like checklists - structured guidance for a task that the main Claude session follows directly.
 
 This repo includes four skills:

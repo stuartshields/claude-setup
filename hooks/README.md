@@ -1,5 +1,7 @@
 ## Hooks
 
+> **TL;DR:** 20 hooks across 10 lifecycle events. PreToolUse hooks block bad code before it's written (stubs, console.log, space indentation). Stop hooks catch incomplete work and shortcut patterns. PostToolUse hooks track modified files and detect reasoning loops. Exit 2 blocks, exit 0 allows, exit 1 is a silent warning.
+
 Rules tell Claude what to do. But Claude doesn't verify its own work automatically. It won't check code quality before writing a file, or warn you before stopping with unfinished tasks. Hooks solve that.
 
 Hooks are shell scripts that run at key moments in Claude's lifecycle. Registered in [settings.json](../docs/core-guide.md#hook-registration), they intercept tool calls, prompt submissions, and session events. The hook decides what happens: let it through, block it, or add context. For step-by-step examples, see the [Hooks Guide](https://code.claude.com/docs/en/hooks-guide).
