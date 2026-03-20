@@ -4,6 +4,8 @@ title: Start Here
 
 # Start Here
 
+> **TL;DR:** Clone, copy to `~/.claude/`, restart Claude Code. You get global rules, hooks, agents, and skills that apply to every project. Read the Core Guide next to understand what each piece does.
+
 If you are new to this repo, read this first.
 
 This repository is a curated mirror of my global Claude setup in `~/.claude/`.

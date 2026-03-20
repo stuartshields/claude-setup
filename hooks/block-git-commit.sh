@@ -1,6 +1,6 @@
 #!/bin/bash
 # Block git commit commands and destructive Bash operations.
-# PreToolUse hook — receives JSON on stdin, exit 2 to block.
+# PreToolUse hook - receives JSON on stdin, exit 2 to block.
 
 command=$(jq -r '.tool_input.command // empty' 2>/dev/null)
 
@@ -14,9 +14,9 @@ if [[ "$command" =~ git[[:space:]]+(.*[[:space:]]+)?commit ]] || \
 fi
 
 # --- Destructive command blocking ---
-# rm -rf (with any flag ordering) — only match rm as an actual command,
+# rm -rf (with any flag ordering) - only match rm as an actual command,
 # not when it appears inside grep/echo/string arguments.
-# Anchors: start of command, or after && || ; | ( — with optional whitespace.
+# Anchors: start of command, or after && || ; | ( - with optional whitespace.
 if [[ "$command" =~ (^|[[:space:];\&\|\(])rm[[:space:]]+-[a-zA-Z]*r[a-zA-Z]*f ]] || \
    [[ "$command" =~ (^|[[:space:];\&\|\(])rm[[:space:]]+-[a-zA-Z]*f[a-zA-Z]*r ]]; then
 	echo "BLOCKED: rm -rf is not allowed. Remove files individually or ask the user." >&2

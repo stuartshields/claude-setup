@@ -1,16 +1,60 @@
 # Changelog
 
+## 2026-03-20
+
+### Rules audit - instruction budget compliance
+- Reduced always-on instruction count from 128 to 89 bullets (system prompt adds ~50, total now ~139 vs 150 ceiling)
+- Scoped `testing.md` and `architecture.md` with `paths:` frontmatter - only load when working with code files, not config/shell
+- Deleted `verification.md` - merged unique Hook Awareness section into `discipline.md`, rest was duplicated by debugging.md and discipline.md
+- Removed 4 rules from `discipline.md` that duplicate system prompt directives (error handling, wrappers, current requirements, grep-before-reading)
+- Removed `style.md` "Full Fidelity" section - moved to `discipline.md` where it carries more weight (behavioral rules > style file)
+
+### Rules audit - behavioral fixes
+- Rewrote `debugging.md` - replaced "3 tool calls then guess" with 4-step framework (Reproduce → Isolate → Fix → Validate), added Anti-Loop Protocol (2 failed attempts → stop and ask), raised tool call threshold to 8 before summarizing
+- Added "Do Not Pivot to Avoid Hard Work" section to `discipline.md` - counteracts system prompt compound effect where "try simplest approach first" + "keep solutions simple" + "consider alternatives when blocked" causes premature retreat from correct-but-harder fixes
+- Added "Complete Implementations Come First" as top section in `discipline.md` (primacy bias) with key rule duplicated at bottom (recency bias)
+- Fixed `testing.md`: "one assertion per test" → "one behavior per test"; "3+ mocks = refactor" softened to "consider refactoring"; added "test core user-facing behavior first" rule
+- Fixed `debugging.md`: "minimal change" → "targeted change" to align with anti-pivot rules
+- Fixed `ui-ux.md`: "must have aria-label" → "must have accessible names - prefer semantic HTML over aria-label" (W3C First Rule of ARIA compliance)
+- Added design system override caveat to `ui-ux.md`
+
+### Rules - new file
+- Added `harness-maintenance.md` - scoped rule that only loads when editing `~/.claude/` harness files (rules, hooks, agents, skills, settings). Enforces: external research before changes, instruction budget compliance, positive framing, conflict checking, source URL tracking
+
+### CLAUDE.md
+- Added Section 3 "Research Sources" - track external research per project in `.planning/SOURCES.md`
+- Renumbered Style Defaults to Section 4
+
+### Hooks
+- Expanded `check-code-quality.sh` - now catches TODO stubs, placeholder/stub/skeleton comments, `throw new Error('not implemented')`, Python `pass # todo` patterns (all blocking, exit 2)
+- Fixed `stop-dispatcher.sh` - now aggregates ALL blocking reasons from sub-hooks instead of only keeping the last one
+
+### Agents
+- Increased `maxTurns` from 20 to 30 on `backend-builder`, `frontend-builder`, `test-writer` - 20 turns was exhausting budget before implementation completed
+- Added `memory: user` to `architect` agent with memory instructions - architectural decisions should persist across sessions
+- Added memory instructions to `test-writer` and `code-reviewer` - both had `memory: user` but no instructions to use it
+- Upgraded `simplify` agent model from haiku to sonnet - proving behavioral equivalence requires deeper reasoning than haiku provides
+- Fixed `frontend-builder` aria-label rule to match W3C First Rule of ARIA
+
+### Skills
+- Added `context: fork` and `agent: Explore` to `qa-check` skill - verbose audit output now runs in isolated context instead of polluting main conversation
+- Updated `qa-check` WCAG version from 2.1 to 2.2 for consistency with a11y agent
+
+## 2026-03-18
+
+- Fixed `hook-observability-summary.sh` - summary now aggregates across all session logs instead of only the current session. Previous behavior overwrote the summary each new session, losing all prior data. Header now shows session count, date range, and latest session ID.
+
 ## 2026-03-16
 
 - Audited all custom hooks against community best practices (skipping GSD-managed hooks)
-- Fixed `session-cleanup.sh` — added 5 missing `/tmp/claude-*` cleanup patterns and fixed glob for remind state files
-- Added `stop_hook_active` guard to `stop-dispatcher.sh` — uses official loop-prevention mechanism instead of relying solely on custom flag files
-- Rate-limited `hook-observability-summary.sh` — summary markdown now rebuilds every 10th event instead of every tool call
-- Standardized stdin parsing to single-jq `@tsv` pattern in `hook-observability-summary.sh`, `track-modified-files.sh`, and `track-tasks.sh` — avoids buffering multi-MB PostToolUse payloads
-- Removed duplicate CLAUDE.md reminder from `verify-before-stop.sh` — `remind-project-claude.sh` now owns that check exclusively
+- Fixed `session-cleanup.sh` - added 5 missing `/tmp/claude-*` cleanup patterns and fixed glob for remind state files
+- Added `stop_hook_active` guard to `stop-dispatcher.sh` - uses official loop-prevention mechanism instead of relying solely on custom flag files
+- Rate-limited `hook-observability-summary.sh` - summary markdown now rebuilds every 10th event instead of every tool call
+- Standardized stdin parsing to single-jq `@tsv` pattern in `hook-observability-summary.sh`, `track-modified-files.sh`, and `track-tasks.sh` - avoids buffering multi-MB PostToolUse payloads
+- Removed duplicate CLAUDE.md reminder from `verify-before-stop.sh` - `remind-project-claude.sh` now owns that check exclusively
 - Fixed `notification-alert.sh` to parse `title` and `message` from stdin JSON instead of hardcoding notification text
-- Reverted tab enforcement in `check-code-quality.sh` to blocking (exit 2) — removed references to `fix-indentation.sh` which was never deployed
-- Updated `hooks/README.md` — removed `fix-indentation.sh` walkthrough, updated code snippets to match deployed versions
+- Reverted tab enforcement in `check-code-quality.sh` to blocking (exit 2) - removed references to `fix-indentation.sh` which was never deployed
+- Updated `hooks/README.md` - removed `fix-indentation.sh` walkthrough, updated code snippets to match deployed versions
 - Overhauled all 8 always-loaded rule files for instruction compliance, based on community best practices audit
 - Reduced always-loaded rule surface from ~310 lines to ~190 lines (38% reduction) while preserving all substance
 - Deduplicated "Tests Pass But Code Has Bugs" (was in both `testing.md` and `debugging.md`, now only in `testing.md`)

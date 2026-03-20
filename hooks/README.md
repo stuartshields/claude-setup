@@ -1,5 +1,7 @@
 ## Hooks
 
+> **TL;DR:** 20 hooks across 10 lifecycle events. PreToolUse hooks block bad code before it's written (stubs, console.log, space indentation). Stop hooks catch incomplete work and shortcut patterns. PostToolUse hooks track modified files and detect reasoning loops. Exit 2 blocks, exit 0 allows, exit 1 is a silent warning.
+
 Rules tell Claude what to do. But Claude doesn't verify its own work automatically. It won't check code quality before writing a file, or warn you before stopping with unfinished tasks. Hooks solve that.
 
 Hooks are shell scripts that run at key moments in Claude's lifecycle. Registered in [settings.json](../docs/core-guide.md#hook-registration), they intercept tool calls, prompt submissions, and session events. The hook decides what happens: let it through, block it, or add context. For step-by-step examples, see the [Hooks Guide](https://code.claude.com/docs/en/hooks-guide).
@@ -200,17 +202,18 @@ How to use this folder in Claude:
 | `agent-guard-readonly.sh` | Agent `PreToolUse` hook that blocks destructive Bash commands. Used by `code-reviewer` agent. |
 | `agent-guard-write-block.sh` | Agent `PreToolUse` hook that blocks `Write`/`Edit` entirely. Used by `code-reviewer` agent. |
 | `block-git-commit.sh` | `PreToolUse` policy hook that blocks `git commit` and destructive Bash patterns. |
-| `check-code-quality.sh` | Deterministic `PreToolUse` quality gate for `Write`/`Edit`. |
+| `check-code-quality.sh` | Deterministic `PreToolUse` quality gate for `Write`/`Edit`. Catches: space indentation, trailing whitespace, console.log, debugger, placeholder comments, TODO stubs, "not implemented" throws, Python pass stubs. |
 | `check-unfinished-tasks.sh` | `Stop` + `UserPromptSubmit` hook that warns/blocks on incomplete task state. |
 | `compact-restore.sh` | `SessionStart` restore hook that reloads pre-compaction saved state. |
 | `detect-perf-degradation.sh` | `PostToolUse` + `PostToolUseFailure` hook that detects reasoning loops and error spikes. |
+| `hook-observability-summary.sh` | `PostToolUse` + `PostToolUseFailure` hook that tracks hook outcomes per session and rebuilds an aggregate summary across all sessions every 10th event. |
 | `drift-review-stop.sh` | `Stop` hook that catches common cognitive-drift response patterns. |
 | `notification-alert.sh` | `Notification` hook for terminal/native attention alerts. |
 | `permission-notify.sh` | `PermissionRequest` hook that plays alert when approval is needed. |
 | `pre-compaction-preserve.sh` | `PreCompact` hook that saves session/project state before compaction. |
 | `remind-project-claude.sh` | `UserPromptSubmit` hook that emits actionable CLAUDE.md reminders. |
 | `session-cleanup.sh` | `SessionEnd` hook that removes session temp artifacts. |
-| `stop-dispatcher.sh` | Single `Stop` dispatcher that runs stop checks and returns one final decision. |
+| `stop-dispatcher.sh` | Single `Stop` dispatcher that runs stop checks, aggregates all blocking reasons, and returns one final decision. |
 | `stop-quality-check.sh` | `Stop` hook that blocks incomplete-work completion patterns. |
 | `track-modified-files.sh` | `PostToolUse` (`Write|Edit`) tracker for files modified this session. |
 | `track-tasks.sh` | `PostToolUse` (`TaskCreate|TaskUpdate`) tracker for task lifecycle state. |

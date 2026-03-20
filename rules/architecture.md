@@ -1,9 +1,22 @@
+---
+paths:
+  - "**/*.js"
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.jsx"
+  - "**/*.vue"
+  - "**/*.svelte"
+  - "**/*.py"
+  - "**/*.php"
+  - "**/*.go"
+  - "**/*.rs"
+---
+
 # Architecture
 
 ## Modular-First
 - **200-Line Rule:** If a feature will exceed 200 lines, propose a modular split during planning.
 - **Atomic Responsibility:** Logic -> `/hooks` or `/services`. Types -> `types/`. Sub-components -> `/components` or `/features`.
-- **One thing per file.** If a file does more than one thing, split it.
 
 ## Directory Mapping
 > Defaults. Project CLAUDE.md overrides these.
@@ -14,7 +27,7 @@
 - `/services`: API/External integrations.
 
 ## Monorepo Guidance
-- **Identify the active package** before reading CLAUDE.md. Check: (1) package root, (2) monorepo root, (3) both — package-level overrides root.
+- **Identify the active package** before reading CLAUDE.md. Check: (1) package root, (2) monorepo root, (3) both - package-level overrides root.
 - **Respect package boundaries.** Only import across packages if the dependency graph allows it.
 - **Run commands in scope.** Use the package's build/test/lint, not root-level.
 - **Check for shared configs** (tsconfig, eslint, prettier) at root. Packages may extend or override.

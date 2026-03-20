@@ -1,6 +1,6 @@
 #!/bin/bash
 # Deterministic code quality gate for Write/Edit tool calls.
-# Replaces the Stop prompt hook — no LLM, no JSON validation errors.
+# Replaces the Stop prompt hook - no LLM, no JSON validation errors.
 
 TMPINPUT=$(mktemp)
 TMPCODE=$(mktemp)
@@ -33,14 +33,14 @@ NONBLOCKING_NOTES=""
 # Allows: docblock continuation ( * ...), smart tabs (tab+spaces for alignment).
 # Flags: pure space indentation (spaces as sole indent mechanism).
 if grep -Eq '^ +[^*[:space:]]' "$TMPCODE"; then
-	# Space-indented non-docblock lines exist — check if tabs are also present.
-	# If yes, spaces are likely alignment (smart tabs) — allow it.
+	# Space-indented non-docblock lines exist - check if tabs are also present.
+	# If yes, spaces are likely alignment (smart tabs) - allow it.
 	if ! grep -q '^\t' "$TMPCODE"; then
-		ERRORS="${ERRORS}INDENTATION: Space indentation detected — rewrite using tabs. "
+		ERRORS="${ERRORS}INDENTATION: Space indentation detected - rewrite using tabs. "
 	fi
 fi
 
-# Trailing whitespace — blocking error.
+# Trailing whitespace - blocking error.
 if grep -Eq '[[:space:]]$' "$TMPCODE"; then
 	ERRORS="${ERRORS}TRAILING WHITESPACE: Remove trailing spaces/tabs from line endings. "
 fi
@@ -49,20 +49,32 @@ fi
 case "$FILE_PATH" in
 	*.js|*.mjs|*.ts|*.tsx|*.jsx)
 		if grep -q 'console\.log(' "$TMPCODE"; then
-			ERRORS="${ERRORS}console.log() found — remove or use console.error. "
+			ERRORS="${ERRORS}console.log() found - remove or use console.error. "
 		fi
 		if grep -Eq '^\s*debugger\s*;?\s*$' "$TMPCODE"; then
-			ERRORS="${ERRORS}debugger statement found — remove before shipping. "
+			ERRORS="${ERRORS}debugger statement found - remove before shipping. "
 		fi
 		;;
 esac
 
-# No placeholder comments
+# No placeholder comments or stub implementations
 if grep -Eq '//\s*\.\.\.\s*$' "$TMPCODE"; then
-	ERRORS="${ERRORS}Placeholder comment '// ...' found — write real code. "
+	ERRORS="${ERRORS}Placeholder comment '// ...' found - write real code. "
 fi
 if grep -Eiq '//\s*rest of' "$TMPCODE"; then
-	ERRORS="${ERRORS}Placeholder comment '// rest of...' found — write real code. "
+	ERRORS="${ERRORS}Placeholder comment '// rest of...' found - write real code. "
+fi
+if grep -Eiq '//\s*(TODO|FIXME|HACK|XXX):?\s*(implement|add|finish|complete|fill|wire)' "$TMPCODE"; then
+	ERRORS="${ERRORS}TODO stub found - implement the logic instead of leaving a TODO. "
+fi
+if grep -Eiq '(#|//|/\*)\s*(placeholder|stub|skeleton|not yet implemented|left as exercise)' "$TMPCODE"; then
+	ERRORS="${ERRORS}Stub/placeholder comment found - write the real implementation. "
+fi
+if grep -Eq 'throw new Error\(['\''"]not implemented' "$TMPCODE"; then
+	ERRORS="${ERRORS}'throw not implemented' found - write the real implementation. "
+fi
+if grep -Eq 'pass\s*#\s*(todo|fixme|implement|stub)' "$TMPCODE"; then
+	ERRORS="${ERRORS}Python pass stub found - implement the logic. "
 fi
 
 if [ -n "$ERRORS" ]; then

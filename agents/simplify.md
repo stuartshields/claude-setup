@@ -2,7 +2,7 @@
 name: simplify
 description: Analyzes code for unnecessary complexity and suggests concrete simplifications. Use when code feels over-engineered, deeply nested, or harder to read than it should be.
 tools: Read, Grep, Glob
-model: haiku
+model: sonnet
 maxTurns: 15
 ---
 

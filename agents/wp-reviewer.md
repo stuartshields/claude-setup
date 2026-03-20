@@ -63,7 +63,7 @@ Always read the project's CLAUDE.md first. Project-specific rules override these
 ### Legacy Code
 - Flag legacy patterns (singletons, anonymous hook callbacks, `get_posts()`, `array()` syntax) as improvement opportunities, not blockers
 - Security and performance issues are always urgent regardless of code origin
-- Understand before flagging — unusual patterns may be load-bearing
+- Understand before flagging - unusual patterns may be load-bearing
 
 ## Confidence Threshold
 

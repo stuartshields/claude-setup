@@ -4,6 +4,8 @@ title: Agents
 
 ## Agents
 
+> **TL;DR:** 17 custom agents for specific domains. Read-only agents (code-reviewer, a11y, security) are structurally blocked from writing files. Builder agents (frontend, backend) run in worktrees with `maxTurns: 30`. The architect, code-reviewer, and test-writer persist memory across sessions. The simplify agent runs on sonnet (not haiku) because proving behavioral equivalence needs deeper reasoning.
+
 Rules apply to every conversation. But some tasks need a different personality entirely - a code reviewer that only reads and never writes, a security auditor that can use a cheaper model, a WordPress specialist that only loads PHP-related tools. Rules can't do that. Agents can.
 
 Agents are markdown files with YAML frontmatter that define specialist subagents. Claude can delegate tasks to them when the work matches. The agent runs with its own instructions, its own tool restrictions, and optionally its own model. It reports back when done.
@@ -71,17 +73,17 @@ Rule of thumb: if it's a style preference or a guardrail → rule. If it's a dis
 
 ### Subagents vs agent teams
 
-Every agent in this repo is designed as a **subagent** — a focused specialist that does work and reports back. Claude Code also offers **agent teams** (experimental), where multiple Claude instances coordinate through shared task lists and direct messaging. These are different tools for different problems.
+Every agent in this repo is designed as a **subagent** - a focused specialist that does work and reports back. Claude Code also offers **agent teams** (experimental), where multiple Claude instances coordinate through shared task lists and direct messaging. These are different tools for different problems.
 
 **Why these agents are subagents:**
 - Each agent has a single, well-defined role (review code, audit security, write tests)
-- They report findings or deliver artifacts back to the caller — they don't need to discuss with each other
+- They report findings or deliver artifacts back to the caller - they don't need to discuss with each other
 - Token cost is proportional to the task, not multiplied per teammate
 - Tool restrictions, hooks, and model selection give enough control without team coordination overhead
 
 **When agent teams would add value:**
 - Multiple reviewers need to cross-reference and challenge each other's findings (e.g., a security reviewer flagging that an a11y fix introduces an XSS vector)
-- Debugging with competing hypotheses — agents actively trying to disprove each other's theories
+- Debugging with competing hypotheses - agents actively trying to disprove each other's theories
 - Cross-layer feature work where frontend, backend, and test writers need to agree on interfaces in real time
 
 **Current tradeoffs against teams:**
@@ -126,7 +128,7 @@ hooks:
           timeout: 5
 ```
 
-Hook syntax: `matcher` is a regex against tool names. `exit 2` blocks the tool call. `exit 0` allows it. `timeout` is in seconds. Prefer external scripts over inline `command: |` blocks — inline YAML is fragile and a parse error silently breaks enforcement.
+Hook syntax: `matcher` is a regex against tool names. `exit 2` blocks the tool call. `exit 0` allows it. `timeout` is in seconds. Prefer external scripts over inline `command: |` blocks - inline YAML is fragile and a parse error silently breaks enforcement.
 
 ### Preloading skills
 
@@ -187,17 +189,17 @@ How to use this folder in Claude:
 | File | What it does | Notable features |
 |------|--------------|------------------|
 | `a11y.md` | Deep WCAG 2.2 accessibility auditor (semantic HTML, keyboard, ARIA, forms, contrast). | read-only |
-| `architect.md` | Deep architectural research and recommendation agent (decision docs, no implementation). | |
-| `backend-builder.md` | Backend implementation specialist for routes, schemas, and server-side services. | |
+| `architect.md` | Deep architectural research and recommendation agent (decision docs, no implementation). | `memory: user` |
+| `backend-builder.md` | Backend implementation specialist for routes, schemas, and server-side services. | `maxTurns: 30` |
 | `cleanup.md` | Dead-code and cruft cleanup specialist. | |
 | `code-reviewer.md` | Read-only reviewer for bugs, edge cases, and CLAUDE.md compliance. | `hooks` (command blocking) |
-| `frontend-builder.md` | Frontend implementation specialist for components/pages/features. | |
+| `frontend-builder.md` | Frontend implementation specialist for components/pages/features. | `maxTurns: 30` |
 | `migration-reviewer.md` | Database migration safety reviewer (SQL, ORM, WordPress dbDelta). | read-only |
 | `perf.md` | Performance audit specialist (runtime, bundle, rendering inefficiencies). | |
 | `quick-edit.md` | Fast trivial-edit specialist with strict scope guardrails. | `hooks` (content validation) |
 | `security.md` | Deep security audit specialist adapted to stack context. | |
-| `simplify.md` | Complexity-reduction specialist for over-engineered code. | |
-| `test-writer.md` | Test-writing specialist aligned with project test framework/patterns. | `disallowedTools` |
+| `simplify.md` | Complexity-reduction specialist for over-engineered code. | `model: sonnet` |
+| `test-writer.md` | Test-writing specialist aligned with project test framework/patterns. | `disallowedTools`, `maxTurns: 30` |
 | `ui-review.md` | UI/UX review specialist for usability/accessibility/responsiveness. | |
 | `wp.md` | Principal WordPress implementation specialist (architecture/hooks/REST/editor). | |
 | `wp-perf.md` | WordPress performance specialist (queries, caching, CWV, DB optimization). | |

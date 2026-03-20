@@ -14,7 +14,7 @@ if echo "$STDIN_DATA" | jq -e '.stop_hook_active == true' >/dev/null 2>&1; then
 	exit 0
 fi
 
-BLOCK_OUTPUT=""
+BLOCK_REASONS=""
 
 # Sub-hooks to run in order
 HOOKS=(
@@ -46,16 +46,21 @@ for hook in "${HOOKS[@]}"; do
 		# Extract or build reason, prepend hook name
 		if echo "$OUTPUT" | jq -e . >/dev/null 2>&1; then
 			REASON=$(echo "$OUTPUT" | jq -r '.reason // "Blocked by hook"')
-			BLOCK_OUTPUT=$(jq -n --arg reason "[$hook] $REASON" '{"decision":"block","reason":$reason}')
 		else
-			BLOCK_OUTPUT=$(jq -n --arg reason "[$hook] $OUTPUT" '{"decision":"block","reason":$reason}')
+			REASON="$OUTPUT"
+		fi
+		# Aggregate all blocking reasons (not just the last one)
+		if [ -n "$BLOCK_REASONS" ]; then
+			BLOCK_REASONS="${BLOCK_REASONS}\n[$hook] ${REASON}"
+		else
+			BLOCK_REASONS="[$hook] ${REASON}"
 		fi
 	fi
 done
 
 # Output result
-if [ -n "$BLOCK_OUTPUT" ]; then
-	echo "$BLOCK_OUTPUT"
+if [ -n "$BLOCK_REASONS" ]; then
+	jq -n --arg reason "$(printf '%b' "$BLOCK_REASONS")" '{"decision":"block","reason":$reason}'
 else
 	echo '{"decision":"approve"}'
 fi

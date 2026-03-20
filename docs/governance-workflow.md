@@ -4,6 +4,8 @@ title: Governance Workflow
 
 # Governance Workflow
 
+> **TL;DR:** Review your setup on a schedule - weekly quick checks (10 min), monthly full reviews (45 min). Seven controls cover config drift, docs parity, permissions, plugins, stop-path checks, hook observability, and memory hygiene. Use the review template to score findings by impact/effort and fix highest-score items first.
+
 This is the operational workflow for keeping your Claude setup healthy over time. It covers both your global configuration (`~/.claude/`) and per-project overrides (`.claude/` at the project root). Without periodic review, rules go stale, hooks accumulate without anyone checking if they still fire correctly, and the gap between what your setup says and what it does widens quietly.
 
 ## How It Works
