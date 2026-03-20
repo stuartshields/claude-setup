@@ -2,7 +2,7 @@
 # UserPromptSubmit hook: emits only actionable CLAUDE.md reminders.
 # Keeps steady-state prompts quiet to reduce context overhead.
 
-# Read only needed fields — avoid buffering full payload.
+# Read only needed fields - avoid buffering full payload.
 read -r CWD SESSION_ID < <(jq -r '[.cwd // "", .session_id // ""] | @tsv')
 if [ -z "$CWD" ] || [ ! -d "$CWD" ]; then
 	exit 0

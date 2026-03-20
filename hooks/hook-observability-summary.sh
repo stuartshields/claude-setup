@@ -2,7 +2,7 @@
 # PostToolUse + PostToolUseFailure hook.
 # Tracks hook outcomes per session and refreshes a markdown summary for governance reviews.
 
-# Single jq call — avoid buffering full PostToolUse payload
+# Single jq call - avoid buffering full PostToolUse payload
 IFS=$'\t' read -r SESSION_ID EVENT TOOL_NAME < <(jq -r '[.session_id // "", .hook_event_name // "PostToolUse", .tool_name // "unknown"] | @tsv')
 
 [ -z "$SESSION_ID" ] && exit 0

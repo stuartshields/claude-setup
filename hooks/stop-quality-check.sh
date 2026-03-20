@@ -1,7 +1,7 @@
 #!/bin/bash
 # Stop hook: checks the assistant's final message for signs of incomplete work.
 # Replaces the prompt-type hook that was unreliable with JSON output.
-# Mechanical pattern matching — no model invocation needed.
+# Mechanical pattern matching - no model invocation needed.
 
 IFS=$'\t' read -r SESSION_ID LAST_MSG < <(jq -r '[.session_id // "", .last_assistant_message // ""] | @tsv')
 
@@ -48,7 +48,7 @@ fi
 
 if [ -n "$ISSUES" ]; then
 	touch "$FLAG"
-	REASON=$(printf "QUALITY CHECK — potential shortcuts detected:\n%b\nAddress these before finishing, or explain why they're acceptable." "$ISSUES")
+	REASON=$(printf "QUALITY CHECK - potential shortcuts detected:\n%b\nAddress these before finishing, or explain why they're acceptable." "$ISSUES")
 	jq -n --arg reason "$REASON" '{"decision":"block","reason":$reason}'
 fi
 

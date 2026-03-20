@@ -1,5 +1,5 @@
 #!/bin/bash
-# SessionEnd hook — cleans up temp files for this session.
+# SessionEnd hook - cleans up temp files for this session.
 
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')

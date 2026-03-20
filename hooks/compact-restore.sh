@@ -1,5 +1,5 @@
 #!/bin/bash
-# SessionStart compact hook — reads PreCompact saved state if available,
+# SessionStart compact hook - reads PreCompact saved state if available,
 # otherwise rebuilds context from filesystem.
 
 INPUT=$(cat)
