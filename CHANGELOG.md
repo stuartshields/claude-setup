@@ -36,6 +36,11 @@ Added 5 new skills built from comparing workflows against external AI-augmented 
 - Updated hooks/README.md - hook count 20 to 22, added both new hooks to file table
 - Updated governance-workflow.md - Control 7 (Memory Governance) now references the memory-review hook and /review-memory skill
 
+### Research sources
+- Updated CLAUDE.md research sources rule - entries now include a per-entry date: `(YYYY-MM-DD)` for when the source was last verified
+- Backfilled all entries in `.planning/SOURCES.md` with verification dates
+- Added Hook Development sources section for context threshold and session state patterns
+
 ### Rules - new file
 - Added `staleness.md` - tracks `<!-- Last updated: YYYY-MM-DD -->` comments across all guidance files (rules, CLAUDE.md, agents, skills). Flags files older than 30 days so AI best practices stay current as models evolve. Requires updating the date on every edit.
 

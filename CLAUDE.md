@@ -28,7 +28,7 @@
 
 ## 3. RESEARCH SOURCES
 - **Track external research per project.** When WebSearch/WebFetch informs a decision (library choice, architecture pattern, bug fix, API usage), append the source URL and a one-line summary to `.planning/SOURCES.md` in the project root.
-- **Create `.planning/SOURCES.md` on first use.** Group by topic. Keep entries concise: `- [Title](URL) - why it was relevant`.
+- **Create `.planning/SOURCES.md` on first use.** Group by topic. Include a date per entry: `- [Title](URL) - why it was relevant (YYYY-MM-DD)`. The date is when the source was last verified, not when the decision was made.
 - **Check existing sources first.** Before researching a topic, read `.planning/SOURCES.md` if it exists - the answer may already be documented from a prior session.
 
 ## 4. STYLE DEFAULTS
