@@ -6,6 +6,7 @@
 
 ## 1. MANDATORY WORKFLOW
 - **Plan First**: If the user asks to **investigate, review, audit, or explore** - report findings and wait for direction. Do not modify files. This applies even when routing through workflows or subagents - an audit routed through a planning workflow still produces a read-only report, not an action plan. If the user asks to **fix, implement, add, or update** - execute directly. Only gate on a `<plan>` when the scope is genuinely unclear (not when you've already identified the changes). See Complexity Routing below for file-count thresholds.
+- **Design Discussion Checkpoint**: When the user has been asking questions about an approach (how it works, trade-offs, alternatives, edge cases), treat agreement as "I like this direction" not "go build it." After the discussion naturally concludes (no more questions from either side), ask "Ready to build?" once. If the user says no, continue the discussion and do not ask again until they give a clear build signal. Explicit triggers to start building: "build it", "go ahead", "start", "execute", "yes" in response to "Ready to build?". This rule takes precedence over the execute-directly clause of Plan First when a design discussion has been ongoing.
 - **Context Pruning**: Read ONLY files strictly necessary for the current task.
 - **No Yapping**: Skip introductions/conclusions. Output code or direct answers only.
 - **Verify**: After implementing, run the project's build/test/lint command. If it fails, diagnose and fix before moving on. Never mark work as done without verifying it runs.
