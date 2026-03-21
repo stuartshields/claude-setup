@@ -17,7 +17,7 @@ Everything in this setup is built with token cost in mind. Claude Code has a fin
 
 How this setup stays lean:
 
-**Rules** are split into always-on (6 files, ~85 bullets) and conditional (6 files, path-triggered). The conditional rules only load when you're working with matching file types - `php-wordpress.md` doesn't burn context when you're writing JavaScript. The always-on budget stays under ~100 bullets to avoid the point where Claude starts quietly dropping instructions.
+**Rules** are split into always-on (6 files, ~85 bullet points) and conditional (6 files, path-triggered). The conditional rules only load when you're working with matching file types - `php-wordpress.md` doesn't burn context when you're writing JavaScript. The always-on budget stays under ~100 bullet points to avoid the point where Claude starts quietly dropping instructions.
 
 **Hooks** are shell scripts, not LLM calls. A hook that checks for console.log costs zero tokens - it runs in bash, returns an exit code, and only injects text into context when it has something to say. The `additionalContext` output is one line. Compare this to a prompt-type hook that asks an LLM to review every write - that costs hundreds of tokens per tool call.
 

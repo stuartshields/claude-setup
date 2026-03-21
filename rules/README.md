@@ -5,7 +5,7 @@ title: Rules
 
 ## Rules
 
-> **TL;DR:** 12 rule files, 6 always-loaded (~85 bullets), 6 conditional (scoped by file type). Total instruction budget stays under ~150 with the system prompt. Rules that Claude already follows without instruction are deleted. Rules it keeps breaking get moved to hooks instead.
+> **TL;DR:** 12 rule files, 6 always-loaded (~85 bullet points), 6 conditional (scoped by file type). Total instruction budget stays under ~150 with the system prompt. Rules that Claude already follows without instruction are deleted. Rules it keeps breaking get moved to hooks instead.
 
 For what each rule does, why it exists, and how it compares to community patterns, see the [Component Reference](../docs/component-reference.md#rules).
 
