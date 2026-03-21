@@ -63,7 +63,7 @@ Each layer solves a different problem. Removing one doesn't break the others, bu
 
 ## What Makes This Setup Different
 
-Most Claude Code setups focus on one or two layers - typically a CLAUDE.md with rules and maybe a few hooks for formatting. This setup goes deeper in five areas.
+Most Claude Code setups focus on one or two layers - typically a CLAUDE.md with rules and maybe a few hooks for formatting. This setup goes deeper in eight areas.
 
 ### Mechanical enforcement over prompt discipline
 
@@ -73,9 +73,21 @@ The agent guard hooks show the difference clearly. Telling an agent "you are rea
 
 This setup has 22 hooks across 10 lifecycle events. Most community setups have 3-6 and use them for formatting and commit blocking. The agent guards, stop gates, task tracking, drift detection, and observability hooks here go further than what I've found elsewhere.
 
+### Workflow skills that structure how you work
+
+Most Claude Code setups have skills that wrap tools (Figma, Playwright) or enforce patterns (TDD, code review). This setup has those, but also has workflow skills that structure how you interact with Claude itself. Several of these were inspired by patterns from [Ivan Kristianto](https://github.com/ivankristianto) - particularly the parallel code review approach, the "Vibe User" concept of testing apps from a user's perspective, test plan generation, and the idea that session learnings need a deliberate review step rather than just automatic capture.
+
+- [`/brainstorm`](../skills/brainstorm/SKILL.md) stops Claude from jumping to implementation. It interviews you one question at a time, proposes approaches with trade-offs, writes a discovery brief, then dispatches a subagent to review the brief for gaps (max 3 iterations). The interview is the point - it forces both you and Claude to understand the problem before committing to a solution. The spec-first approach was influenced by Ivan's workflow of spending time on the spec before writing any code.
+- [`/multi-review`](../skills/multi-review/SKILL.md) runs three review agents in parallel (maintainability, performance, security) on the same code. Each agent reviews from a different angle. The consolidated report notes conflicts when agents disagree - "perf says inline this, maintainability says extract it" - so you make the trade-off, not the agent. The three-angle parallel pattern came from Ivan's code review workflow.
+- [`/vibe-user`](../skills/vibe-user/SKILL.md) opens your app in a browser and explores it as a real user. It blocks source code reading - the whole point is a fresh perspective. You built it, so you know too much. This skill surfaces the problems you'd never notice. Adapted from Ivan's "Vibe User" technique.
+- [`/test-plan`](../skills/test-plan/SKILL.md) generates user-facing test checklists from git diff ("click submit and verify the success message") not code-facing ones ("POST /api/form returns 200"). Execute mode runs the plan via Playwright with pass/fail per scenario. Inspired by Ivan's test plan generation and browser-based execution workflow.
+- [`/review-memory`](../skills/review-memory/SKILL.md) is the manual counterpart to the memory-review hook. Loads all topic files, categorises each as promote/keep/remove, and updates the review timestamp. Ivan's reflection pattern (extracting learnings after sessions) highlighted the gap - auto-memory captures things, but nothing prompted you to review and promote them.
+
+Superpowers comes closest with its brainstorming and code review skills, but they're separate steps rather than integrated workflows, and they don't cover UX testing or memory management.
+
 ### Memory as a managed lifecycle
 
-Most approaches to session-to-session learning fall into two camps: manual reflection skills you invoke at session end (Superpowers, blog-post-style `/reflect`), or automatic capture that injects everything into the next session (`claude-mem`). Manual reflection depends on remembering to do it. Automatic injection accumulates noise.
+Most approaches to session-to-session learning fall into two camps: manual reflection skills you invoke at session end (Superpowers, or the reflect pattern [Ivan Kristianto](https://github.com/ivankristianto) uses), or automatic capture that injects everything into the next session (`claude-mem`). Manual reflection depends on remembering to do it. Automatic injection accumulates noise. Ivan's approach highlighted the gap - capturing learnings is only half the problem. The other half is making sure they feed back into future sessions without accumulating noise.
 
 This setup treats memory as a lifecycle with three stages:
 
@@ -85,9 +97,13 @@ This setup treats memory as a lifecycle with three stages:
 
 Permanent learnings get promoted to CLAUDE.md or rules where they're explicit and version-controlled. The memory directory stays lean. The 200-line auto-loaded limit on MEMORY.md means noise has a real cost - every stale entry pushes out something useful.
 
-### WordPress depth
+### Design Discussion Checkpoint
 
-4 agents ([`wp`](../agents/wp.md), [`wp-reviewer`](../agents/wp-reviewer.md), [`wp-security`](../agents/wp-security.md), [`wp-perf`](../agents/wp-perf.md)) and 1 skill ([`debug-wp`](../skills/debug-wp/SKILL.md)) cover architecture, code review, security, performance, and debugging for WordPress projects. The agents know WordPress idioms - `wp_enqueue_script` instead of raw script tags, `$wpdb->prepare()` for queries, nonce verification on forms - so reviews catch WP-specific issues that a generic code reviewer misses. I haven't found equivalent WordPress-specialist tooling in other Claude Code setups.
+Claude's CLAUDE.md has a "Plan First" rule: if the user asks to investigate, report and wait. If the user asks to fix or implement, execute directly. That works well for clear-cut requests. Where it breaks down is design discussions - you're asking questions about an approach, exploring trade-offs, and Claude reads your agreement with a direction as "go build it."
+
+The Design Discussion Checkpoint rule addresses this. When you've been asking questions about how something works, what the trade-offs are, or what alternatives exist, Claude treats agreement as "I like this direction" not "start implementing." After the discussion naturally concludes, it asks "Ready to build?" once. If you say no, it continues the discussion without asking again until you give a clear build signal ("build it", "go ahead", "start").
+
+This came from a real problem during this setup's development - Claude jumped to writing code mid-conversation when the design was still being discussed. The community handles the plan-to-implementation transition with explicit plan approval gates (everything-claude-code's `/plan` command requires a "yes" before execution), but nothing addresses the informal conversation case where there's no formal plan to approve.
 
 ### Always-on safety nets
 
@@ -96,6 +112,10 @@ Some protections only work if you remember to invoke them. This setup has severa
 - **Staleness detection** flags rule files older than 30 days. AI best practices evolve fast - a rule referencing deprecated features teaches Claude the wrong patterns.
 - **Dependency hallucination prevention** forces Claude to verify package names and URLs exist before referencing them. I haven't seen this pattern in other community setups.
 - **Discipline rules** (anti-pivot, scope control, Design Discussion Checkpoint) prevent Claude's most common failure modes without needing a specific skill or agent invocation.
+
+### WordPress depth
+
+4 agents ([`wp`](../agents/wp.md), [`wp-reviewer`](../agents/wp-reviewer.md), [`wp-security`](../agents/wp-security.md), [`wp-perf`](../agents/wp-perf.md)) and 1 skill ([`debug-wp`](../skills/debug-wp/SKILL.md)) cover architecture, code review, security, performance, and debugging for WordPress projects. The agents know WordPress idioms - `wp_enqueue_script` instead of raw script tags, `$wpdb->prepare()` for queries, nonce verification on forms - so reviews catch WP-specific issues that a generic code reviewer misses. I haven't found equivalent WordPress-specialist tooling in other Claude Code setups.
 
 ### GSD, plugins, and MCP servers
 
@@ -114,6 +134,15 @@ GSD agents (planner, executor, verifier, etc.) respect the existing setup - they
 - `figma` - design context extraction, screenshots, variables, and Code Connect mappings. The [`figma`](../skills/figma/SKILL.md) skill wraps this with a structured workflow.
 - `playwright` - browser automation for testing, visual verification, and UX review. Used by [`playwright`](../skills/playwright/SKILL.md), [`vibe-user`](../skills/vibe-user/SKILL.md), and [`test-plan`](../skills/test-plan/SKILL.md) skills.
 - `tailwindcss` - Tailwind CSS utilities, colour palettes, and configuration guidance.
+
+### Research source tracking
+
+When Claude researches something externally (WebSearch, WebFetch, Context7) and that research informs a decision, the source URL gets logged to `.planning/SOURCES.md` with a one-line summary and a verification date. This serves two purposes:
+
+1. **Avoid re-researching.** Before looking something up, Claude checks SOURCES.md first - the answer may already be documented from a prior session.
+2. **Know when sources go stale.** The per-entry date records when the source was last verified, not when the decision was made. If you're revisiting a library choice 3 months later, you can see whether the research is still fresh or needs re-checking.
+
+This is a CLAUDE.md rule, not a hook or skill - it's a convention that Claude follows during normal work. I haven't seen source tracking with verification dates in other Claude Code setups.
 
 ---
 
@@ -158,7 +187,7 @@ Hooks are shell scripts that intercept Claude's actions at specific lifecycle po
 | Hook | When it fires | What it does | Community comparison |
 |------|--------------|-------------|---------------------|
 | [`check-code-quality.sh`](../hooks/check-code-quality.sh) | PreToolUse (Write/Edit) | Blocks space indentation, console.log, debugger, placeholder comments, TODO stubs. | ECC has configurable hook profiles (minimal/standard/strict). Most community setups use Prettier/Biome as post-write formatters. Ours blocks before writing - bad code never hits the filesystem. |
-| [`project-quality-gates.sh`](../hooks/project-quality-gates.sh) | PostToolUse (Write/Edit) | Detects available lint/typecheck/test commands from package.json. Advisory only - reminds Claude to run them, doesn't run them itself. | `claude-code-skills` has a `story-quality-gate` with 4-level verdicts. Ours is passive detection rather than active execution. |
+| [`project-quality-gates.sh`](../hooks/project-quality-gates.sh) | PostToolUse (Write/Edit) | Detects available lint/typecheck/test commands from package.json. Advisory only - reminds Claude to run them, doesn't run them itself. Inspired by [Ivan Kristianto's](https://github.com/ivankristianto) quality gates approach (6 checks per commit), adapted into an advisory model. | `claude-code-skills` has a `story-quality-gate` with 4-level verdicts. Ours is passive detection rather than active execution. |
 
 ### Stop and verification gates
 
