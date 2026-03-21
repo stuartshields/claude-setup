@@ -7,6 +7,8 @@ title: Skills & Memory
 
 > **TL;DR:** 9 skills across two categories. **Workflow skills** handle multi-step processes: `/brainstorm` (structured discovery before planning), `/multi-review` (parallel code review from 3 angles), `/review-memory` (guided memory cleanup and promotion), `/test-plan` (generate and execute user-facing test checklists), `/vibe-user` (browser-based UX testing as a real user). **Tool skills** wrap specific integrations: `/debug-wp` (WordPress debugging), `/figma` (Figma MCP design-to-code), `/playwright` (browser automation), `/qa-check` (multi-stack QA audit). Skills run in the main context by default. `qa-check` uses `context: fork` so its verbose output doesn't pollute your conversation.
 
+For what each skill does, why it exists, and how it compares to community alternatives, see the [Component Reference](../docs/component-reference.md#skills).
+
 Skills are reusable task templates with step-by-step instructions. They differ from agents: agents are delegatable specialists (a different "person" doing the work), skills are more like checklists - structured guidance for a task that the main Claude session follows directly.
 
 ### Workflow skills
