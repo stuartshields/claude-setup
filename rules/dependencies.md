@@ -1,8 +1,10 @@
+<!-- Last updated: 2026-03-21 -->
+
 # Dependencies
 
 ## Hallucinated Reference Prevention
 - **Verify before referencing.** For any URL, package, CLI tool, or API endpoint not already in the codebase, verify it exists (WebSearch, `npm search`, or ask the user) BEFORE writing it.
-- Validate names and URLs exist - "sounds right" is not verification.
+- Validate names and URLs exist — "sounds right" is not verification.
 - Ask the user if you don't know the real URL.
 
 ## Dependency Hygiene

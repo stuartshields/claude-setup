@@ -17,7 +17,7 @@ Use `$ARGUMENTS` to scope the audit to a specific directory or file pattern (e.g
 
 Do NOT fix issues - only report them. Present findings as structured Markdown tables.
 
-## Procedure
+## Method
 
 ### Phase 0: Stack Detection
 

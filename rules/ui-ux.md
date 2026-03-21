@@ -19,6 +19,7 @@ paths:
   - "**/blocks/**"
   - "**/patterns/**"
 ---
+<!-- Last updated: 2026-03-21 -->
 
 # UI/UX & Accessibility
 
@@ -30,8 +31,8 @@ paths:
 - **Micro-interactions:** Add subtle hover/active states and transitions. Use what's already installed (framer-motion, motion, GSAP, etc.) or fall back to CSS transitions.
 
 ## Accessibility (A11Y)
-- Use semantic HTML (`main`, `nav`, `section`, `article`). Prefer native HTML elements over ARIA - the first rule of ARIA is "don't use ARIA" when native semantics suffice.
-- All interactive elements must have accessible names - prefer visible labels and semantic HTML over `aria-label`. Only use `aria-label` when no visible text exists.
+- Use semantic HTML (`main`, `nav`, `section`, `article`). Prefer native HTML elements over ARIA — the first rule of ARIA is "don't use ARIA" when native semantics suffice.
+- All interactive elements must have accessible names — prefer visible labels and semantic HTML over `aria-label`. Only use `aria-label` when no visible text exists.
 - Check color contrast (AA standard minimum).
 - 100% keyboard navigability - focus states must be visible.
 

@@ -1,6 +1,7 @@
 ---
 title: Governance Workflow
 ---
+<!-- Last updated: 2026-03-21 -->
 
 # Governance Workflow
 
@@ -91,11 +92,14 @@ What to check:
 
 Keeps persistent memory accurate, minimal, and aligned with current protocol. Auto memory accumulates over time. Stale entries teach Claude outdated patterns.
 
+The `memory-review-prompt.sh` hook automates the review prompt - it fires on GSD phase completion, session start with 3+ new memory files, or when context drops to 30% remaining. Run `/review-memory` for guided cleanup: it categorises entries as Promote (move to CLAUDE.md/rules/skills), Keep, or Remove, and checks for duplicates before promoting.
+
 What to check:
 - Memory entries in `~/.claude/projects/*/memory/MEMORY.md` reviewed for stale or duplicated guidance
 - Session-only notes not promoted to persistent memory without recurring value
 - Agent memory (`~/.claude/agent-memory/`) reviewed if subagents use persistent memory
 - Memory changes include owner, rationale, and review date
+- MEMORY.md stays under 200 lines (the auto-loaded limit)
 
 ## Running A Review
 

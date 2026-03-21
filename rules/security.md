@@ -1,3 +1,5 @@
+<!-- Last updated: 2026-03-21 -->
+
 # Security (Always-On)
 
 Baseline patterns for every session. Use the `security` agent for deep audits.

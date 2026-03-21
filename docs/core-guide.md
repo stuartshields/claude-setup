@@ -1,6 +1,7 @@
 ---
 title: Core Guide
 ---
+<!-- Last updated: 2026-03-21 -->
 
 > **TL;DR:** CLAUDE.md gives Claude standing instructions. Rules enforce style and behavior (5 always-loaded, 6 conditional). Hooks enforce rules mechanically - blocking bad writes, catching incomplete work, detecting loops. Agents are specialists (17 custom) for code review, security, testing, and more. Keep always-on instructions under ~100 bullets or Claude starts ignoring them.
 

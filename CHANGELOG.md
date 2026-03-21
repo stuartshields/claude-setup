@@ -1,5 +1,55 @@
 # Changelog
 
+## 2026-03-21
+
+### New workflow skills
+Added 5 new skills built from comparing workflows against external AI-augmented development patterns (Superpowers framework, community skills directory, colleague's blog post). These fill gaps the community hasn't addressed - no existing skills cover parallel multi-angle code review, user-perspective UX testing, or memory lifecycle management.
+
+- `multi-review` - Spawns 3 subagents in parallel (code-reviewer for maintainability, perf for performance, security for vulnerabilities). Each reviews the same scope from a different angle. Consolidates findings into a single report with conflicts noted when agents disagree. The parallel review pattern was adapted from Superpowers' dispatching-parallel-agents skill and the blog post's 3-angle code review approach.
+- `brainstorm` - Structured discovery before planning. Explores project context, interviews you one question at a time, proposes 2-3 approaches with trade-offs, writes a discovery brief, then dispatches a subagent to review the brief (max 3 iterations). Adapted from Superpowers' 9-step brainstorming skill - simplified to 6 steps since their spec review loop and visual companion are the only parts worth keeping.
+- `vibe-user` - Opens an app in Playwright and explores it as a real user with no prior knowledge. Blocks source code reading - the value is the fresh perspective. Documents findings per page, tests core flows, reports top 3 improvements. No community equivalent exists.
+- `test-plan` - Two modes in one skill. Generate mode creates user-facing test checklists from git diff. Execute mode runs the plan via Playwright, recording PASS/FAIL/BLOCKED with screenshots. No community equivalent for the generate-from-diff pattern.
+- `review-memory` - Guided memory cleanup. Loads all topic files, categorises entries as Promote (move to CLAUDE.md/rules/skills), Keep, or Remove. Checks for duplicates before promoting. Updates the review timestamp so the memory-review hook knows when you last reviewed. The community uses manual `/reflect` or `/learn` skills that depend on you remembering to invoke them - our approach automates the prompt via hooks.
+
+### New hooks
+- `project-quality-gates.sh` - PostToolUse advisory hook that detects project lint/typecheck/test commands from package.json and config files (eslint, tsconfig, biome). Reports available gates without running them - the agent decides when to run them before finishing. Rate-limited to 60s. Adapted from the blog post's quality gates concept (6 checks per commit) into an advisory model that doesn't block partial work.
+- `memory-review-prompt.sh` - Three-trigger memory review prompt. Fires on: GSD phase completion (UserPromptSubmit), 3+ new memory files on session start (SessionStart on startup/clear/compact), or context at 30% remaining with 3+ new files (PostToolUse). Advisory only. The 30% threshold sits between GSD's warning (35%) and critical (25%) levels. Reads the context bridge file written by the statusline hook - same pattern the GSD context monitor uses.
+
+### CLAUDE.md
+- Added Design Discussion Checkpoint rule - during active design discussions, treat agreement as "I like this direction" not "go build it." Asks "Ready to build?" once after discussion concludes. Takes precedence over Plan First's execute-directly clause. This gap was identified when Claude jumped to implementation mid-discussion - no community patterns address the discussion-to-implementation transition.
+- Removed remaining emdashes from Plan First and Research Sources sections
+
+### Skill structure standardisation
+- Standardised all skills on `## Method` (was `## Procedure` in qa-check)
+- Added `## Method` wrapper and `## Rules` section to figma skill
+- Replaced all double dashes (`--`) with single dashes across all new and existing skills
+- Removed "actionable" AI filler from vibe-user description
+- Added `Do NOT` hard boundary to vibe-user When to Use section
+- Merged vibe-user Constraints into Rules (single section)
+- test-plan detects default branch instead of hardcoding `main`
+
+### Rules
+- Added hook awareness note to discipline.md - documents that agent-guard hooks and stop sub-hooks are intentionally absent from settings.json (registered in agent frontmatter or called by dispatchers)
+
+### Documentation
+- Updated skills/README.md - 9 skills across workflow and tool categories with descriptions
+- Updated hooks/README.md - hook count 20 to 22, added both new hooks to file table
+- Updated governance-workflow.md - Control 7 (Memory Governance) now references the memory-review hook and /review-memory skill
+
+### Research sources
+- Updated CLAUDE.md research sources rule - entries now include a per-entry date: `(YYYY-MM-DD)` for when the source was last verified
+- Backfilled all entries in `.planning/SOURCES.md` with verification dates
+- Added Hook Development sources section for context threshold and session state patterns
+
+### Rules - new file
+- Added `staleness.md` - tracks `<!-- Last updated: YYYY-MM-DD -->` comments across all guidance files (rules, CLAUDE.md, agents, skills). Flags files older than 30 days so AI best practices stay current as models evolve. Requires updating the date on every edit.
+
+### All rules + CLAUDE.md
+- Added `<!-- Last updated: 2026-03-21 -->` comment to all 12 rule files and `CLAUDE.md`. Future sessions will compare these dates against the current date and flag stale guidance.
+
+### Rules README
+- Updated file count (11 → 12), always-loaded count (5 → 6), bullet count (~76 → ~85) to reflect `staleness.md` addition.
+
 ## 2026-03-20
 
 ### Rules audit - instruction budget compliance

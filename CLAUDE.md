@@ -1,3 +1,5 @@
+<!-- Last updated: 2026-03-21 -->
+
 # GLOBAL PROTOCOL (v2026.2)
 
 ## 0. SHORTCUTS & TRIGGERS
@@ -6,6 +8,7 @@
 
 ## 1. MANDATORY WORKFLOW
 - **Plan First**: If the user asks to **investigate, review, audit, or explore** - report findings and wait for direction. Do not modify files. This applies even when routing through workflows or subagents - an audit routed through a planning workflow still produces a read-only report, not an action plan. If the user asks to **fix, implement, add, or update** - execute directly. Only gate on a `<plan>` when the scope is genuinely unclear (not when you've already identified the changes). See Complexity Routing below for file-count thresholds.
+- **Design Discussion Checkpoint**: When the user has been asking questions about an approach (how it works, trade-offs, alternatives, edge cases), treat agreement as "I like this direction" not "go build it." After the discussion naturally concludes (no more questions from either side), ask "Ready to build?" once. If the user says no, continue the discussion and do not ask again until they give a clear build signal. Explicit triggers to start building: "build it", "go ahead", "start", "execute", "yes" in response to "Ready to build?". This rule takes precedence over the execute-directly clause of Plan First when a design discussion has been ongoing.
 - **Context Pruning**: Read ONLY files strictly necessary for the current task.
 - **No Yapping**: Skip introductions/conclusions. Output code or direct answers only.
 - **Verify**: After implementing, run the project's build/test/lint command. If it fails, diagnose and fix before moving on. Never mark work as done without verifying it runs.
@@ -25,7 +28,7 @@
 
 ## 3. RESEARCH SOURCES
 - **Track external research per project.** When WebSearch/WebFetch informs a decision (library choice, architecture pattern, bug fix, API usage), append the source URL and a one-line summary to `.planning/SOURCES.md` in the project root.
-- **Create `.planning/SOURCES.md` on first use.** Group by topic. Keep entries concise: `- [Title](URL) - why it was relevant`.
+- **Create `.planning/SOURCES.md` on first use.** Group by topic. Include a date per entry: `- [Title](URL) - why it was relevant (YYYY-MM-DD)`. The date is when the source was last verified, not when the decision was made.
 - **Check existing sources first.** Before researching a topic, read `.planning/SOURCES.md` if it exists - the answer may already be documented from a prior session.
 
 ## 4. STYLE DEFAULTS
