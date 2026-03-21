@@ -36,6 +36,10 @@ Added 5 new skills built from comparing workflows against external AI-augmented 
 - Updated hooks/README.md - hook count 20 to 22, added both new hooks to file table
 - Updated governance-workflow.md - Control 7 (Memory Governance) now references the memory-review hook and /review-memory skill
 
+### Component reference page
+- Added `docs/component-reference.md` - single reference page covering every rule, hook, agent, and skill with what it does, why it exists, and how it compares to community alternatives (everything-claude-code, Superpowers, Trail of Bits, claude-code-skills, skills.sh)
+- Linked from start-here.md (Continue Reading + Quick Links) and README.md (reading path + Full Documentation)
+
 ### Research sources
 - Updated CLAUDE.md research sources rule - entries now include a per-entry date: `(YYYY-MM-DD)` for when the source was last verified
 - Backfilled all entries in `.planning/SOURCES.md` with verification dates
