@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-03-21
+
+### Rules - new file
+- Added `staleness.md` - tracks `<!-- Last updated: YYYY-MM-DD -->` comments across all guidance files (rules, CLAUDE.md, agents, skills). Flags files older than 30 days so AI best practices stay current as models evolve. Requires updating the date on every edit.
+
+### All rules + CLAUDE.md
+- Added `<!-- Last updated: 2026-03-21 -->` comment to all 12 rule files and `CLAUDE.md`. Future sessions will compare these dates against the current date and flag stale guidance.
+
+### Rules README
+- Updated file count (11 → 12), always-loaded count (5 → 6), bullet count (~76 → ~85) to reflect `staleness.md` addition.
+
 ## 2026-03-20
 
 ### Rules audit - instruction budget compliance

@@ -14,16 +14,17 @@ paths:
   - "**/*.go"
   - "**/*.rs"
 ---
+<!-- Last updated: 2026-03-21 -->
 
 # Testing
 
 ## Test-First Mandate
-- **Write a FAILING test before implementing.** Run it to confirm the assertion itself fails - "module not found" proves nothing.
+- **Write a FAILING test before implementing.** Run it to confirm the assertion itself fails — "module not found" proves nothing.
 - **Test the core user-facing behavior first.** The primary feature gets tested before edge cases, error paths, or peripheral features. If the app's purpose is posting, test posting first.
 - After implementation, run the full test suite to catch regressions.
 
 ## Test Against the Spec
-- **Write tests from the requirement, not the code.** Test behavior and observable state - not private methods or internal data structures.
+- **Write tests from the requirement, not the code.** Test behavior and observable state — not private methods or internal data structures.
 - **Mutation check:** After tests pass, mentally break the implementation (flip `>` to `>=`, remove a guard). If tests still pass, they're weak.
 
 ## When Tests Pass But Code Has Bugs
@@ -32,9 +33,9 @@ paths:
 - **Reproduce the user's exact scenario in a new test** before attempting another fix. If you can't reproduce it, you don't understand the bug.
 
 ## Mock Discipline
-- **Prefer real dependencies.** Every mock is an assumption - if wrong, the test passes and the code breaks.
+- **Prefer real dependencies.** Every mock is an assumption — if wrong, the test passes and the code breaks.
 - **Mock only:** external APIs (network), time/dates, randomness, third-party services.
-- **If a test needs 3+ mocks, consider whether the design needs refactoring** - but don't block on it.
+- **If a test needs 3+ mocks, consider whether the design needs refactoring** — but don't block on it.
 
 ## Test Quality
 - **AAA pattern:** Arrange -> Act -> Assert.

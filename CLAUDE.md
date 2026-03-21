@@ -1,3 +1,5 @@
+<!-- Last updated: 2026-03-21 -->
+
 # GLOBAL PROTOCOL (v2026.2)
 
 ## 0. SHORTCUTS & TRIGGERS

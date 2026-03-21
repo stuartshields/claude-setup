@@ -1,10 +1,11 @@
 ---
 title: Rules
 ---
+<!-- Last updated: 2026-03-21 -->
 
 ## Rules
 
-> **TL;DR:** 11 rule files, 5 always-loaded (~76 bullets), 6 conditional (scoped by file type). Total instruction budget stays under ~150 with the system prompt. Rules that Claude already follows without instruction are deleted. Rules it keeps breaking get moved to hooks instead.
+> **TL;DR:** 12 rule files, 6 always-loaded (~85 bullets), 6 conditional (scoped by file type). Total instruction budget stays under ~150 with the system prompt. Rules that Claude already follows without instruction are deleted. Rules it keeps breaking get moved to hooks instead.
 
 Without rules, you repeat the same instructions every conversation. "Use tabs." "No console.log." "Always parameterize SQL." "Don't add unrequested features." Every. Single. Session.
 
@@ -43,20 +44,22 @@ These rules follow community-validated patterns for instruction compliance:
 | `testing.md` | Test-first workflow and test quality rules (failing test first, behavior-focused assertions, mock skepticism). Now scoped to code files. |
 | `ui-ux.md` | Frontend UI/UX quality rules with WCAG 2.2 AA accessibility, W3C ARIA-first guidance. |
 | `harness-maintenance.md` | Scoped to `~/.claude/` files only. Enforces external research, instruction budget, and source tracking when modifying the harness. |
+| `staleness.md` | Tracks last-updated dates on all guidance files. Flags files older than 30 days so AI best practices stay current as models evolve. |
 
 ### Always-loaded rules
 
-These 5 files load every session (~76 bullet points):
+These 6 files load every session (~82 bullet points):
 
 - `debugging.md` - 4-step framework, anti-loop protocol, hypothesis-driven investigation
 - `dependencies.md` - hallucinated package prevention, dependency hygiene
 - `discipline.md` - complete implementations, anti-pivot rules, scope control, verification
 - `security.md` - input validation, injection prevention, secrets handling
+- `staleness.md` - 30-day freshness check on all guidance files, auto-updates dates on edit
 - `style.md` - tabs, clean code
 
 ### Conditional rules
 
-These 5 files are scoped by `paths:` frontmatter and only load when relevant files are in play:
+These 6 files are scoped by `paths:` frontmatter and only load when relevant files are in play:
 
 - `architecture.md` - modular-first structure, monorepo guidance (loads for code files)
 - `environment.md` - HTTPS, build tooling, agent routing (loads for config files)

@@ -11,6 +11,7 @@ paths:
   - "**/*.go"
   - "**/*.rs"
 ---
+<!-- Last updated: 2026-03-21 -->
 
 # Architecture
 
@@ -27,7 +28,7 @@ paths:
 - `/services`: API/External integrations.
 
 ## Monorepo Guidance
-- **Identify the active package** before reading CLAUDE.md. Check: (1) package root, (2) monorepo root, (3) both - package-level overrides root.
+- **Identify the active package** before reading CLAUDE.md. Check: (1) package root, (2) monorepo root, (3) both — package-level overrides root.
 - **Respect package boundaries.** Only import across packages if the dependency graph allows it.
 - **Run commands in scope.** Use the package's build/test/lint, not root-level.
 - **Check for shared configs** (tsconfig, eslint, prettier) at root. Packages may extend or override.

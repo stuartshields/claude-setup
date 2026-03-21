@@ -1,3 +1,5 @@
+<!-- Last updated: 2026-03-21 -->
+
 ## Hooks
 
 > **TL;DR:** 22 hooks across 10 lifecycle events. PreToolUse hooks block bad code before it's written (stubs, console.log, space indentation). Stop hooks catch incomplete work and shortcut patterns. PostToolUse hooks track modified files, detect reasoning loops, detect available quality gates, and prompt memory review when context is low. Exit 2 blocks, exit 0 allows, exit 1 is a silent warning.

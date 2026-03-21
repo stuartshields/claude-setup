@@ -2,6 +2,7 @@
 layout: default
 title: Claude Code Setup
 ---
+<!-- Last updated: 2026-03-21 -->
 
 # Claude Code Setup
 

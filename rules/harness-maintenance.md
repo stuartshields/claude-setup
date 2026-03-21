@@ -7,16 +7,17 @@ paths:
   - ".claude/CLAUDE.md"
   - ".claude/settings.*"
 ---
+<!-- Last updated: 2026-03-21 -->
 
 # Harness Maintenance Protocol
 
-> Applies when modifying rules, hooks, agents, skills, settings, or global CLAUDE.md - not project work or GSD.
+> Applies when modifying rules, hooks, agents, skills, settings, or global CLAUDE.md — not project work or GSD.
 
 ## Research Before Changing
 - **IMPORTANT: Do not use training data for harness decisions.** Always validate with external sources (WebSearch/WebFetch) before modifying rules, hooks, agents, or skills. Training data is stale and may reflect outdated Claude Code behavior, deprecated APIs, or patterns that no longer apply.
 - **Check the system prompt repo** ([Piebald-AI/claude-code-system-prompts](https://github.com/Piebald-AI/claude-code-system-prompts)) to understand what the system prompt already says. Rules that duplicate system prompt directives waste instruction slots.
 - **Check known issues** on [anthropics/claude-code](https://github.com/anthropics/claude-code/issues) for model-level behavioral patterns relevant to the change.
-- **Check existing research first.** Read `~/.claude/projects/-Users-stuart--claude/memory/reference_harness_research.md` before searching - the topic may already have sources from a prior session.
+- **Check existing research first.** Read `~/.claude/projects/-Users-stuart--claude/memory/reference_harness_research.md` before searching — the topic may already have sources from a prior session.
 
 ## Instruction Budget
 - **Always-on ceiling: ~100 bullet points across unscoped rule files.** The system prompt adds ~50 more. Total should stay under 150.
@@ -25,9 +26,9 @@ paths:
 - **Scope rules by path** when they only apply to specific file types. Use `paths:` frontmatter.
 
 ## Rule Quality Checks
-- **Positive framing over negative.** "Use named exports" beats "Do NOT use default exports" - negation activates the unwanted concept.
+- **Positive framing over negative.** "Use named exports" beats "Do NOT use default exports" — negation activates the unwanted concept.
 - **Anchor critical rules at top and bottom** of the file (primacy + recency bias).
-- **Check for conflicts with system prompt directives.** System prompt has higher attention weight - your rule must be specific and additive to win the conflict.
+- **Check for conflicts with system prompt directives.** System prompt has higher attention weight — your rule must be specific and additive to win the conflict.
 - **Check for conflicts between rule files.** Search for contradictions (e.g., "minimal change" in one file vs "touch all necessary files" in another).
 - **If a rule is violated 3+ times, move enforcement to a hook.** Prose rules are suggestions; hooks are laws.
 

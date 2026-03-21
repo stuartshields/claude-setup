@@ -1,3 +1,5 @@
+<!-- Last updated: 2026-03-21 -->
+
 # Discipline
 
 ## IMPORTANT: Complete Implementations Come First
