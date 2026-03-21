@@ -1,6 +1,6 @@
 ## Hooks
 
-> **TL;DR:** 20 hooks across 10 lifecycle events. PreToolUse hooks block bad code before it's written (stubs, console.log, space indentation). Stop hooks catch incomplete work and shortcut patterns. PostToolUse hooks track modified files and detect reasoning loops. Exit 2 blocks, exit 0 allows, exit 1 is a silent warning.
+> **TL;DR:** 22 hooks across 10 lifecycle events. PreToolUse hooks block bad code before it's written (stubs, console.log, space indentation). Stop hooks catch incomplete work and shortcut patterns. PostToolUse hooks track modified files, detect reasoning loops, detect available quality gates, and prompt memory review when context is low. Exit 2 blocks, exit 0 allows, exit 1 is a silent warning.
 
 Rules tell Claude what to do. But Claude doesn't verify its own work automatically. It won't check code quality before writing a file, or warn you before stopping with unfinished tasks. Hooks solve that.
 
@@ -207,9 +207,11 @@ How to use this folder in Claude:
 | `compact-restore.sh` | `SessionStart` restore hook that reloads pre-compaction saved state. |
 | `detect-perf-degradation.sh` | `PostToolUse` + `PostToolUseFailure` hook that detects reasoning loops and error spikes. |
 | `hook-observability-summary.sh` | `PostToolUse` + `PostToolUseFailure` hook that tracks hook outcomes per session and rebuilds an aggregate summary across all sessions every 10th event. |
+| `memory-review-prompt.sh` | Three-trigger memory review: GSD phase completion (`UserPromptSubmit`), accumulated memory on session start (`SessionStart`), low context at 30% remaining (`PostToolUse`). Advisory only. |
 | `drift-review-stop.sh` | `Stop` hook that catches common cognitive-drift response patterns. |
 | `notification-alert.sh` | `Notification` hook for terminal/native attention alerts. |
 | `permission-notify.sh` | `PermissionRequest` hook that plays alert when approval is needed. |
+| `project-quality-gates.sh` | `PostToolUse` (`Write\|Edit`) advisory hook that detects project lint/typecheck/test commands from package.json and config files. Rate-limited to 60s. |
 | `pre-compaction-preserve.sh` | `PreCompact` hook that saves session/project state before compaction. |
 | `remind-project-claude.sh` | `UserPromptSubmit` hook that emits actionable CLAUDE.md reminders. |
 | `session-cleanup.sh` | `SessionEnd` hook that removes session temp artifacts. |

@@ -4,7 +4,7 @@ title: Skills & Memory
 
 ## Skills
 
-> **TL;DR:** 8 skills across two categories. **Workflow skills** handle multi-step processes: `/brainstorm` (structured discovery before planning), `/multi-review` (parallel code review from 3 angles), `/test-plan` (generate and execute user-facing test checklists), `/vibe-user` (browser-based UX testing as a real user). **Tool skills** wrap specific integrations: `/debug-wp` (WordPress debugging), `/figma` (Figma MCP design-to-code), `/playwright` (browser automation), `/qa-check` (multi-stack QA audit). Skills run in the main context by default. `qa-check` uses `context: fork` so its verbose output doesn't pollute your conversation.
+> **TL;DR:** 9 skills across two categories. **Workflow skills** handle multi-step processes: `/brainstorm` (structured discovery before planning), `/multi-review` (parallel code review from 3 angles), `/review-memory` (guided memory cleanup and promotion), `/test-plan` (generate and execute user-facing test checklists), `/vibe-user` (browser-based UX testing as a real user). **Tool skills** wrap specific integrations: `/debug-wp` (WordPress debugging), `/figma` (Figma MCP design-to-code), `/playwright` (browser automation), `/qa-check` (multi-stack QA audit). Skills run in the main context by default. `qa-check` uses `context: fork` so its verbose output doesn't pollute your conversation.
 
 Skills are reusable task templates with step-by-step instructions. They differ from agents: agents are delegatable specialists (a different "person" doing the work), skills are more like checklists - structured guidance for a task that the main Claude session follows directly.
 
@@ -16,6 +16,7 @@ These skills structure how you work with agents. They were built after comparing
 - `multi-review` - Parallel code review from three angles. Spawns three subagents simultaneously (code-reviewer for maintainability, perf for performance, security for vulnerabilities), each reviewing the same scope. Consolidates findings into a single report with conflicts noted when agents disagree. Use before merging or after completing a feature.
 - `test-plan` - Two modes in one skill. Generate mode creates a user-facing test checklist from git diff - scenarios describe what a user does, not what the code does. Execute mode runs an existing plan via Playwright MCP, recording PASS/FAIL/BLOCKED per scenario with screenshots as evidence.
 - `vibe-user` - Opens an app in Playwright and explores it as a real user with no prior knowledge. The skill explicitly blocks reading source code - the value is the fresh perspective. Documents findings per page, tests core user flows, and reports the top 3 highest-impact UX improvements.
+- `review-memory` - Guided cleanup of auto-memory. Loads all memory files, categorises each entry as Promote (move to CLAUDE.md/rules/skills), Keep, or Remove. Presents a table for your approval before making changes. Checks for duplicates before promoting and warns if MEMORY.md exceeds the 200-line auto-loaded limit. Run it when the memory-review hook prompts you, or anytime you want to audit what auto-memory has captured.
 
 ### Tool skills
 
@@ -40,6 +41,8 @@ skills/
     SKILL.md    ← parallel 3-angle code review
   playwright/
     SKILL.md    ← browser automation
+  review-memory/
+    SKILL.md    ← guided memory cleanup and promotion
   qa-check/
     SKILL.md    ← multi-stack QA audit
   test-plan/
@@ -180,6 +183,7 @@ How to use this folder in Claude:
 | `multi-review/SKILL.md` | Parallel code review orchestrator: spawns maintainability, performance, and security agents simultaneously. |
 | `playwright/SKILL.md` | Playwright MCP workflow for snapshot-first interaction, form automation, and visual/debug checks. |
 | `qa-check/SKILL.md` | Multi-stack QA audit workflow (WCAG 2.2 AA accessibility, performance, code quality). Runs in forked Explore context. |
+| `review-memory/SKILL.md` | Guided memory cleanup: categorise entries as Promote/Keep/Remove, check for duplicates, update review timestamp. |
 | `test-plan/SKILL.md` | Two-mode skill: generate user-facing test checklists from git diff, or execute them via Playwright. |
 | `vibe-user/SKILL.md` | Browser-based UX testing as a real user. Explores app with no source code access, reports findings per page. |
 
