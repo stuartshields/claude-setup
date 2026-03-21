@@ -3,7 +3,7 @@ title: Core Guide
 ---
 <!-- Last updated: 2026-03-21 -->
 
-> **TL;DR:** CLAUDE.md gives Claude standing instructions. Rules enforce style and behavior (5 always-loaded, 6 conditional). Hooks enforce rules mechanically - blocking bad writes, catching incomplete work, detecting loops. Agents are specialists (17 custom) for code review, security, testing, and more. Keep always-on instructions under ~100 bullets or Claude starts ignoring them.
+> **TL;DR:** CLAUDE.md gives Claude standing instructions. Rules enforce style and behavior (5 always-loaded, 6 conditional). Hooks enforce rules mechanically - blocking bad writes, catching incomplete work, detecting loops. Agents are specialists (17 custom) for code review, security, testing, and more. Keep always-on instructions under ~100 bullet points or Claude starts ignoring them.
 
 For a quick table of every rule, hook, agent, and skill with community comparisons, see the [Component Reference](component-reference.md). This guide explains how the pieces fit together.
 
@@ -566,9 +566,9 @@ This setup manages the budget by:
 - **Keeping always-loaded rules lean** - 5 files, ~76 bullet points. With the system prompt, total is ~139.
 - **Scoping aggressively** - `testing.md` and `architecture.md` used to load every session. Now they only load when you're working with code files. That saved 30 bullet points from sessions where they weren't relevant (editing config, writing shell scripts).
 - **Deleting system prompt duplicates** - rules like "add error handling only for scenarios that can actually occur" already exist in Claude's system prompt. Restating them wastes a slot. We removed 4 such duplicates.
-- **Merging small files** - `verification.md` had 7 bullets, 4 of which duplicated other files. The unique parts (hook awareness) moved into `discipline.md`. One fewer file to load.
+- **Merging small files** - `verification.md` had 7 bullet points, 4 of which duplicated other files. The unique parts (hook awareness) moved into `discipline.md`. One fewer file to load.
 
-The `harness-maintenance.md` rule (only loaded when editing `~/.claude/` files) includes a budget check step: count always-on bullets before adding new rules. If you're near 100, scope or consolidate before adding.
+The `harness-maintenance.md` rule (only loaded when editing `~/.claude/` files) includes a budget check step: count always-on bullet points before adding new rules. If you're near 100, scope or consolidate before adding.
 
 ### Research-First Harness Changes
 

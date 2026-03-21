@@ -57,7 +57,7 @@ Added 5 new skills built from comparing workflows against external AI-augmented 
 ## 2026-03-20
 
 ### Rules audit - instruction budget compliance
-- Reduced always-on instruction count from 128 to 89 bullets (system prompt adds ~50, total now ~139 vs 150 ceiling)
+- Reduced always-on instruction count from 128 to 89 bullet points (system prompt adds ~50, total now ~139 vs 150 ceiling)
 - Scoped `testing.md` and `architecture.md` with `paths:` frontmatter - only load when working with code files, not config/shell
 - Deleted `verification.md` - merged unique Hook Awareness section into `discipline.md`, rest was duplicated by debugging.md and discipline.md
 - Removed 4 rules from `discipline.md` that duplicate system prompt directives (error handling, wrappers, current requirements, grep-before-reading)

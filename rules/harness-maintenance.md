@@ -21,7 +21,7 @@ paths:
 
 ## Instruction Budget
 - **Always-on ceiling: ~100 bullet points across unscoped rule files.** The system prompt adds ~50 more. Total should stay under 150.
-- **Before adding a new rule:** count always-on bullets (`grep -c '^\s*-' ~/.claude/rules/*.md` for unscoped files). If at/near 100, scope or consolidate before adding.
+- **Before adding a new rule:** count always-on bullet points (`grep -c '^\s*-' ~/.claude/rules/*.md` for unscoped files). If at/near 100, scope or consolidate before adding.
 - **Delete rules Claude already follows without instruction.** If removing a rule wouldn't change behavior, it's wasting a slot.
 - **Scope rules by path** when they only apply to specific file types. Use `paths:` frontmatter.
 
