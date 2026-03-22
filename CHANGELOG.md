@@ -17,6 +17,11 @@
 ### Changelogs
 - Created `~/.claude/CHANGELOG.md` for tracking harness config changes (rules, agents, skills, hooks, settings)
 
+### Synced from global `~/.claude/` (second pass)
+- **hooks/repeated-edit-guard.sh**: New hook — guards against repeated edits to the same file
+- **settings.json**: Added `repeated-edit-guard.sh` PreToolUse hook on Edit, session cleanup now clears edit count files, figma plugin disabled
+- **rules/discipline.md**: Shortened "No workaround chains" bullet (removed specific examples, kept the principle)
+
 ## 2026-03-21
 
 ### New workflow skills
