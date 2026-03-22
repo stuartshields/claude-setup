@@ -56,7 +56,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "rm -f /tmp/claude-remind-* 2>/dev/null; exit 0"
+            "command": "rm -f /tmp/claude-remind-* /tmp/claude-edit-count-* 2>/dev/null; exit 0"
           }
         ]
       },
@@ -104,6 +104,15 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/check-code-quality.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/repeated-edit-guard.sh"
           }
         ]
       }
@@ -288,7 +297,7 @@
     "frontend-design@claude-code-plugins": true,
     "claude-hud@claude-hud": true,
     "swift-lsp@claude-plugins-official": true,
-    "figma@claude-plugins-official": true,
+    "figma@claude-plugins-official": false,
     "rust-analyzer-lsp@claude-plugins-official": true
   }
 }

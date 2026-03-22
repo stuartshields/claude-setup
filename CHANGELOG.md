@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-03-22
+
+### Synced from global `~/.claude/`
+- **rules/discipline.md**: Added Context Pruning section (3 bullets). Added to Complete Implementations (edge cases), Do Not Pivot (test assertions, conditional branches, no workaround chains), Scope Control (classify before acting, design discussions, task boundaries, mid-session redirects), Verify Before Declaring Done (fix bugs during review, challenge tests, confirm right problem, passing tests != correct). Removed Anti-Over-Engineering section and "Do exactly what was asked" bullet (consolidated)
+- **rules/debugging.md**: Added 6 bullets to Validate Before Fixing. Expanded Anti-Loop bullet. Specified `console.error` over `console.log` in two bullets
+- **rules/style.md**: Updated Clean code bullet — `console.error` for debug, `console.log` hook-blocked
+- **rules/harness-maintenance.md**: Expanded positive framing rule with trap/safety exceptions
+- **rules/staleness.md**: Updated format from `YYYY-MM-DD` to ISO 8601 datetime
+- **skills/review-memory/SKILL.md**: Reordered evaluation to Remove-first. Added Keep justification. Added accuracy verification rule
+- **CLAUDE.md**: Removed rules now covered by `discipline.md` (Plan First, Design Discussion, Context Pruning, No Yapping, Do exactly what was asked, Anti-Over-Engineering)
+
+### Timestamps
+- Updated all `<!-- Last updated -->` comments from `YYYY-MM-DD` to ISO 8601 datetime (`YYYY-MM-DDTHH:MM+TZ:TZ`) across all rule files and CLAUDE.md
+
+### Changelogs
+- Created `~/.claude/CHANGELOG.md` for tracking harness config changes (rules, agents, skills, hooks, settings)
+
+### Synced from global `~/.claude/` (second pass)
+- **hooks/repeated-edit-guard.sh**: New hook — guards against repeated edits to the same file
+- **settings.json**: Added `repeated-edit-guard.sh` PreToolUse hook on Edit, session cleanup now clears edit count files, figma plugin disabled
+- **rules/discipline.md**: Shortened "No workaround chains" bullet (removed specific examples, kept the principle)
+
 ## 2026-03-21
 
 ### New workflow skills

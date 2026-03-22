@@ -1,4 +1,4 @@
-<!-- Last updated: 2026-03-21 -->
+<!-- Last updated: 2026-03-22T11:46+11:00 -->
 
 # Style & Code Quality
 
@@ -9,4 +9,4 @@
 	2. `new_string` MUST also use literal tabs.
 	3. If Edit fails on indented line, fix tab/space mismatch — do not fall back to sed/awk/python.
 	4. When unsure, start `old_string` at first non-whitespace character.
-- **Clean code:** No `console.log`, no trailing whitespace, no redundant try/catch.
+- **Clean code:** Use `console.error` for debug output (never `console.log` — blocked by hook). Keep lines clean of trailing whitespace. Let errors propagate unless at a system boundary.

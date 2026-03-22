@@ -4,7 +4,7 @@ paths:
   - "**/composer.json"
   - "**/phpunit.xml*"
 ---
-<!-- Last updated: 2026-03-21 -->
+<!-- Last updated: 2026-03-22T11:46+11:00 -->
 
 # PHP & WordPress Backend
 

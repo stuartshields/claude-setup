@@ -32,11 +32,13 @@ List what was found:
 
 ### Step 2: Categorise Each Entry
 
-For each memory entry, classify as one of:
+For each memory entry, evaluate all three categories **in this order**:
 
-- **Promote** - This is a permanent pattern, convention, or constraint. It belongs in CLAUDE.md, a rule file, or a skill. Example: "always use parameterised queries in this project's API layer."
-- **Keep** - Still relevant and useful for future sessions but not permanent enough for CLAUDE.md. Example: "user prefers terse responses with no trailing summaries."
-- **Remove** - Stale, wrong, duplicated by CLAUDE.md/rules, or too specific to a past task. Example: "Phase 12 is currently in progress" when Phase 12 finished weeks ago.
+1. **Remove?** Is this stale, wrong, duplicated by CLAUDE.md/rules, or derivable from code/git? If yes → Remove.
+2. **Promote?** Does this encode a convention, decision, or constraint that should survive memory cleanup? If losing it would cause mistakes in future sessions, it belongs in CLAUDE.md, a rule file, or a skill → Promote.
+3. **Keep** only if the entry is still relevant but too situational or temporary for a permanent file (e.g., user preferences, in-flight research, external context not derivable from code).
+
+**Every "Keep" must include a one-line justification for why it doesn't belong in CLAUDE.md, a rule, or a skill.** If you can't articulate why, it's probably a Promote.
 
 Present the categorisation as a table:
 
@@ -44,7 +46,7 @@ Present the categorisation as a table:
 | # | Entry | File | Category | Reason |
 |---|-------|------|----------|--------|
 | 1 | Always use tabs | MEMORY.md | Remove | Already in rules/style.md |
-| 2 | User is senior dev | user_role.md | Keep | Informs response depth |
+| 2 | User is senior dev | user_role.md | Keep | User profile, not a project convention |
 | 3 | API uses JWT auth | project_api.md | Promote | Add to project CLAUDE.md |
 ```
 
@@ -77,4 +79,5 @@ date +%s > ~/.claude/projects/<project-path-encoded>/memory/.last-review
 - **Do NOT auto-promote or auto-remove without user confirmation.** Present the table, wait for approval.
 - **Do NOT modify CLAUDE.md without showing the proposed change first.**
 - **Check for duplicates.** Before promoting, grep the destination file to confirm the learning isn't already there.
+- **Verify memory accuracy before promoting.** Memories are written by Claude and may contain inferences or assumptions that were never confirmed. Quote the specific claim being promoted and confirm it's accurate with the user.
 - **Keep MEMORY.md under 200 lines.** That's the auto-loaded limit. If it's over, prioritise removing noise.
