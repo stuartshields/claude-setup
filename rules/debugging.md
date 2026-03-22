@@ -1,4 +1,4 @@
-<!-- Last updated: 2026-03-21 -->
+<!-- Last updated: 2026-03-22 -->
 
 # Debugging & Investigation
 
@@ -12,9 +12,15 @@
 ## Validate Before Fixing
 - **Confirm root cause before proposing code changes.** Isolation first, fix second — no exceptions.
 - **One hypothesis at a time.** Rank possibilities and test the most likely first.
+- **Test means run code, not reason in your head.** "Testing" a hypothesis means executing a command, writing a failing test, or checking real output. Ruling something out by thinking about it is not testing — it's guessing.
+- **Read the user's evidence first.** When the user provides a screenshot, error message, or reproduction — study it before forming any hypothesis. The answer is usually visible in what they showed you.
+- **If you can't reproduce the issue in tests, say so.** Don't keep writing more test infrastructure hoping to catch it. Tell the user what you've verified works and ask them to confirm what they're seeing. Two rounds of failed reproduction means you're missing context — ask, don't guess.
+- **If the user says it's still broken after your fix, your mental model is wrong.** Stop patching. Re-read their latest message, look at any evidence they provided, and describe back to them what you think is happening. Let them correct your understanding before writing more code.
 - **Every hypothesis needs a validation step.** State: (1) what you suspect, (2) how to confirm it, (3) expected output, (4) what it means if output differs.
 - **Replace "maybe" and "possibly" with testable instrumentation.** Uncertainty means you need more data.
+- **Add logging to trace actual behavior.** When reasoning about what code "should" do isn't working, add temporary `console.error` instrumentation to see what it actually does at runtime (never `console.log` — blocked by hook). Reading code is not observing behavior.
 - **Assume your initial diagnosis is wrong.** Define what would falsify your hypothesis before testing it.
+- **GUI bugs need visible error reporting.** When fixing bugs in a GUI app where you can't run the UI interactively, add visible error reporting (error banners, console.error) so the user can report what they see. Don't assume a fix works without observable verification.
 
 ## Investigation Over Assumption
 - **Search before assuming.** If a file path, variable, or architectural detail is not in context, use Glob/Grep to find it. Ask the user only if search fails.
@@ -27,12 +33,12 @@
 
 ## Anti-Loop Protocol
 - **Each attempt MUST use a different approach.** If attempt 1 failed, your diagnosis was wrong — don't vary the fix, vary the diagnosis. Re-trace the data flow from scratch.
-- **After 2 failed fix attempts, STOP.** Do not try a third variation. Instead: state what you've tried, what each attempt ruled out, and ask the user for more context or suggest a fundamentally different angle.
+- **After 2 failed fix attempts, STOP.** Do not try a third variation. Instead: state what you've tried, what each attempt ruled out, and ask the user for more context or suggest a fundamentally different angle. Count by user feedback, not by your internal reasoning — if the user says "still broken" twice, you've failed twice regardless of whether each fix felt different to you.
 - **Watch for oscillation.** If fixing A breaks B and fixing B breaks A, the problem is contradictory constraints or a wrong mental model — not a code issue. Stop, identify the conflict, and surface it to the user.
 - **Context pollution is real.** After 2 failed corrections in the same conversation, the context is polluted with wrong approaches. Recommend `/clear` and restate with lessons learned.
 
 ## Time-Box Root Cause Analysis
 - **Check memory files and prior notes FIRST.** Start with documented untried approaches.
-- **Skip root-cause isolation only when you truly can't observe the runtime** (e.g., native app crash with no logs). Even then, prefer adding instrumentation over guessing.
+- **Skip root-cause isolation only when you truly can't observe the runtime** (e.g., native app crash with no logs). Even then, prefer adding `console.error` instrumentation over guessing (never `console.log` — blocked by hook).
 - **Only research hypotheses you can test locally.**
 - **After 8+ tool calls without reproducing the issue**, step back and summarize what you know. Ask the user if the reproduction steps are correct before continuing.
