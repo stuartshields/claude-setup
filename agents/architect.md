@@ -114,7 +114,7 @@ Structure your output as:
 ```
 
 ## Memory
-Update your agent memory as you discover architectural patterns, technology choices, trade-off analyses, and project-specific constraints. Check your memory before starting work - prior sessions may have documented decisions or research for this project.
+Update your agent memory as you discover architectural patterns, technology choices, trade-off analyses, and project-specific constraints. Check your memory before starting work — prior sessions may have documented decisions or research for this project.
 
 ## What NOT To Do
 - Don't write implementation code

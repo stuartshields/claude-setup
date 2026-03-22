@@ -122,7 +122,7 @@ Severity levels:
 - **INFO** - Improvement opportunity, minor inconsistency, or style deviation
 
 ## Memory
-Update your agent memory as you discover codebase patterns, recurring issues, architectural decisions, and project-specific conventions. Check your memory before starting work - prior sessions may have documented patterns for this project.
+Update your agent memory as you discover codebase patterns, recurring issues, architectural decisions, and project-specific conventions. Check your memory before starting work — prior sessions may have documented patterns for this project.
 
 ## Rules
 

@@ -1,11 +1,11 @@
 ---
 title: Rules
 ---
-<!-- Last updated: 2026-03-21 -->
+<!-- Last updated: 2026-03-23T15:30+11:00 -->
 
 ## Rules
 
-> **TL;DR:** 12 rule files, 6 always-loaded (~85 bullet points), 6 conditional (scoped by file type). Total instruction budget stays under ~150 with the system prompt. Rules that Claude already follows without instruction are deleted. Rules it keeps breaking get moved to hooks instead.
+> **TL;DR:** 13 rule files, 7 always-loaded (~95 bullet points), 6 conditional (scoped by file type). Total instruction budget stays under ~150 with the system prompt. Rules that Claude already follows without instruction are deleted. Rules it keeps breaking get moved to hooks instead.
 
 For what each rule does, why it exists, and how it compares to community patterns, see the [Component Reference](../docs/component-reference.md#rules).
 
@@ -46,15 +46,17 @@ These rules follow community-validated patterns for instruction compliance:
 | `testing.md` | Test-first workflow and test quality rules (failing test first, behavior-focused assertions, mock skepticism). Now scoped to code files. |
 | `ui-ux.md` | Frontend UI/UX quality rules with WCAG 2.2 AA accessibility, W3C ARIA-first guidance. |
 | `harness-maintenance.md` | Scoped to `~/.claude/` files only. Enforces external research, instruction budget, and source tracking when modifying the harness. |
+| `research-and-decisions.md` | Research source tracking (`.planning/SOURCES.md`) and Architecture Decision Records (`.planning/adr/`) for structured project decisions. |
 | `staleness.md` | Tracks last-updated dates on all guidance files. Flags files older than 30 days so AI best practices stay current as models evolve. |
 
 ### Always-loaded rules
 
-These 6 files load every session (~82 bullet points):
+These 7 files load every session (~92 bullet points):
 
 - `debugging.md` - 4-step framework, anti-loop protocol, hypothesis-driven investigation
 - `dependencies.md` - hallucinated package prevention, dependency hygiene
 - `discipline.md` - complete implementations, anti-pivot rules, scope control, verification
+- `research-and-decisions.md` - research source tracking, Architecture Decision Records
 - `security.md` - input validation, injection prevention, secrets handling
 - `staleness.md` - 30-day freshness check on all guidance files, auto-updates dates on edit
 - `style.md` - tabs, clean code

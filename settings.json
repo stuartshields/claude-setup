@@ -86,6 +86,14 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/Users/stuart/Personal/co2-status-line/src/update-check.js\""
+          }
+        ]
       }
     ],
     "PreToolUse": [
@@ -291,7 +299,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "node \"/Users/stuart/.claude/hooks/gsd-statusline.js\""
+    "command": "node \"/Users/stuart/Personal/co2-status-line/src/statusline.js\" --wrap 'node \"/Users/stuart/.claude/hooks/gsd-statusline.js\"'"
   },
   "enabledPlugins": {
     "frontend-design@claude-code-plugins": true,
@@ -299,5 +307,13 @@
     "swift-lsp@claude-plugins-official": true,
     "figma@claude-plugins-official": false,
     "rust-analyzer-lsp@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-co2-status-line": {
+      "source": {
+        "source": "github",
+        "repo": "stuartshields/claude-co2-status-line"
+      }
+    }
   }
 }

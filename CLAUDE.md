@@ -1,4 +1,4 @@
-<!-- Last updated: 2026-03-22T11:46+11:00 -->
+<!-- Last updated: 2026-03-23T15:00+11:00 -->
 
 # GLOBAL PROTOCOL (v2026.2)
 
@@ -22,11 +22,6 @@
 	2. Keep only project-specific conventions.
 	3. Standardize indents to Tabs.
 
-## 3. RESEARCH SOURCES
-- **Track external research per project.** When WebSearch/WebFetch informs a decision (library choice, architecture pattern, bug fix, API usage), append the source URL and a one-line summary to `.planning/SOURCES.md` in the project root.
-- **Create `.planning/SOURCES.md` on first use.** Group by topic. Include a date per entry: `- [Title](URL) - why it was relevant (YYYY-MM-DD)`. The date is when the source was last verified, not when the decision was made.
-- **Check existing sources first.** Before researching a topic, read `.planning/SOURCES.md` if it exists - the answer may already be documented from a prior session.
-
-## 4. STYLE DEFAULTS
+## 3. STYLE DEFAULTS
 - **JavaScript**: ES6+ only. Use ES Modules (`import`/`export`), arrow functions, `const`/`let` (never `var`), template literals, destructuring, async/await. No CommonJS (`require`/`module.exports`).
 - **CSS**: TailwindCSS v4 with the TailwindCSS CLI (`@tailwindcss/cli`). CSS-first config (`@theme` in `input.css`), no `tailwind.config.js`.

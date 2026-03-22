@@ -1,8 +1,9 @@
 #!/bin/bash
-# Memory review prompt - single script handling three lifecycle events.
+# Memory review prompt - single script handling four lifecycle events.
 # Trigger 1 (UserPromptSubmit): GSD phase completion in GSD projects.
 # Trigger 2 (SessionStart): Accumulated memory files from prior sessions.
 # Trigger 3 (PostToolUse): Context at 30% remaining with 3+ new memory files.
+# Trigger 4 (UserPromptSubmit): Wrap-up phrases indicating session end.
 # Advisory only - never blocks. Rate-limited to avoid noise.
 
 INPUT=$(cat)
@@ -77,6 +78,25 @@ if [ "$EVENT" = "UserPromptSubmit" ]; then
 				TRIGGER="phase"
 				mkdir -p "$MEMORY_DIR" 2>/dev/null
 				echo "$PHASE_ID" > "$PHASE_CACHE" 2>/dev/null
+			fi
+		fi
+	fi
+
+	# ── Trigger 4: Wrap-up phrases (UserPromptSubmit only) ──
+
+	if [ -z "$TRIGGER" ]; then
+		# Rate limit: once per session for wrap-up detection
+		WRAPUP_CACHE="/tmp/claude-memory-wrapup-${SESSION_ID}"
+		[ -f "$WRAPUP_CACHE" ] && exit 0
+
+		USER_PROMPT=$(echo "$INPUT" | jq -r '.prompt // ""' | tr '[:upper:]' '[:lower:]')
+
+		# Match wrap-up phrases (case-insensitive, anchored to avoid mid-task false positives)
+		if echo "$USER_PROMPT" | grep -qiE "(let'?s wrap up$|let'?s finish up$|i think we'?re done|that'?s it for today|that'?s all for now|i'?m wrapping up$|i'?m done for now|end of session|call it a day|that'?s everything|good stopping point|let'?s stop here)"; then
+			NEW_COUNT=$(count_new_memory)
+			if [ "$NEW_COUNT" -ge 1 ]; then
+				TRIGGER="wrapup"
+				touch "$WRAPUP_CACHE" 2>/dev/null
 			fi
 		fi
 	fi
@@ -155,7 +175,7 @@ fi
 
 [ -z "$TRIGGER" ] && exit 0
 
-# Mark session as prompted (trigger 1 only - triggers 2 and 3 have their own rate limits)
+# Mark session as prompted (trigger 1 only - triggers 2, 3, 4 have their own rate limits)
 if [ "$TRIGGER" = "phase" ]; then
 	touch "/tmp/claude-memory-review-${SESSION_ID}" 2>/dev/null
 fi
@@ -170,7 +190,10 @@ case "$TRIGGER" in
 		echo "Auto-memory has ${NEW_COUNT} new topic files since last review. Run /review-memory to review, promote, and clean up."
 		;;
 	context)
-		echo "Context is getting low and there are ${NEW_COUNT} new memory topic files to review. Run /review-memory before this session ends to avoid losing unreviewed learnings."
+		echo "Context is getting low and there are ${NEW_COUNT} new memory topic files to review. Run /review-memory --compact before this session ends to avoid losing unreviewed learnings."
+		;;
+	wrapup)
+		echo "Wrapping up with ${NEW_COUNT} unreviewed memory topic files. Run /review-memory to review, promote, and clean up before ending."
 		;;
 esac
 
