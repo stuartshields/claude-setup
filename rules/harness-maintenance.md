@@ -7,7 +7,7 @@ paths:
   - ".claude/CLAUDE.md"
   - ".claude/settings.*"
 ---
-<!-- Last updated: 2026-03-21 -->
+<!-- Last updated: 2026-03-22T11:46+11:00 -->
 
 # Harness Maintenance Protocol
 
@@ -26,7 +26,7 @@ paths:
 - **Scope rules by path** when they only apply to specific file types. Use `paths:` frontmatter.
 
 ## Rule Quality Checks
-- **Positive framing over negative.** "Use named exports" beats "Do NOT use default exports" — negation activates the unwanted concept.
+- **Positive framing over negative — with exceptions.** "Use named exports" beats "Do NOT use default exports" — negation activates the unwanted concept. **Keep negative framing for trap rules** (specific wrong actions that look right: "never flip a test assertion") **and safety rails** (severe consequences: "never raw v-html without DOMPurify"). Reframe style preferences and redundant doubles only.
 - **Anchor critical rules at top and bottom** of the file (primacy + recency bias).
 - **Check for conflicts with system prompt directives.** System prompt has higher attention weight — your rule must be specific and additive to win the conflict.
 - **Check for conflicts between rule files.** Search for contradictions (e.g., "minimal change" in one file vs "touch all necessary files" in another).
