@@ -128,6 +128,7 @@ GSD agents (planner, executor, verifier, etc.) respect the existing setup - they
 - `figma` - Figma MCP integration for design-to-code workflows
 - `claude-hud` - statusline dashboard showing model, task, directory, and context usage
 - `swift-lsp` and `rust-analyzer-lsp` - language server support for Swift and Rust projects
+- [`co2-status-line`](https://github.com/stuartshields/claude-co2-status-line) - shows energy (Wh), CO2 (g), and water (ml) estimates per session based on token usage. Uses Epoch AI and ScienceDirect research for per-token energy rates. Registered via `extraKnownMarketplaces` in `settings.json` and wraps the existing GSD statusline using `--wrap` so both outputs display together (GSD on line 1, CO2 metrics on line 2). Install with `/plugin marketplace add stuartshields/claude-co2-status-line` then `/plugin install co2-status-line@claude-co2-status-line`
 
 **MCP servers** configured in `.claude.json`:
 - `context7` - up-to-date library documentation and code examples. Used for verifying Claude Code features, skill frontmatter, and hook patterns against current docs rather than training data.
@@ -142,13 +143,13 @@ When Claude researches something externally (WebSearch, WebFetch, Context7) and 
 1. **Avoid re-researching.** Before looking something up, Claude checks SOURCES.md first - the answer may already be documented from a prior session.
 2. **Know when sources go stale.** The per-entry date records when the source was last verified, not when the decision was made. If you're revisiting a library choice 3 months later, you can see whether the research is still fresh or needs re-checking.
 
-This is a CLAUDE.md rule, not a hook or skill - it's a convention that Claude follows during normal work. I haven't seen source tracking with verification dates in other Claude Code setups.
+This is defined in [`research-and-decisions.md`](../rules/research-and-decisions.md) - an always-loaded rule that also covers Architecture Decision Records (`.planning/adr/`). ADRs capture architectural choices with context, options considered, and consequences so future sessions don't reverse decisions without understanding why they were made. I haven't seen source tracking with verification dates or structured ADRs in other Claude Code setups.
 
 ---
 
 ## Rules
 
-Rules are markdown files that load into Claude's context and shape how it behaves. Six load on every session (always-on), six load conditionally based on file paths.
+Rules are markdown files that load into Claude's context and shape how it behaves. Seven load on every session (always-on), six load conditionally based on file paths.
 
 ### Always-on rules
 
@@ -161,6 +162,7 @@ These load every session regardless of project. They define the baseline behavio
 | [`style.md`](../rules/style.md) | Tabs only, Edit tool tab handling, no console.log, clean code. | Claude defaults to spaces and leaves debug statements. The Edit tool tab handling section prevents a known Claude Code bug where Edit fails on indented lines. | ECC has language-specific style rules (TypeScript, Python, Go). Ours is language-agnostic and focused on the tab/Edit tool interaction that trips up most setups. |
 | [`dependencies.md`](../rules/dependencies.md) | Verify packages/URLs exist before referencing. Ask before adding dependencies. | Claude hallucates package names. This rule forces verification via WebSearch or `npm search` before writing an import. | I haven't found an equivalent in other setups. ECC covers dependency security in their `security` rule but not hallucination prevention. |
 | [`security.md`](../rules/security.md) | Input validation, parameterised queries, output escaping, secrets in env vars. | Baseline security patterns for every session. Lightweight - use the `security` agent for deep audits. | Trail of Bits has 35 security plugins - the community gold standard. Our rule is lighter but always-on, which means it applies even when you don't think to invoke a security review. |
+| [`research-and-decisions.md`](../rules/research-and-decisions.md) | Research source tracking (`.planning/SOURCES.md`) and Architecture Decision Records (`.planning/adr/`). | Prevents re-researching the same topics across sessions. ADRs capture why decisions were made so future sessions don't reverse them without knowing the context. | I haven't found an equivalent in other setups. Most setups track decisions in CLAUDE.md inline rather than structured records. |
 | [`staleness.md`](../rules/staleness.md) | Tracks `<!-- Last updated -->` dates across all guidance files. Flags files older than 30 days. | AI best practices evolve fast. Rules written 3 months ago may reference deprecated features or outdated patterns. This catches drift automatically. | I haven't found an equivalent in other setups. |
 
 ### Conditional rules

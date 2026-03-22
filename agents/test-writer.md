@@ -123,7 +123,7 @@ When done, report:
 - Test command used and results (pass/fail count)
 
 ## Memory
-Update your agent memory as you discover test patterns, framework quirks, common assertion approaches, and project-specific testing conventions. Check your memory before starting work - prior sessions may have documented patterns for this project.
+Update your agent memory as you discover test patterns, framework quirks, common assertion approaches, and project-specific testing conventions. Check your memory before starting work — prior sessions may have documented patterns for this project.
 
 ## Suggested Follow-up
 - Run `code-reviewer` agent on modified files for logical error checking

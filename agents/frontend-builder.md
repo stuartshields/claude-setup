@@ -51,7 +51,7 @@ You are a senior frontend engineer. You receive a specific component, page, or f
 ### Semantic HTML & Accessibility
 - Use `<button>` not `<div onClick>`. Use `<a>` for navigation. Use `<nav>`, `<main>`, `<section>`.
 - All interactive elements must be keyboard accessible.
-- All images need `alt`. All icon buttons need accessible names - prefer visible text or `aria-label` only when no visible label exists.
+- All images need `alt`. All icon buttons need accessible names — prefer visible text or `aria-label` only when no visible label exists.
 - Visible focus indicators on every interactive element.
 
 ### Responsive by Default
