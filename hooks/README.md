@@ -2,7 +2,16 @@
 
 ## Hooks
 
-> **TL;DR:** 22 hooks across 10 lifecycle events. PreToolUse hooks block bad code before it's written (stubs, console.log, space indentation). Stop hooks catch incomplete work and shortcut patterns. PostToolUse hooks track modified files, detect reasoning loops, detect available quality gates, and prompt memory review when context is low. Exit 2 blocks, exit 0 allows, exit 1 is a silent warning.
+> **TL;DR:** 22 hooks across 10 lifecycle events:
+>
+> - **Quality gates** - `check-code-quality.sh`, `project-quality-gates.sh`, `stop-quality-check.sh`. Block bad code before it's written (stubs, console.log, space indentation) and catch incomplete work at session end.
+> - **Agent guards** - `agent-guard-write-block.sh`, `agent-guard-readonly.sh`, `agent-guard-max-lines.sh`. Enforce read-only and scope limits on specific agents through PreToolUse hooks.
+> - **Loop and drift detection** - `detect-perf-degradation.sh`, `drift-review-stop.sh`, `repeated-edit-guard.sh`. Catch reasoning loops, oscillating edits, and cognitive drift before they waste context.
+> - **Memory and session lifecycle** - `memory-review-prompt.sh`, `compact-restore.sh`, `pre-compaction-preserve.sh`, `session-cleanup.sh`. Four-trigger memory review (phase completion, session start, low context, wrap-up phrases), compaction state preservation and restoration.
+> - **Tracking and observability** - `track-modified-files.sh`, `track-tasks.sh`, `hook-observability-summary.sh`. Record what changed and when for drift detection and session summaries.
+> - **Policy and notifications** - `block-git-commit.sh`, `check-unfinished-tasks.sh`, `verify-before-stop.sh`, `remind-project-claude.sh`, `stop-dispatcher.sh`, `notification-alert.sh`, `permission-notify.sh`. Commit blocking, task state warnings, CLAUDE.md reminders, and attention alerts.
+>
+> Exit 2 blocks the action, exit 0 allows it, exit 1 is a silent warning.
 
 For why each hook exists and how it compares to community patterns, see the [Component Reference](../docs/component-reference.md#hooks).
 
@@ -211,7 +220,7 @@ How to use this folder in Claude:
 | `compact-restore.sh` | `SessionStart` restore hook that reloads pre-compaction saved state. |
 | `detect-perf-degradation.sh` | `PostToolUse` + `PostToolUseFailure` hook that detects reasoning loops and error spikes. |
 | `hook-observability-summary.sh` | `PostToolUse` + `PostToolUseFailure` hook that tracks hook outcomes per session and rebuilds an aggregate summary across all sessions every 10th event. |
-| `memory-review-prompt.sh` | Three-trigger memory review: GSD phase completion (`UserPromptSubmit`), accumulated memory on session start (`SessionStart`), low context at 30% remaining (`PostToolUse`). Advisory only. |
+| `memory-review-prompt.sh` | Four-trigger memory review: GSD phase completion (`UserPromptSubmit`), accumulated memory on session start (`SessionStart`), low context at 30% remaining (`PostToolUse`), wrap-up phrases like "let's wrap up" or "I think we're done" (`UserPromptSubmit`). Low-context trigger suggests `--compact` mode. Advisory only. |
 | `drift-review-stop.sh` | `Stop` hook that catches common cognitive-drift response patterns. |
 | `notification-alert.sh` | `Notification` hook for terminal/native attention alerts. |
 | `permission-notify.sh` | `PermissionRequest` hook that plays alert when approval is needed. |

@@ -5,7 +5,12 @@ title: Rules
 
 ## Rules
 
-> **TL;DR:** 13 rule files, 7 always-loaded (~95 bullet points), 6 conditional (scoped by file type). Total instruction budget stays under ~150 with the system prompt. Rules that Claude already follows without instruction are deleted. Rules it keeps breaking get moved to hooks instead.
+> **TL;DR:** 14 rule files across 2 loading modes:
+>
+> - **Always-on** (8 files) - `debugging.md` (4-step framework, anti-loop, rebuild-vs-patch, visual/CSS bugs), `discipline.md` (complete implementations, anti-pivot, context pruning, post-compaction, spec challenge), `communication.md` (design discussion checkpoint, classify-before-acting, surface problems), `dependencies.md` (hallucination prevention, one-round verification), `security.md` (input validation, injection prevention, audit scoping), `research-and-decisions.md` (source tracking, ADRs), `staleness.md` (30-day freshness checks), `style.md` (tabs, clean code).
+> - **Conditional** (6 files, scoped by file type) - `architecture.md`, `testing.md`, `ui-ux.md`, `php-wordpress.md`, `environment.md`, `harness-maintenance.md`. Load only when working with matching files, keeping the always-on count under the ~150 ceiling (including system prompt).
+>
+> Rules Claude already follows without instruction are deleted. Rules it keeps breaking get moved to hooks instead.
 
 For what each rule does, why it exists, and how it compares to community patterns, see the [Component Reference](../docs/component-reference.md#rules).
 
@@ -45,17 +50,19 @@ These rules follow community-validated patterns for instruction compliance:
 | `style.md` | Code style guardrails (tabs-only, clean code). |
 | `testing.md` | Test-first workflow and test quality rules (failing test first, behavior-focused assertions, mock skepticism). Now scoped to code files. |
 | `ui-ux.md` | Frontend UI/UX quality rules with WCAG 2.2 AA accessibility, W3C ARIA-first guidance. |
-| `harness-maintenance.md` | Scoped to `~/.claude/` files only. Enforces external research, instruction budget, and source tracking when modifying the harness. |
+| `harness-maintenance.md` | Scoped to `~/.claude/` files only. Enforces external research, instruction budget (~100 always-on bullet ceiling), rule quality checks (positive framing, rationale for non-obvious rules, primacy/recency anchoring), and source tracking when modifying the harness. |
 | `research-and-decisions.md` | Research source tracking (`.planning/SOURCES.md`) and Architecture Decision Records (`.planning/adr/`) for structured project decisions. |
 | `staleness.md` | Tracks last-updated dates on all guidance files. Flags files older than 30 days so AI best practices stay current as models evolve. |
+| `communication.md` | When to ask vs act, design discussion checkpoint, responding to the user, surfacing problems, progress and status. |
 
 ### Always-loaded rules
 
-These 7 files load every session (~92 bullet points):
+These 8 files load every session:
 
-- `debugging.md` - 4-step framework, anti-loop protocol, hypothesis-driven investigation
-- `dependencies.md` - hallucinated package prevention, dependency hygiene
-- `discipline.md` - complete implementations, anti-pivot rules, scope control, verification
+- `debugging.md` - 4-step framework, anti-loop protocol, hypothesis-driven investigation, rebuild-vs-patch guidance, visual/CSS bug protocol
+- `dependencies.md` - hallucinated package prevention, one-round verification, dependency hygiene
+- `discipline.md` - complete implementations, anti-pivot rules, scope control, context pruning, post-compaction discipline, spec challenge, verification
+- `communication.md` - design discussion checkpoint, classify-before-acting, question-is-the-task, interview-first, surface-problems
 - `research-and-decisions.md` - research source tracking, Architecture Decision Records
 - `security.md` - input validation, injection prevention, secrets handling
 - `staleness.md` - 30-day freshness check on all guidance files, auto-updates dates on edit

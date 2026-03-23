@@ -1,7 +1,7 @@
 ---
 title: Component Reference
 ---
-<!-- Last updated: 2026-03-21 -->
+<!-- Last updated: 2026-03-23 -->
 
 # Component Reference
 
@@ -81,7 +81,7 @@ Most Claude Code setups have skills that wrap tools (Figma, Playwright) or enfor
 - [`/multi-review`](../skills/multi-review/SKILL.md) runs three review agents in parallel (maintainability, performance, security) on the same code. Each agent reviews from a different angle. The consolidated report notes conflicts when agents disagree - "perf says inline this, maintainability says extract it" - so you make the trade-off, not the agent. The three-angle parallel pattern came from Ivan's code review workflow.
 - [`/vibe-user`](../skills/vibe-user/SKILL.md) opens your app in a browser and explores it as a real user. It blocks source code reading - the whole point is a fresh perspective. You built it, so you know too much. This skill surfaces the problems you'd never notice. Adapted from Ivan's "Vibe User" technique.
 - [`/test-plan`](../skills/test-plan/SKILL.md) generates user-facing test checklists from git diff ("click submit and verify the success message") not code-facing ones ("POST /api/form returns 200"). Execute mode runs the plan via Playwright with pass/fail per scenario. Inspired by Ivan's test plan generation and browser-based execution workflow.
-- [`/review-memory`](../skills/review-memory/SKILL.md) is the manual counterpart to the memory-review hook. Loads all topic files, categorises each as promote/keep/remove, and updates the review timestamp. Ivan's reflection pattern (extracting learnings after sessions) highlighted the gap - auto-memory captures things, but nothing prompted you to review and promote them.
+- [`/review-memory`](../skills/review-memory/SKILL.md) is the manual counterpart to the memory-review hook. Full mode loads all topic files, categorises each as promote/keep/remove, and runs a post-promote contradiction check against existing rules. Compact mode (`--compact`) reads only MEMORY.md summaries for quick reviews when context is low. Ivan's reflection pattern (extracting learnings after sessions) highlighted the gap - auto-memory captures things, but nothing prompted you to review and promote them. The contradiction check was inspired by Compound Engineering's `ce:compound-refresh` skill, which checks if new learnings make older docs stale.
 
 Superpowers comes closest with its brainstorming and code review skills, but they're separate steps rather than integrated workflows, and they don't cover UX testing or memory management.
 
@@ -92,18 +92,21 @@ Most approaches to session-to-session learning fall into two camps: manual refle
 This setup treats memory as a lifecycle with three stages:
 
 1. **Capture** - auto-memory records corrections and patterns as they happen during work
-2. **Prompt** - the `memory-review-prompt.sh` hook fires at natural breakpoints: GSD phase completion, session start when 3+ new topic files have accumulated, or when context drops to 30% remaining (reading the context bridge file written by the statusline hook - the same mechanism the GSD context monitor uses at its 35%/25% thresholds)
-3. **Review** - the `/review-memory` skill loads all topic files, categorises each as Promote (move to CLAUDE.md/rules/skills), Keep, or Remove, checks for duplicates before promoting, and updates the review timestamp
+2. **Prompt** - the `memory-review-prompt.sh` hook fires at four natural breakpoints: GSD phase completion, session start when 3+ new topic files have accumulated, context dropping to 30% remaining (suggests `--compact` mode), and wrap-up phrases like "let's wrap up" or "I think we're done"
+3. **Review** - the `/review-memory` skill has two modes. Full mode loads all topic files, categorises each as Promote/Keep/Remove, checks for duplicates, and runs a post-promote contradiction check (scanning existing rules and remaining memories for conflicts with what was just promoted). Compact mode reads only MEMORY.md summaries for quick decisions when context is tight
+4. **Contradiction check** - after promoting a memory to a rule file, the skill greps the destination and other rule files for overlap or conflicts. This catches cases where a promoted rule duplicates or contradicts existing guidance - the same problem Compound Engineering's `ce:compound-refresh` solves for solution docs
 
 Permanent learnings get promoted to CLAUDE.md or rules where they're explicit and version-controlled. The memory directory stays lean. The 200-line auto-loaded limit on MEMORY.md means noise has a real cost - every stale entry pushes out something useful.
 
-### Design Discussion Checkpoint
+### Communication discipline
 
-Claude's CLAUDE.md has a "Plan First" rule: if the user asks to investigate, report and wait. If the user asks to fix or implement, execute directly. That works well for clear-cut requests. Where it breaks down is design discussions - you're asking questions about an approach, exploring trade-offs, and Claude reads your agreement with a direction as "go build it."
+Claude's default behaviour has two failure modes in conversations: jumping to implementation during design discussions, and silently retrying failed operations instead of telling you what happened. The [`communication.md`](../rules/communication.md) rule addresses both.
 
-The Design Discussion Checkpoint rule addresses this. When you've been asking questions about how something works, what the trade-offs are, or what alternatives exist, Claude treats agreement as "I like this direction" not "start implementing." After the discussion naturally concludes, it asks "Ready to build?" once. If you say no, it continues the discussion without asking again until you give a clear build signal ("build it", "go ahead", "start").
+The Design Discussion Checkpoint is the centrepiece. When you've been asking questions about an approach, exploring trade-offs, or reviewing alternatives, Claude treats agreement as "I like this direction" not "start implementing." After the discussion naturally concludes, it asks "Ready to build?" once. If you say no, it continues without asking again until you give a clear build signal ("build it", "go ahead", "start"). This came from a real problem during this setup's development - Claude jumped to writing code mid-conversation when the design was still being discussed.
 
-This came from a real problem during this setup's development - Claude jumped to writing code mid-conversation when the design was still being discussed. The community handles the plan-to-implementation transition with explicit plan approval gates (everything-claude-code's `/plan` command requires a "yes" before execution), but nothing addresses the informal conversation case where there's no formal plan to approve.
+The rule also covers: classify-before-acting (investigate = read-only, fix = execute), question-is-the-task (answer and stop, don't springboard into action), words-before-tools on failure (explain what happened before retrying), and interview-first when ambiguous. These were split out from discipline.md to keep discipline focused on implementation behaviour and communication focused on interaction behaviour.
+
+The community handles the plan-to-implementation transition with explicit plan approval gates (everything-claude-code's `/plan` command requires a "yes" before execution), but nothing addresses the informal conversation case where there's no formal plan to approve.
 
 ### Always-on safety nets
 
@@ -111,7 +114,9 @@ Some protections only work if you remember to invoke them. This setup has severa
 
 - **Staleness detection** flags rule files older than 30 days. AI best practices evolve fast - a rule referencing deprecated features teaches Claude the wrong patterns.
 - **Dependency hallucination prevention** forces Claude to verify package names and URLs exist before referencing them. I haven't seen this pattern in other community setups.
-- **Discipline rules** (anti-pivot, scope control, Design Discussion Checkpoint) prevent Claude's most common failure modes without needing a specific skill or agent invocation.
+- **Spec challenge** (discipline.md) flags contradictory, ambiguous, or impossible requirements before building. A bad spec produces confidently wrong output that passes all your gates. The [`feasibility-check`](../agents/feasibility-check.md) agent extends this mechanically - it extracts what a spec assumes about the codebase (fields, endpoints, dependencies, patterns), greps for each assumption, and reports CONFIRMED/NOT FOUND/CONTRADICTED. Nobody else has pre-build spec assumption checking. Pimzino's spec-workflow validates spec format (are requirements testable?), not spec correctness (does this field actually exist?).
+- **Builder escalation** - all four builder agents (backend, frontend, test-writer, wp) stop and report after 2 failed approaches instead of burning remaining turns on variations of a failing approach. Superpowers has status codes (DONE/BLOCKED/NEEDS_CONTEXT) for this. Ours is simpler but covers the main case.
+- **Discipline rules** (anti-pivot, scope control, context pruning, post-compaction discipline) prevent Claude's most common failure modes without needing a specific skill or agent invocation.
 
 ### WordPress depth
 
@@ -149,7 +154,7 @@ This is defined in [`research-and-decisions.md`](../rules/research-and-decisions
 
 ## Rules
 
-Rules are markdown files that load into Claude's context and shape how it behaves. Seven load on every session (always-on), six load conditionally based on file paths.
+Rules are markdown files that load into Claude's context and shape how it behaves. Eight load on every session (always-on), six load conditionally based on file paths.
 
 ### Always-on rules
 
@@ -157,13 +162,14 @@ These load every session regardless of project. They define the baseline behavio
 
 | Rule | What it does | Why it exists | Community comparison |
 |------|-------------|---------------|---------------------|
-| [`debugging.md`](../rules/debugging.md) | 4-step framework: Reproduce, Isolate, Fix, Validate. Anti-loop protocol (stop after 2 failed attempts). | Without this, Claude jumps straight to fixing without confirming the root cause. The anti-loop protocol prevents it from trying the same broken approach repeatedly. | Superpowers has a `systematic-debugging` skill with similar 4-phase approach. Ours is always-loaded so it applies even without invoking a skill. |
-| [`discipline.md`](../rules/discipline.md) | Scope control, anti-pivot rules, complete implementations, regression awareness, Design Discussion Checkpoint. | The strongest rule file. Prevents Claude from pivoting to easier approaches, skipping hard parts, making bonus changes, or jumping to implementation during design discussions. | I haven't found an equivalentcovers this breadth. ECC has a `coding-style` rule that partially overlaps. The anti-pivot and Design Discussion Checkpoint patterns are unique to this setup. |
+| [`debugging.md`](../rules/debugging.md) | 4-step framework: Reproduce, Isolate, Fix, Validate. Anti-loop protocol (stop after 2 failed attempts). Rebuild-vs-patch guidance. Visual/CSS bug protocol. Confirmation bias prevention. | Without this, Claude jumps straight to fixing without confirming the root cause. The anti-loop protocol prevents it from trying the same broken approach repeatedly. The rebuild rule acknowledges that sometimes starting fresh is faster than patching - research shows an incorrect first hypothesis biases you against correct solutions found later. | Superpowers has a `systematic-debugging` skill with similar 4-phase approach. Ours is always-loaded so it applies even without invoking a skill. The write-delete-rewrite detection and visual/CSS bug protocol are unique to this setup. |
+| [`discipline.md`](../rules/discipline.md) | Complete implementations, anti-pivot rules, scope control, context pruning (5-read limit, no re-reads), post-compaction discipline, spec challenge, regression awareness. | The strongest rule file. Prevents Claude from pivoting to easier approaches, skipping hard parts, making bonus changes, re-reading files already in context, or building against a bad spec. Post-compaction discipline prevents the re-read loop that wastes context after compression. | I haven't found an equivalent that covers this breadth. ECC has a `coding-style` rule that partially overlaps. The anti-pivot, spec challenge, and post-compaction discipline patterns are unique to this setup. |
 | [`style.md`](../rules/style.md) | Tabs only, Edit tool tab handling, no console.log, clean code. | Claude defaults to spaces and leaves debug statements. The Edit tool tab handling section prevents a known Claude Code bug where Edit fails on indented lines. | ECC has language-specific style rules (TypeScript, Python, Go). Ours is language-agnostic and focused on the tab/Edit tool interaction that trips up most setups. |
-| [`dependencies.md`](../rules/dependencies.md) | Verify packages/URLs exist before referencing. Ask before adding dependencies. | Claude hallucates package names. This rule forces verification via WebSearch or `npm search` before writing an import. | I haven't found an equivalent in other setups. ECC covers dependency security in their `security` rule but not hallucination prevention. |
+| [`dependencies.md`](../rules/dependencies.md) | Verify packages/URLs exist before referencing. One-round verification (search once, don't try name variations). Ask before adding dependencies. | Claude hallucates package names - "sounds right" is the #1 source. This rule forces verification via WebSearch or `npm search` before writing an import, and limits it to one search round to prevent spiralling into alternative packages without asking. | I haven't found an equivalent in other setups. ECC covers dependency security in their `security` rule but not hallucination prevention. |
 | [`security.md`](../rules/security.md) | Input validation, parameterised queries, output escaping, secrets in env vars. | Baseline security patterns for every session. Lightweight - use the `security` agent for deep audits. | Trail of Bits has 35 security plugins - the community gold standard. Our rule is lighter but always-on, which means it applies even when you don't think to invoke a security review. |
 | [`research-and-decisions.md`](../rules/research-and-decisions.md) | Research source tracking (`.planning/SOURCES.md`) and Architecture Decision Records (`.planning/adr/`). | Prevents re-researching the same topics across sessions. ADRs capture why decisions were made so future sessions don't reverse them without knowing the context. | I haven't found an equivalent in other setups. Most setups track decisions in CLAUDE.md inline rather than structured records. |
 | [`staleness.md`](../rules/staleness.md) | Tracks `<!-- Last updated -->` dates across all guidance files. Flags files older than 30 days. | AI best practices evolve fast. Rules written 3 months ago may reference deprecated features or outdated patterns. This catches drift automatically. | I haven't found an equivalent in other setups. |
+| [`communication.md`](../rules/communication.md) | Design discussion checkpoint, classify-before-acting, question-is-the-task, words-before-tools on failure, interview-first when ambiguous. | Prevents Claude from jumping to implementation during design discussions, silently retrying failed operations, or springboarding from answers into unrequested actions. Split from discipline.md to separate interaction behaviour from implementation behaviour. | ECC's `/plan` command requires explicit approval before execution. Ours handles the informal case where there's no formal plan to approve. |
 
 ### Conditional rules
 
@@ -261,6 +267,7 @@ Agents are specialist subagents with restricted tools, model overrides, and scop
 | [`quick-edit`](../agents/quick-edit.md) | Fast haiku-based editor for trivial changes under 50 lines. Hooks prevent scope creep. | Speed for small changes. Escalates to sonnet if the task is too complex. | I haven't found an equivalent in other setups. |
 | [`frontend-builder`](../agents/frontend-builder.md) | Implements frontend components with full fidelity. Designed for parallel execution. | Build multiple components simultaneously in separate worktrees. | Vercel skills cover patterns. I haven't found an equivalentas a builder agent. |
 | [`backend-builder`](../agents/backend-builder.md) | Implements API routes, database schemas, server logic. Designed for parallel execution. | Same parallel pattern as frontend-builder, for backend work. | I haven't found an equivalent in other setups. |
+| [`feasibility-check`](../agents/feasibility-check.md) | Pre-build spec assumption checker. Extracts what a spec assumes about the codebase (fields, endpoints, dependencies, patterns), greps for each one, reports CONFIRMED/NOT FOUND/CONTRADICTED. | Catches bad specs before they produce confidently wrong output. The weak link is assumption extraction (the model might miss implicit assumptions), but the verification step is mechanical. | Nobody has this. Pimzino's spec-workflow validates spec format, not spec correctness. Superpowers has brainstorm approval but no codebase cross-reference. |
 
 ### Review agents
 
@@ -295,7 +302,7 @@ Skills are reusable task templates - structured guidance that the main Claude se
 | [`brainstorm`](../skills/brainstorm/SKILL.md) | Interviews you one question at a time, proposes 2-3 approaches with trade-offs, writes a discovery brief, runs a spec review loop (max 3 iterations). | Stops Claude from jumping to implementation before understanding the problem. The spec review catches gaps you glossed over. | Superpowers' `brainstorming` (65K installs) is the standard. We adapted their 9-step process to 6 steps, keeping the interview and spec review loop. |
 | [`test-plan`](../skills/test-plan/SKILL.md) | Generate mode: creates user-facing test checklists from git diff. Execute mode: runs the plan via Playwright with PASS/FAIL/BLOCKED per scenario. | Test scenarios describe what a user does, not what the code does. Bridges the gap between code tests (test-writer agent) and user acceptance. | I haven't found an equivalentfor generating checklists from diffs. ECC's `/tdd` and Superpowers' `test-driven-development` focus on code-level tests. |
 | [`vibe-user`](../skills/vibe-user/SKILL.md) | Opens an app in Playwright, explores as a real user. Blocks source code reading. Reports UX findings per page with top 3 improvements. | You built it, so you know too much. This skill surfaces problems you wouldn't notice because you're too close to the code. | I haven't found an equivalent in other setups. Anthropic's `webapp-testing` and Vercel's `web-design-guidelines` are code-focused, not user-focused. |
-| [`review-memory`](../skills/review-memory/SKILL.md) | Loads all auto-memory files, categorises each as Promote/Keep/Remove, checks for duplicates, updates review timestamp. | Auto-memory accumulates noise. This skill helps you promote permanent learnings to CLAUDE.md/rules/skills and clean up the rest. | ECC uses session auto-save. `claude-mem` does automatic capture. Nobody has guided review with promote/keep/remove categorisation. |
+| [`review-memory`](../skills/review-memory/SKILL.md) | Two modes: full mode loads all memory files, categorises as Promote/Keep/Remove, runs a post-promote contradiction check against existing rules. Compact mode (`--compact`) reads only MEMORY.md summaries for low-context sessions. Checks for duplicates, updates review timestamp. | Auto-memory accumulates noise. This skill helps you promote permanent learnings to CLAUDE.md/rules/skills and clean up the rest. The contradiction check catches cases where a promoted rule conflicts with or supersedes existing guidance. | ECC uses session auto-save. `claude-mem` does automatic capture. Compound Engineering has `ce:compound-refresh` for doc staleness - inspired our contradiction check. Nobody else has guided review with promote/keep/remove categorisation. |
 
 ### Tool skills
 
