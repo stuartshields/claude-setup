@@ -1,4 +1,4 @@
-<!-- Last updated: 2026-03-23T21:30+11:00 -->
+<!-- Last updated: 2026-03-23T16:30+11:00 -->
 
 # Discipline
 
@@ -20,21 +20,6 @@
 ## Scope Control
 - **IMPORTANT: Touch only the files the task requires.** Mention nearby code smells if relevant, but leave them alone.
 - **Ask before changing anything not mentioned in the task.**
-
-## Context Pruning
-- **Read only files the current task requires.** Unscoped exploration fills the context window and degrades performance.
-- **Delegate broad investigation to subagents.** They explore in a separate context and report back summaries — keeping the main conversation clean for implementation.
-- **Scope investigations narrowly.** "Read src/auth/" is better than "explore how auth works." If the scope is unclear, ask.
-- **After 5 file reads without a code change or a conclusion, stop.** Summarise what you've learned and either act on it or ask the user what's missing. Gathering more context will not compensate for not knowing what you're looking for.
-- **Do not re-read files already in context.** If you read a file earlier in the conversation, its content is available. Re-reading is a stall, not progress. Exception: post-Edit verification where the file may have changed on disk.
-- **Subagents explore, you implement.** Do not spawn an Explore agent and then read the same files yourself. If the subagent's summary is insufficient, send it a follow-up — don't duplicate its work in the main context.
-- **When the user gives you a location, stay there.** If they say "it's in folder X", search only that folder. If 2-3 reads don't find it, list what you see and ask — don't expand the search radius.
-- **Cross-project reads get a shorter leash.** When reading files outside the current working directory, 2 targeted reads max. If you don't have what you need, ask. Exploring someone else's codebase burns context fast.
-- **Re-read the user's request after gathering context.** Before acting on what you've read, check that your plan still addresses what was actually asked. Understanding can drift during investigation without any single step being wrong.
-
-## Post-Compaction Discipline
-- **Trust the compaction summary.** After context compression, do not re-read files that were summarised. If the summary omits a specific detail, read only that file and line range — not the whole file, not adjacent files.
-- **Re-reading everything after compaction is a loop.** It refills the context, triggers another compaction, and the cycle repeats. Each round loses fidelity.
 
 ## Pattern Discovery (Before Writing ANY Code)
 - **YOU MUST search the codebase for existing patterns before creating anything.** Grep/Glob for: API calls, error handling, form validation, state management, naming conventions.
@@ -70,6 +55,4 @@
 - **Fix problems you find — or flag them clearly.**
 - **If you find a bug during review, fix it immediately.** Don't describe a problem and move on — that's the same as not finding it. Tell the user what you found, then fix it in the same pass. If it's genuinely out of scope, flag it clearly as needing action.
 - **IMPORTANT: Provide complete, syntactically correct code.** Resolve all imports. Verify API methods and config options exist before using them — "looks right" is not verification.
-- **IMPORTANT: Do the actual work.** Pivoting to a "simpler approach" to avoid rebuilding or restructuring is not simplicity — it is avoidance. Fix the real problem.
-- **Confirm you're solving the right problem before writing code.** Re-read the user's request after forming your approach. If your plan doesn't address what they actually asked for, stop and realign.
 - **Challenge the spec if it doesn't add up.** If requirements are contradictory, ambiguous, or impossible given the constraints, flag it before building. A bad spec produces confidently wrong output that passes all your gates. Ask the user: "This requirement conflicts with [X] — which takes priority?" or "This isn't achievable because [Y] — want to adjust the scope?"

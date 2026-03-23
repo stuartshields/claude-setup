@@ -1,4 +1,4 @@
-<!-- Last updated: 2026-03-23T10:30+11:00 -->
+<!-- Last updated: 2026-03-23T16:30+11:00 -->
 
 # Debugging & Investigation
 
@@ -35,12 +35,6 @@
 - **Context pollution is real.** After 2 failed corrections in the same conversation, the context is polluted with wrong approaches. Recommend `/clear` and restate with lessons learned.
 - **Watch for write-delete-rewrite.** If you write code, delete or revert it, then write substantially the same code again — you are oscillating, not iterating. The context contains contradictory constraints. Stop, identify which constraints conflict, and surface the conflict to the user.
 - **Reverting your own change is a failed attempt.** Count it toward the 2-attempt limit even if no test ran. Writing code and undoing it means the approach was wrong — varying the same idea will not fix it.
-
-## Visual / CSS Bugs
-- **You cannot see rendered output.** Do not trace rendering pipelines in your head — you will always be guessing.
-- **One-round proposal.** For visual bugs: (1) identify the most likely CSS/DOM cause from the code, (2) propose the fix with your reasoning, (3) ask the user to verify. If wrong, ask what they see — don't theorize further.
-- **Screenshots are your only ground truth.** Study what the screenshot shows before reading code. The visual symptom narrows the search space more than tracing call chains.
-- **Prefer CSS-level fixes over widget/DOM workarounds.** CSS properties (border, padding, background) apply uniformly across lines and states. Widget-level fixes (character rendering, inline spans) are fragile across fonts, line heights, and empty lines.
 
 ## Time-Box Root Cause Analysis
 - **Check memory files and prior notes FIRST.** Start with documented untried approaches.

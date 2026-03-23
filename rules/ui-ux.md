@@ -1,25 +1,7 @@
 ---
-paths:
-  # JS/React/Vue
-  - "**/*.vue"
-  - "**/*.jsx"
-  - "**/*.tsx"
-  - "**/*.svelte"
-  - "**/*.css"
-  - "**/*.scss"
-  - "**/*.html"
-  - "**/components/**"
-  - "**/views/**"
-  - "**/pages/**"
-  # PHP/WordPress templates
-  - "**/template-parts/**"
-  - "**/templates/**"
-  - "**/theme/**"
-  - "**/themes/**"
-  - "**/blocks/**"
-  - "**/patterns/**"
+paths: "**/*.vue,**/*.jsx,**/*.tsx,**/*.svelte,**/*.css,**/*.scss,**/*.html,**/components/**,**/views/**,**/pages/**,**/template-parts/**,**/templates/**,**/theme/**,**/themes/**,**/blocks/**,**/patterns/**"
 ---
-<!-- Last updated: 2026-03-22T11:46+11:00 -->
+<!-- Last updated: 2026-03-23T16:30+11:00 -->
 
 # UI/UX & Accessibility
 
@@ -40,3 +22,9 @@ paths:
 - Use "Empty States" and "Loading Skeletons" instead of blank screens.
 - Implement toast notifications or inline feedback for user actions.
 - Avoid pure `#000` or `#FFF`. Use "Rich Grays" (e.g., slate-900).
+
+## Visual / CSS Bugs
+- **You cannot see rendered output.** Do not trace rendering pipelines in your head — you will always be guessing.
+- **One-round proposal.** For visual bugs: (1) identify the most likely CSS/DOM cause from the code, (2) propose the fix with your reasoning, (3) ask the user to verify. If wrong, ask what they see — don't theorize further.
+- **Screenshots are your only ground truth.** Study what the screenshot shows before reading code. The visual symptom narrows the search space more than tracing call chains.
+- **Prefer CSS-level fixes over widget/DOM workarounds.** CSS properties (border, padding, background) apply uniformly across lines and states. Widget-level fixes (character rendering, inline spans) are fragile across fonts, line heights, and empty lines.

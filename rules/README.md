@@ -1,14 +1,14 @@
 ---
 title: Rules
 ---
-<!-- Last updated: 2026-03-23T15:30+11:00 -->
+<!-- Last updated: 2026-03-23T16:30+11:00 -->
 
 ## Rules
 
-> **TL;DR:** 14 rule files across 2 loading modes:
+> **TL;DR:** 15 rule files across 2 loading modes (plus 1 reference template):
 >
-> - **Always-on** (8 files) - `debugging.md` (4-step framework, anti-loop, rebuild-vs-patch, visual/CSS bugs), `discipline.md` (complete implementations, anti-pivot, context pruning, post-compaction, spec challenge), `communication.md` (design discussion checkpoint, classify-before-acting, surface problems), `dependencies.md` (hallucination prevention, one-round verification), `security.md` (input validation, injection prevention, audit scoping), `research-and-decisions.md` (source tracking, ADRs), `staleness.md` (30-day freshness checks), `style.md` (tabs, clean code).
-> - **Conditional** (6 files, scoped by file type) - `architecture.md`, `testing.md`, `ui-ux.md`, `php-wordpress.md`, `environment.md`, `harness-maintenance.md`. Load only when working with matching files, keeping the always-on count under the ~150 ceiling (including system prompt).
+> - **Always-on** (9 files) - `debugging.md` (4-step framework, anti-loop, rebuild-vs-patch), `discipline.md` (complete implementations, anti-pivot, scope control, spec challenge), `context-management.md` (context pruning, post-compaction discipline, 5-read limit, subagent delegation), `communication.md` (design discussion checkpoint, classify-before-acting, surface problems), `dependencies.md` (hallucination prevention, one-round verification), `security.md` (input validation, injection prevention, audit scoping), `research-and-decisions.md` (source tracking, ADRs), `staleness.md` (30-day freshness checks), `style.md` (tabs, clean code).
+> - **Conditional** (6 files, scoped by file type) - `architecture.md`, `testing.md`, `ui-ux.md` (includes visual/CSS bug protocol), `php-wordpress.md`, `environment.md`, `harness-maintenance.md`. Load only when working with matching files, keeping the always-on count under the ~150 ceiling (including system prompt).
 >
 > Rules Claude already follows without instruction are deleted. Rules it keeps breaking get moved to hooks instead.
 
@@ -43,13 +43,14 @@ These rules follow community-validated patterns for instruction compliance:
 | `architecture.md` | Modular-first structure guidance (200-line rule, atomic responsibility, monorepo boundaries). |
 | `debugging.md` | Root-cause-first debugging protocol: validate one hypothesis at a time, trace full data flow, no speculative fixes. |
 | `dependencies.md` | Blocks hallucinated packages/URLs and enforces dependency hygiene before adding or referencing anything external. |
+| `context-management.md` | Context pruning (5-read limit, subagent delegation, stay-where-user-points-you) and post-compaction discipline (trust summaries, don't re-read loop). |
 | `discipline.md` | Scope control, anti-overengineering rules, complete implementation checks, and regression awareness guardrails. |
 | `environment.md` | Configuration-file handling rules for build/tooling/env files (`tsconfig`, `.env`, Docker, bundler configs, etc.). |
 | `php-wordpress.md` | WordPress/PHP-specific development standards and conventions for WP projects. |
 | `security.md` | Always-on security baseline: input validation, SQL injection prevention, XSS prevention, secret handling. |
 | `style.md` | Code style guardrails (tabs-only, clean code). |
 | `testing.md` | Test-first workflow and test quality rules (failing test first, behavior-focused assertions, mock skepticism). Now scoped to code files. |
-| `ui-ux.md` | Frontend UI/UX quality rules with WCAG 2.2 AA accessibility, W3C ARIA-first guidance. |
+| `ui-ux.md` | Frontend UI/UX quality rules with WCAG 2.2 AA accessibility, W3C ARIA-first guidance. Includes visual/CSS bug protocol (moved from debugging.md). |
 | `harness-maintenance.md` | Scoped to `~/.claude/` files only. Enforces external research, instruction budget (~100 always-on bullet ceiling), rule quality checks (positive framing, rationale for non-obvious rules, primacy/recency anchoring), and source tracking when modifying the harness. |
 | `research-and-decisions.md` | Research source tracking (`.planning/SOURCES.md`) and Architecture Decision Records (`.planning/adr/`) for structured project decisions. |
 | `staleness.md` | Tracks last-updated dates on all guidance files. Flags files older than 30 days so AI best practices stay current as models evolve. |
@@ -57,11 +58,12 @@ These rules follow community-validated patterns for instruction compliance:
 
 ### Always-loaded rules
 
-These 8 files load every session:
+These 9 files load every session:
 
-- `debugging.md` - 4-step framework, anti-loop protocol, hypothesis-driven investigation, rebuild-vs-patch guidance, visual/CSS bug protocol
+- `context-management.md` - context pruning (5-read limit, subagent delegation, cross-project leash), post-compaction discipline
+- `debugging.md` - 4-step framework, anti-loop protocol, hypothesis-driven investigation, rebuild-vs-patch guidance
 - `dependencies.md` - hallucinated package prevention, one-round verification, dependency hygiene
-- `discipline.md` - complete implementations, anti-pivot rules, scope control, context pruning, post-compaction discipline, spec challenge, verification
+- `discipline.md` - complete implementations, anti-pivot rules, scope control, spec challenge, verification
 - `communication.md` - design discussion checkpoint, classify-before-acting, question-is-the-task, interview-first, surface-problems
 - `research-and-decisions.md` - research source tracking, Architecture Decision Records
 - `security.md` - input validation, injection prevention, secrets handling

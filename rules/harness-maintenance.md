@@ -1,11 +1,5 @@
 ---
-paths:
-  - ".claude/rules/**"
-  - ".claude/hooks/**"
-  - ".claude/agents/*.md"
-  - ".claude/skills/**"
-  - ".claude/CLAUDE.md"
-  - ".claude/settings.*"
+paths: ".claude/rules/**,.claude/hooks/**,.claude/agents/*.md,.claude/skills/**,.claude/CLAUDE.md,.claude/settings.*"
 ---
 <!-- Last updated: 2026-03-22T11:46+11:00 -->
 
