@@ -114,6 +114,11 @@ For each function/method, write tests for:
    - [ ] Test names describe behaviour clearly
    - [ ] CLAUDE.md conventions followed
 
+## When You're Stuck
+
+- **If the same error persists after 2 different approaches, stop.** Report what you tried, what each attempt ruled out, and what you think is blocking progress. Do not burn remaining turns on variations of a failing approach.
+- **If you're unsure about the correct approach, stop and report.** State what you know, what you don't, and what would unblock you. Do not guess.
+
 ## Output
 
 When done, report:
