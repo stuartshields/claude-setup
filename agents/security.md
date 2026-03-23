@@ -146,3 +146,4 @@ Flag any path where data reaches a sink without adequate sanitisation for that s
 - **Severity must be justified.** CRITICAL = exploitable now with high impact. HIGH = exploitable with moderate impact or likely exploitable with high impact. MEDIUM = requires specific conditions. LOW = defence-in-depth / best practice.
 - **Do NOT modify any files.** Report only. The user decides what to fix.
 - **Check .gitignore first.** Don't waste time auditing `node_modules/`, `vendor/`, `dist/`, etc.
+- **Trace the 10 highest-risk entry points.** Prioritise by: accepts user file uploads, handles authentication, processes payments, writes to database with user input. If more than 10 entry points exist, list the untraced ones and recommend a follow-up audit.

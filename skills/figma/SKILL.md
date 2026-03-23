@@ -79,3 +79,4 @@ If the project uses Code Connect mappings:
 - **If the user says it doesn't look right, they're right.** Don't explain why the CSS "should" work. Look at what's actually rendering. Call `get_screenshot` again and compare.
 - **MCP output is a reference, not final code.** Translate to the project's conventions, framework, and existing components.
 - **Break large designs into smaller sections.** Large selections slow the tools down or produce incomplete responses.
+- **Visual iteration limit: 3 rounds.** After 3 compare-fix-screenshot cycles without achieving parity, stop and report: what matches, what doesn't, and what you've tried. The remaining deltas may need manual inspection or are platform-specific rendering differences.

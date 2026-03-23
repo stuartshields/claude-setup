@@ -79,3 +79,4 @@ Generated: <date>
 - **Include the unhappy path.** For every form, test with empty fields, invalid data, and duplicate submissions. For every action, test what happens when it fails.
 - **In execute mode, follow steps literally.** Do not improvise or skip steps. If a step is ambiguous, record it as BLOCKED with a note about what was unclear.
 - **Use `browser_snapshot` first** to understand page structure before interacting. Use `browser_take_screenshot` to capture evidence of failures.
+- **Limit file reads to 15 files.** If the diff touches more than 15 files, group by feature area and generate scenarios from the diff summary and the 15 most relevant files. Tell the user which files were skipped.

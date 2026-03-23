@@ -122,3 +122,4 @@ Update your agent memory as you discover architectural patterns, technology choi
 - Don't present more than 4 options (decision fatigue)
 - Don't ignore existing CLAUDE.md decisions
 - Don't recommend migration for its own sake  - the current approach needs a concrete problem
+- Don't spend more than 8 turns on research (Phase 1 + Phase 2 combined). If you haven't gathered enough data in 8 turns, produce the decision document with what you have and flag open questions that need more research.

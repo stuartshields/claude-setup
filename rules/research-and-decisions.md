@@ -1,4 +1,4 @@
-<!-- Last updated: 2026-03-23T15:30+11:00 -->
+<!-- Last updated: 2026-03-23T16:30+11:00 -->
 
 # Research Sources & Decision Records
 
@@ -8,7 +8,7 @@
 - **Check existing sources first.** Before any WebSearch/WebFetch, check if `.planning/SOURCES.md` exists in the project root. Read it — the answer may already be documented from a prior session.
 
 ### During Research
-- **Track external research per project.** When WebSearch/WebFetch informs a decision (library choice, architecture pattern, bug fix, API usage), append the source to `.planning/SOURCES.md` in the project root.
+- **Track external research per project.** When WebSearch/WebFetch informs a decision (library choice, architecture pattern, bug fix, API usage, bug report workaround), append the source to `.planning/SOURCES.md` in the project root. This includes research done during debugging - if a GitHub issue or community post changes your approach, log it immediately, not after the fix.
 - **Create `.planning/SOURCES.md` on first use.** Group entries by topic.
 - **Entry format:** `- [Title](URL) - what decision/file it influenced (YYYY-MM-DD)`
 	- The date is when the source was last verified, not when the decision was made.
@@ -30,32 +30,7 @@
 ### File Format
 - **Filename:** `NNNN-short-title.md` (e.g. `0001-use-css-first-tailwind.md`)
 - **Number sequentially.** Check the highest existing number and increment.
-- **Template:**
-
-```markdown
-# NNNN. Short Title
-
-**Date:** YYYY-MM-DD
-**Status:** accepted | superseded by [NNNN](NNNN-*.md) | deprecated
-
-## Context
-What is the problem or decision we're facing? Why does it matter now?
-
-## Options Considered
-1. **Option A** — brief description
-   - Pro: ...
-   - Con: ...
-2. **Option B** — brief description
-   - Pro: ...
-   - Con: ...
-
-## Decision
-What we chose and why. Be specific about the deciding factor.
-
-## Consequences
-What changes as a result. What trade-offs we're accepting.
-Link to SOURCES.md entries if research informed this decision.
-```
+- **Template:** Copy `~/.claude/templates/adr-template.md` as your starting point.
 
 ### Maintaining ADRs
 - **Never edit an accepted ADR.** If a decision changes, write a new ADR that supersedes it and update the old one's status.

@@ -1,11 +1,18 @@
 ---
 title: Agents
 ---
-<!-- Last updated: 2026-03-21 -->
+<!-- Last updated: 2026-03-23 -->
 
 ## Agents
 
-> **TL;DR:** 17 custom agents for specific domains. Read-only agents (code-reviewer, a11y, security) are structurally blocked from writing files. Builder agents (frontend, backend) run in worktrees with `maxTurns: 30`. The architect, code-reviewer, and test-writer persist memory across sessions. The simplify agent runs on sonnet (not haiku) because proving behavioral equivalence needs deeper reasoning.
+> **TL;DR:** 18 custom agents across four categories:
+>
+> - **Read-only agents** - `code-reviewer`, `a11y`, `security`, `perf`, `simplify`, `ui-review`, `migration-reviewer`, `cleanup`, `feasibility-check`, `wp-reviewer`, `wp-perf`, `wp-security`. Structurally blocked from writing files through tool restrictions (no Write/Edit in frontmatter). `code-reviewer` and `wp-reviewer` have additional hook enforcement via `agent-guard-write-block.sh`.
+> - **Builder agents** - `backend-builder`, `frontend-builder`, `test-writer`, `wp`. Run in worktrees with `maxTurns: 30`. All four escalate after 2 failed approaches instead of looping ("When You're Stuck" section).
+> - **Research agents** - `architect` (opus, 25 turns, 8-turn research limit), `feasibility-check` (sonnet, 20 turns, pre-build spec assumption checker).
+> - **Fast agents** - `quick-edit` (haiku, 10 turns, 50-line limit, escalates to sonnet when task is too complex).
+>
+> `architect`, `code-reviewer`, and `test-writer` persist memory across sessions. `simplify` runs on sonnet (not haiku) because proving behavioral equivalence needs deeper reasoning.
 
 For what each agent does, why it exists, and how it compares to community alternatives, see the [Component Reference](../docs/component-reference.md#agents).
 
@@ -208,6 +215,7 @@ How to use this folder in Claude:
 | `wp-perf.md` | WordPress performance specialist (queries, caching, CWV, DB optimization). | |
 | `wp-reviewer.md` | Read-only WordPress code reviewer (PHP/hooks/queries/REST/security standards). | read-only, lean context |
 | `wp-security.md` | WordPress security specialist (sanitization, escaping, nonce/auth/REST risk). | `model: opus` |
+| `feasibility-check.md` | Pre-build spec assumption checker. Extracts what a spec assumes about the codebase, greps for each assumption, reports CONFIRMED/NOT FOUND/CONTRADICTED. | read-only |
 
 `references/` contains supporting reference docs used by WordPress-specialized agents.
 

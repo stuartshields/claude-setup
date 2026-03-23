@@ -1,11 +1,5 @@
 ---
-paths:
-  - ".claude/rules/**"
-  - ".claude/hooks/**"
-  - ".claude/agents/*.md"
-  - ".claude/skills/**"
-  - ".claude/CLAUDE.md"
-  - ".claude/settings.*"
+paths: ".claude/rules/**,.claude/hooks/**,.claude/agents/*.md,.claude/skills/**,.claude/CLAUDE.md,.claude/settings.*"
 ---
 <!-- Last updated: 2026-03-22T11:46+11:00 -->
 
@@ -30,6 +24,7 @@ paths:
 - **Anchor critical rules at top and bottom** of the file (primacy + recency bias).
 - **Check for conflicts with system prompt directives.** System prompt has higher attention weight — your rule must be specific and additive to win the conflict.
 - **Check for conflicts between rule files.** Search for contradictions (e.g., "minimal change" in one file vs "touch all necessary files" in another).
+- **Include rationale when the reason is non-obvious.** A brief "why" helps the model know when to apply the rule — not just what to do. Skip rationale when the reason is self-evident (e.g., security basics). One sentence, not a paragraph.
 - **If a rule is violated 3+ times, move enforcement to a hook.** Prose rules are suggestions; hooks are laws.
 
 ## After Any Change

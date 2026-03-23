@@ -5,7 +5,12 @@ title: Skills & Memory
 
 ## Skills
 
-> **TL;DR:** 9 skills across two categories. **Workflow skills** handle multi-step processes: `/brainstorm` (structured discovery before planning), `/multi-review` (parallel code review from 3 angles), `/review-memory` (guided memory cleanup and promotion), `/test-plan` (generate and execute user-facing test checklists), `/vibe-user` (browser-based UX testing as a real user). **Tool skills** wrap specific integrations: `/debug-wp` (WordPress debugging), `/figma` (Figma MCP design-to-code), `/playwright` (browser automation), `/qa-check` (multi-stack QA audit). Skills run in the main context by default. `qa-check` uses `context: fork` so its verbose output doesn't pollute your conversation.
+> **TL;DR:** 10 skills across 2 categories:
+>
+> - **Workflow skills** - `/brainstorm` (structured discovery before planning), `/multi-review` (parallel code review from 3 angles), `/review-memory` (guided memory cleanup with full and compact modes, post-promote contradiction check), `/test-plan` (generate and execute user-facing test checklists, 15-file limit for large diffs), `/vibe-user` (browser-based UX testing as a real user, 10-page cap with checkpoints).
+> - **Tool skills** - `/debug-rules` (audit rule loading via InstructionsLoaded hook, flags CSV bug), `/debug-wp` (WordPress debugging), `/figma` (Figma MCP design-to-code, 3-round visual iteration limit), `/playwright` (browser automation), `/qa-check` (multi-stack QA audit, runs in forked context).
+>
+> Skills run in the main context by default. `qa-check` uses `context: fork` so its verbose output doesn't pollute your conversation.
 
 For what each skill does, why it exists, and how it compares to community alternatives, see the [Component Reference](../docs/component-reference.md#skills).
 
@@ -19,12 +24,13 @@ These skills structure how you work with agents. They were built after comparing
 - `multi-review` - Parallel code review from three angles. Spawns three subagents simultaneously (code-reviewer for maintainability, perf for performance, security for vulnerabilities), each reviewing the same scope. Consolidates findings into a single report with conflicts noted when agents disagree. Use before merging or after completing a feature.
 - `test-plan` - Two modes in one skill. Generate mode creates a user-facing test checklist from git diff - scenarios describe what a user does, not what the code does. Execute mode runs an existing plan via Playwright MCP, recording PASS/FAIL/BLOCKED per scenario with screenshots as evidence.
 - `vibe-user` - Opens an app in Playwright and explores it as a real user with no prior knowledge. The skill explicitly blocks reading source code - the value is the fresh perspective. Documents findings per page, tests core user flows, and reports the top 3 highest-impact UX improvements.
-- `review-memory` - Guided cleanup of auto-memory. Loads all memory files, categorises each entry as Promote (move to CLAUDE.md/rules/skills), Keep, or Remove. Presents a table for your approval before making changes. Checks for duplicates before promoting and warns if MEMORY.md exceeds the 200-line auto-loaded limit. Run it when the memory-review hook prompts you, or anytime you want to audit what auto-memory has captured.
+- `review-memory` - Guided cleanup of auto-memory. Two modes: full mode loads all memory files, categorises each entry as Promote/Keep/Remove, presents a table for approval, and runs a post-promote contradiction check against existing rules. Compact mode (`/review-memory --compact`) reads only MEMORY.md summaries and asks a single question - use when context is low or the hook suggests it. Checks for duplicates before promoting and warns if MEMORY.md exceeds the 200-line auto-loaded limit. Run it when the memory-review hook prompts you, or anytime you want to audit what auto-memory has captured.
 
 ### Tool skills
 
 These skills wrap specific tools or integrations with structured methodology.
 
+- `debug-rules` - Diagnose rule loading issues. Reads the `InstructionsLoaded` audit log, compares against expected rules in `~/.claude/rules/`, reports what loaded (and why), what didn't, and flags the user-level `paths:` CSV bug if detected. Requires the `log-instructions.sh` hook.
 - `debug-wp` - WordPress debugging workflow: isolate, trace, reproduce, fix
 - `figma` - Figma MCP workflow for design extraction before implementation
 - `playwright` - Playwright MCP browser automation and verification workflow

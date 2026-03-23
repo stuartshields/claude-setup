@@ -1,24 +1,5 @@
 ---
-paths:
-  # Config files (editing these = environment/tooling work)
-  - "**/vite.config.*"
-  - "**/next.config.*"
-  - "**/webpack.config.*"
-  - "**/babel.config.*"
-  - "**/tailwind.config.*"
-  - "**/.eslintrc*"
-  - "**/.prettierrc*"
-  - "**/tsconfig.*"
-  # PHP/WordPress config
-  - "**/wp-config.php"
-  - "**/phpunit.xml*"
-  - "**/.php-cs-fixer*"
-  # Cloudflare/Infra
-  - "**/wrangler.*"
-  - "**/Dockerfile*"
-  - "**/docker-compose*"
-  # Environment
-  - "**/.env*"
+paths: "**/vite.config.*,**/next.config.*,**/webpack.config.*,**/babel.config.*,**/tailwind.config.*,**/.eslintrc*,**/.prettierrc*,**/tsconfig.*,**/wp-config.php,**/phpunit.xml*,**/.php-cs-fixer*,**/wrangler.*,**/Dockerfile*,**/docker-compose*,**/.env*"
 ---
 <!-- Last updated: 2026-03-22T11:46+11:00 -->
 
