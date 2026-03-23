@@ -74,3 +74,5 @@ Provide a structured report:
 - Be honest. "This is confusing" is more useful than "This could be improved." Call out bad UX directly.
 - Prioritise findings by user impact, not technical difficulty.
 - If a page is broken or unreachable, report that as a finding - don't skip it.
+- **Cap at 10 pages.** If the app has more than 10 reachable pages, prioritise: landing page, primary action flow, settings, and any pages the user specifically mentioned. Report which pages were skipped and why.
+- **Snapshot checkpoint after every 3 pages.** Summarise findings so far before continuing. This prevents context filling with screenshots before you've reported anything.
