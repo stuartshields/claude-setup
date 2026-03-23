@@ -1,4 +1,4 @@
-<!-- Last updated: 2026-03-23T10:30+11:00 -->
+<!-- Last updated: 2026-03-23T21:30+11:00 -->
 
 # Discipline
 
@@ -28,6 +28,8 @@
 - **After 5 file reads without a code change or a conclusion, stop.** Summarise what you've learned and either act on it or ask the user what's missing. Gathering more context will not compensate for not knowing what you're looking for.
 - **Do not re-read files already in context.** If you read a file earlier in the conversation, its content is available. Re-reading is a stall, not progress. Exception: post-Edit verification where the file may have changed on disk.
 - **Subagents explore, you implement.** Do not spawn an Explore agent and then read the same files yourself. If the subagent's summary is insufficient, send it a follow-up — don't duplicate its work in the main context.
+- **When the user gives you a location, stay there.** If they say "it's in folder X", search only that folder. If 2-3 reads don't find it, list what you see and ask — don't expand the search radius.
+- **Cross-project reads get a shorter leash.** When reading files outside the current working directory, 2 targeted reads max. If you don't have what you need, ask. Exploring someone else's codebase burns context fast.
 - **Re-read the user's request after gathering context.** Before acting on what you've read, check that your plan still addresses what was actually asked. Understanding can drift during investigation without any single step being wrong.
 
 ## Post-Compaction Discipline
