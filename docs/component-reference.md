@@ -177,6 +177,8 @@ These load every session regardless of project. They define the baseline behavio
 
 These load only when you're working with matching file types. They add domain-specific guidance without burning context budget on every session.
 
+**Important: user-level `paths:` requires CSV format.** There's a [known bug](https://github.com/anthropics/claude-code/issues/21858) where `paths:` frontmatter in `~/.claude/rules/` silently fails when using YAML array syntax. The internal parser expects a CSV string. Use `paths: "**/*.vue,**/*.tsx,**/*.css"` (works) instead of a YAML list with `- "**/*.vue"` entries (broken). Project-level `.claude/rules/` files are not affected. Use `/debug-rules` to verify your conditional rules are loading correctly.
+
 | Rule | Loads when | What it does | Community comparison |
 |------|-----------|-------------|---------------------|
 | [`architecture.md`](../rules/architecture.md) | Code files (`*.js`, `*.ts`, `*.py`, etc.) | 200-line rule, directory mapping, monorepo guidance. | ECC has `patterns` rule + `architect` agent. |

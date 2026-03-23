@@ -72,7 +72,9 @@ These 9 files load every session:
 
 ### Conditional rules
 
-These 6 files are scoped by `paths:` frontmatter and only load when relevant files are in play:
+These 6 files are scoped by `paths:` frontmatter and only load when relevant files are in play.
+
+**Note:** User-level rules (`~/.claude/rules/`) require CSV format for `paths:` due to a [known bug](https://github.com/anthropics/claude-code/issues/21858). Use `paths: "**/*.vue,**/*.tsx"` not YAML arrays. Run `/debug-rules` to verify loading.
 
 - `architecture.md` - modular-first structure, monorepo guidance (loads for code files)
 - `environment.md` - HTTPS, build tooling, agent routing (loads for config files)

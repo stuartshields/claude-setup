@@ -5,10 +5,10 @@ title: Skills & Memory
 
 ## Skills
 
-> **TL;DR:** 9 skills across 2 categories:
+> **TL;DR:** 10 skills across 2 categories:
 >
 > - **Workflow skills** - `/brainstorm` (structured discovery before planning), `/multi-review` (parallel code review from 3 angles), `/review-memory` (guided memory cleanup with full and compact modes, post-promote contradiction check), `/test-plan` (generate and execute user-facing test checklists, 15-file limit for large diffs), `/vibe-user` (browser-based UX testing as a real user, 10-page cap with checkpoints).
-> - **Tool skills** - `/debug-wp` (WordPress debugging), `/figma` (Figma MCP design-to-code, 3-round visual iteration limit), `/playwright` (browser automation), `/qa-check` (multi-stack QA audit, runs in forked context).
+> - **Tool skills** - `/debug-rules` (audit rule loading via InstructionsLoaded hook, flags CSV bug), `/debug-wp` (WordPress debugging), `/figma` (Figma MCP design-to-code, 3-round visual iteration limit), `/playwright` (browser automation), `/qa-check` (multi-stack QA audit, runs in forked context).
 >
 > Skills run in the main context by default. `qa-check` uses `context: fork` so its verbose output doesn't pollute your conversation.
 
@@ -30,6 +30,7 @@ These skills structure how you work with agents. They were built after comparing
 
 These skills wrap specific tools or integrations with structured methodology.
 
+- `debug-rules` - Diagnose rule loading issues. Reads the `InstructionsLoaded` audit log, compares against expected rules in `~/.claude/rules/`, reports what loaded (and why), what didn't, and flags the user-level `paths:` CSV bug if detected. Requires the `log-instructions.sh` hook.
 - `debug-wp` - WordPress debugging workflow: isolate, trace, reproduce, fix
 - `figma` - Figma MCP workflow for design extraction before implementation
 - `playwright` - Playwright MCP browser automation and verification workflow
