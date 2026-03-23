@@ -295,16 +295,6 @@
           }
         ]
       }
-    ],
-    "InstructionsLoaded": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/log-instructions.sh"
-          }
-        ]
-      }
     ]
   },
   "statusLine": {

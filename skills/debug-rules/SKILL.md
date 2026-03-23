@@ -19,7 +19,28 @@ Use this skill when:
 
 ## Prerequisites
 
-The `InstructionsLoaded` hook must be registered in `~/.claude/settings.json` and `~/.claude/hooks/log-instructions.sh` must exist. If either is missing, tell the user and stop.
+This skill requires the `InstructionsLoaded` audit hook. The hook is **not registered by default** - it's an on-demand diagnostic tool you enable when needed.
+
+### Setup (one-time)
+
+The hook script `~/.claude/hooks/log-instructions.sh` should already exist. To enable logging, add this to `~/.claude/settings.json` under `"hooks"`:
+
+```json
+"InstructionsLoaded": [
+  {
+    "hooks": [
+      {
+        "type": "command",
+        "command": "~/.claude/hooks/log-instructions.sh"
+      }
+    ]
+  }
+]
+```
+
+Then start a new session, do some work that touches files matching your conditional rules, and run `/debug-rules` again.
+
+**Remove the hook from settings.json when done** - it's lightweight but unnecessary for normal use.
 
 ## Step 1: Verify hook is active
 
@@ -27,7 +48,7 @@ The `InstructionsLoaded` hook must be registered in `~/.claude/settings.json` an
 2. Check `~/.claude/settings.json` has an `InstructionsLoaded` entry pointing to it
 3. Check `~/.claude/instruction-audit.log` exists and is non-empty
 
-If the log doesn't exist, tell the user: "No audit log found. The InstructionsLoaded hook needs to fire at least once. Start a new session, do some work, then run this skill again."
+If the hook script is missing, tell the user and stop. If the hook script exists but isn't registered in settings.json, show them the setup instructions above. If the log doesn't exist or is empty, tell the user: "No audit log found. Register the hook, start a new session, do some work, then run `/debug-rules` again."
 
 ## Step 2: Read the audit log
 
