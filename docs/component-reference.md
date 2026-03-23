@@ -1,7 +1,7 @@
 ---
 title: Component Reference
 ---
-<!-- Last updated: 2026-03-23 -->
+<!-- Last updated: 2026-03-23T16:30+11:00 -->
 
 # Component Reference
 
@@ -116,7 +116,8 @@ Some protections only work if you remember to invoke them. This setup has severa
 - **Dependency hallucination prevention** forces Claude to verify package names and URLs exist before referencing them. I haven't seen this pattern in other community setups.
 - **Spec challenge** (discipline.md) flags contradictory, ambiguous, or impossible requirements before building. A bad spec produces confidently wrong output that passes all your gates. The [`feasibility-check`](../agents/feasibility-check.md) agent extends this mechanically - it extracts what a spec assumes about the codebase (fields, endpoints, dependencies, patterns), greps for each assumption, and reports CONFIRMED/NOT FOUND/CONTRADICTED. Nobody else has pre-build spec assumption checking. Pimzino's spec-workflow validates spec format (are requirements testable?), not spec correctness (does this field actually exist?).
 - **Builder escalation** - all four builder agents (backend, frontend, test-writer, wp) stop and report after 2 failed approaches instead of burning remaining turns on variations of a failing approach. Superpowers has status codes (DONE/BLOCKED/NEEDS_CONTEXT) for this. Ours is simpler but covers the main case.
-- **Discipline rules** (anti-pivot, scope control, context pruning, post-compaction discipline) prevent Claude's most common failure modes without needing a specific skill or agent invocation.
+- **Context management** ([`context-management.md`](../rules/context-management.md)) prevents the most common context waste patterns: re-reading files already in context, unscoped exploration, duplicating subagent work, and the post-compaction re-read loop. Broken out from discipline.md so these rules get their own primacy/recency anchoring instead of sitting in the attention dead zone of a 76-line file. Nobody else has a dedicated context management rule file.
+- **Discipline rules** (anti-pivot, scope control, spec challenge) prevent Claude's most common implementation failure modes without needing a specific skill or agent invocation.
 
 ### WordPress depth
 
@@ -154,7 +155,7 @@ This is defined in [`research-and-decisions.md`](../rules/research-and-decisions
 
 ## Rules
 
-Rules are markdown files that load into Claude's context and shape how it behaves. Eight load on every session (always-on), six load conditionally based on file paths.
+Rules are markdown files that load into Claude's context and shape how it behaves. Nine load on every session (always-on), six load conditionally based on file paths.
 
 ### Always-on rules
 
@@ -162,8 +163,9 @@ These load every session regardless of project. They define the baseline behavio
 
 | Rule | What it does | Why it exists | Community comparison |
 |------|-------------|---------------|---------------------|
-| [`debugging.md`](../rules/debugging.md) | 4-step framework: Reproduce, Isolate, Fix, Validate. Anti-loop protocol (stop after 2 failed attempts). Rebuild-vs-patch guidance. Visual/CSS bug protocol. Confirmation bias prevention. | Without this, Claude jumps straight to fixing without confirming the root cause. The anti-loop protocol prevents it from trying the same broken approach repeatedly. The rebuild rule acknowledges that sometimes starting fresh is faster than patching - research shows an incorrect first hypothesis biases you against correct solutions found later. | Superpowers has a `systematic-debugging` skill with similar 4-phase approach. Ours is always-loaded so it applies even without invoking a skill. The write-delete-rewrite detection and visual/CSS bug protocol are unique to this setup. |
-| [`discipline.md`](../rules/discipline.md) | Complete implementations, anti-pivot rules, scope control, context pruning (5-read limit, no re-reads), post-compaction discipline, spec challenge, regression awareness. | The strongest rule file. Prevents Claude from pivoting to easier approaches, skipping hard parts, making bonus changes, re-reading files already in context, or building against a bad spec. Post-compaction discipline prevents the re-read loop that wastes context after compression. | I haven't found an equivalent that covers this breadth. ECC has a `coding-style` rule that partially overlaps. The anti-pivot, spec challenge, and post-compaction discipline patterns are unique to this setup. |
+| [`debugging.md`](../rules/debugging.md) | 4-step framework: Reproduce, Isolate, Fix, Validate. Anti-loop protocol (stop after 2 failed attempts). Rebuild-vs-patch guidance. Confirmation bias prevention. | Without this, Claude jumps straight to fixing without confirming the root cause. The anti-loop protocol prevents it from trying the same broken approach repeatedly. The rebuild rule acknowledges that sometimes starting fresh is faster than patching - research shows an incorrect first hypothesis biases you against correct solutions found later. | Superpowers has a `systematic-debugging` skill with similar 4-phase approach. Ours is always-loaded so it applies even without invoking a skill. The write-delete-rewrite detection is unique to this setup. Visual/CSS bug protocol moved to `ui-ux.md` (conditional, loads only for frontend files). |
+| [`discipline.md`](../rules/discipline.md) | Complete implementations, anti-pivot rules, scope control, spec challenge, regression awareness. | Prevents Claude from pivoting to easier approaches, skipping hard parts, making bonus changes, or building against a bad spec. Context management rules were split to their own file for better attention weight. | I haven't found an equivalent that covers this breadth. ECC has a `coding-style` rule that partially overlaps. The anti-pivot and spec challenge patterns are unique to this setup. |
+| [`context-management.md`](../rules/context-management.md) | Context pruning (5-read limit, trust earlier reads, subagent delegation, cross-project leash), post-compaction discipline (trust summaries, don't re-read loop). | Broken out from discipline.md. These rules sat in the middle of a 76-line file - the attention dead zone. Own file gives them primacy/recency anchoring. | Nobody else has a dedicated context management rule. Most setups rely on the system prompt's built-in context guidance. |
 | [`style.md`](../rules/style.md) | Tabs only, Edit tool tab handling, no console.log, clean code. | Claude defaults to spaces and leaves debug statements. The Edit tool tab handling section prevents a known Claude Code bug where Edit fails on indented lines. | ECC has language-specific style rules (TypeScript, Python, Go). Ours is language-agnostic and focused on the tab/Edit tool interaction that trips up most setups. |
 | [`dependencies.md`](../rules/dependencies.md) | Verify packages/URLs exist before referencing. One-round verification (search once, don't try name variations). Ask before adding dependencies. | Claude hallucates package names - "sounds right" is the #1 source. This rule forces verification via WebSearch or `npm search` before writing an import, and limits it to one search round to prevent spiralling into alternative packages without asking. | I haven't found an equivalent in other setups. ECC covers dependency security in their `security` rule but not hallucination prevention. |
 | [`security.md`](../rules/security.md) | Input validation, parameterised queries, output escaping, secrets in env vars. | Baseline security patterns for every session. Lightweight - use the `security` agent for deep audits. | Trail of Bits has 35 security plugins - the community gold standard. Our rule is lighter but always-on, which means it applies even when you don't think to invoke a security review. |
