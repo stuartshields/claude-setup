@@ -1,13 +1,13 @@
 ---
 title: Rules
 ---
-<!-- Last updated: 2026-03-23T16:30+11:00 -->
+<!-- Last updated: 2026-03-25T10:00+11:00 -->
 
 ## Rules
 
-> **TL;DR:** 15 rule files across 2 loading modes (plus 1 reference template):
+> **TL;DR:** 16 rule files across 2 loading modes (plus 1 reference template):
 >
-> - **Always-on** (9 files) - `debugging.md` (4-step framework, anti-loop, rebuild-vs-patch), `discipline.md` (complete implementations, anti-pivot, scope control, spec challenge), `context-management.md` (context pruning, post-compaction discipline, 5-read limit, subagent delegation), `communication.md` (design discussion checkpoint, classify-before-acting, surface problems), `dependencies.md` (hallucination prevention, one-round verification), `security.md` (input validation, injection prevention, audit scoping), `research-and-decisions.md` (source tracking, ADRs), `staleness.md` (30-day freshness checks), `style.md` (tabs, clean code).
+> - **Always-on** (10 files) - `debugging.md` (4-step framework, anti-loop, rebuild-vs-patch), `discipline.md` (complete implementations, anti-pivot, scope control, spec challenge), `context-management.md` (context pruning, post-compaction discipline, 5-read limit, subagent delegation), `communication.md` (design discussion checkpoint, classify-before-acting, surface problems), `dependencies.md` (hallucination prevention, one-round verification), `security.md` (input validation, injection prevention, audit scoping), `research-and-decisions.md` (source tracking, ADRs), `staleness.md` (30-day freshness checks), `style.md` (tabs, clean code), `tool-usage.md` (Edit retry limit, Bash discipline, search budget).
 > - **Conditional** (6 files, scoped by file type) - `architecture.md`, `testing.md`, `ui-ux.md` (includes visual/CSS bug protocol), `php-wordpress.md`, `environment.md`, `harness-maintenance.md`. Load only when working with matching files, keeping the always-on count under the ~150 ceiling (including system prompt).
 >
 > Rules Claude already follows without instruction are deleted. Rules it keeps breaking get moved to hooks instead.
@@ -30,11 +30,11 @@ The current rules here are split into always-loaded and conditional files. That 
 
 These rules follow community-validated patterns for instruction compliance:
 
-- **Instruction budget awareness.** Always-loaded rules total ~89 bullet points (down from ~128 in v2026.3, ~310 originally). The system prompt adds ~50 more. Total stays under the ~150 ceiling where compliance degrades. Research: [Jaroslawicz et al.](https://dev.to/minatoplanb/i-wrote-200-lines-of-rules-for-claude-code-it-ignored-them-all-4639) - "double instructions, halve compliance."
+- **Instruction budget awareness.** Always-loaded rules total ~95 bullet points (down from ~128 in v2026.3, ~310 originally). The system prompt adds ~50 more. Total stays under the ~150 ceiling where compliance degrades. Research: [Jaroslawicz et al.](https://dev.to/minatoplanb/i-wrote-200-lines-of-rules-for-claude-code-it-ignored-them-all-4639) - "double instructions, halve compliance."
 - **Positive framing.** Rules tell Claude what TO do, not what to avoid. Flipping negative rules to positive equivalents cuts violations by roughly half.
 - **Deduplication.** Each rule lives in exactly one file. Rules that duplicate system prompt directives are deleted - they waste instruction slots. Cross-cutting concepts are not repeated across files.
 - **Primacy/recency ordering.** Most-violated rules sit at the top and bottom of each file to exploit attention bias.
-- **Aggressive scoping.** Rules that only apply to specific file types use `paths:` frontmatter so they don't load during irrelevant sessions. 5 of 10 rule files are now scoped.
+- **Aggressive scoping.** Rules that only apply to specific file types use `paths:` frontmatter so they don't load during irrelevant sessions. 6 of 16 rule files are now scoped.
 
 ### Files in this folder
 
@@ -55,10 +55,11 @@ These rules follow community-validated patterns for instruction compliance:
 | `research-and-decisions.md` | Research source tracking (`.planning/SOURCES.md`) and Architecture Decision Records (`.planning/adr/`) for structured project decisions. |
 | `staleness.md` | Tracks last-updated dates on all guidance files. Flags files older than 30 days so AI best practices stay current as models evolve. |
 | `communication.md` | When to ask vs act, design discussion checkpoint, responding to the user, surfacing problems, progress and status. |
+| `tool-usage.md` | Edit retry limit (re-read after 2 failures), Bash discipline (use dedicated tools), WebSearch/WebFetch budget (3 searches, 2 fetches per question). |
 
 ### Always-loaded rules
 
-These 9 files load every session:
+These 10 files load every session:
 
 - `context-management.md` - context pruning (5-read limit, subagent delegation, cross-project leash), post-compaction discipline
 - `debugging.md` - 4-step framework, anti-loop protocol, hypothesis-driven investigation, rebuild-vs-patch guidance
@@ -69,6 +70,7 @@ These 9 files load every session:
 - `security.md` - input validation, injection prevention, secrets handling
 - `staleness.md` - 30-day freshness check on all guidance files, auto-updates dates on edit
 - `style.md` - tabs, clean code
+- `tool-usage.md` - Edit retry limit, Bash discipline, search budget
 
 ### Conditional rules
 

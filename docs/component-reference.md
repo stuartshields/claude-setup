@@ -1,11 +1,11 @@
 ---
 title: Component Reference
 ---
-<!-- Last updated: 2026-03-23T16:30+11:00 -->
+<!-- Last updated: 2026-03-25T10:00+11:00 -->
 
 # Component Reference
 
-> **TL;DR:** This setup has 6+6 rules, 22 hooks, 17 agents, and 9 skills. This page explains what each one does, why it exists, and how it compares to what the community builds. Use it to decide which parts to adopt and which to skip.
+> **TL;DR:** This setup has 10+6 rules, 22 hooks, 17 agents, and 11 skills. This page explains what each one does, why it exists, and how it compares to what the community builds. Use it to decide which parts to adopt and which to skip.
 
 The individual READMEs ([rules](../rules/README.md), [hooks](../hooks/README.md), [agents](../agents/README.md), [skills](../skills/README.md)) explain how each system works. This page is the quick-scan reference for what each component does and why it's here.
 
@@ -17,7 +17,7 @@ Everything in this setup is built with token cost in mind. Claude Code has a fin
 
 How this setup stays lean:
 
-**Rules** are split into always-on (6 files, ~85 bullet points) and conditional (6 files, path-triggered). The conditional rules only load when you're working with matching file types - `php-wordpress.md` doesn't burn context when you're writing JavaScript. The always-on budget stays under ~100 bullet points to avoid the point where Claude starts quietly dropping instructions.
+**Rules** are split into always-on (10 files, ~89 bullet points) and conditional (6 files, path-triggered). The conditional rules only load when you're working with matching file types - `php-wordpress.md` doesn't burn context when you're writing JavaScript. The always-on budget stays under ~100 bullet points to avoid the point where Claude starts quietly dropping instructions.
 
 **Hooks** are shell scripts, not LLM calls. A hook that checks for console.log costs zero tokens - it runs in bash, returns an exit code, and only injects text into context when it has something to say. The `additionalContext` output is one line. Compare this to a prompt-type hook that asks an LLM to review every write - that costs hundreds of tokens per tool call.
 
@@ -155,7 +155,7 @@ This is defined in [`research-and-decisions.md`](../rules/research-and-decisions
 
 ## Rules
 
-Rules are markdown files that load into Claude's context and shape how it behaves. Nine load on every session (always-on), six load conditionally based on file paths.
+Rules are markdown files that load into Claude's context and shape how it behaves. Ten load on every session (always-on), six load conditionally based on file paths.
 
 ### Always-on rules
 
@@ -172,6 +172,7 @@ These load every session regardless of project. They define the baseline behavio
 | [`research-and-decisions.md`](../rules/research-and-decisions.md) | Research source tracking (`.planning/SOURCES.md`) and Architecture Decision Records (`.planning/adr/`). | Prevents re-researching the same topics across sessions. ADRs capture why decisions were made so future sessions don't reverse them without knowing the context. | I haven't found an equivalent in other setups. Most setups track decisions in CLAUDE.md inline rather than structured records. |
 | [`staleness.md`](../rules/staleness.md) | Tracks `<!-- Last updated -->` dates across all guidance files. Flags files older than 30 days. | AI best practices evolve fast. Rules written 3 months ago may reference deprecated features or outdated patterns. This catches drift automatically. | I haven't found an equivalent in other setups. |
 | [`communication.md`](../rules/communication.md) | Design discussion checkpoint, classify-before-acting, question-is-the-task, words-before-tools on failure, interview-first when ambiguous. | Prevents Claude from jumping to implementation during design discussions, silently retrying failed operations, or springboarding from answers into unrequested actions. Split from discipline.md to separate interaction behaviour from implementation behaviour. | ECC's `/plan` command requires explicit approval before execution. Ours handles the informal case where there's no formal plan to approve. |
+| [`tool-usage.md`](../rules/tool-usage.md) | Edit retry limit (re-read after 2 failures), Bash discipline (use dedicated tools instead), WebSearch/WebFetch budget (3 searches, 2 fetches per question). | Prevents Claude from retrying failing Edit calls with whitespace variations (a common loop), using Bash for operations that have dedicated tools (reduces user visibility), and spiralling through search queries hoping for better results. | I haven't found an equivalent in other setups. Most rely on the system prompt's built-in tool guidance. |
 
 ### Conditional rules
 
@@ -312,6 +313,7 @@ Skills are reusable task templates - structured guidance that the main Claude se
 
 | Skill | What it does | Why it exists | Community comparison |
 |-------|-------------|---------------|---------------------|
+| [`block-journey`](../skills/block-journey/SKILL.md) | Discovers all files for a block/component, traces editorial and front-end user journeys, writes a journey document to `.planning/journeys/`. Read-only. | Onboarding to unfamiliar blocks, pre-modification analysis, post-build documentation. Captures the DOM contract (selectors, ARIA attributes) that connects render output to front-end JS - the part that breaks silently during maintenance. | I haven't found an equivalent in other setups. |
 | [`debug-wp`](../skills/debug-wp/SKILL.md) | WordPress debugging interview and ranked remediation. | Structured diagnosis for WordPress problems. | I haven't found an equivalent in other setups. |
 | [`figma`](../skills/figma/SKILL.md) | Figma MCP workflow for design extraction before implementation. | Forces tool-based design extraction over assumptions. Never implement from memory. | Google Labs Stitch handles design-to-code but isn't Figma-specific. |
 | [`playwright`](../skills/playwright/SKILL.md) | Snapshot-first browser automation and verification. | The right workflow for Playwright MCP - snapshot to understand, screenshot to verify. | Anthropic's `webapp-testing` skill is the closest. |

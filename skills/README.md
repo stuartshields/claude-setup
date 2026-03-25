@@ -1,14 +1,14 @@
 ---
 title: Skills & Memory
 ---
-<!-- Last updated: 2026-03-21 -->
+<!-- Last updated: 2026-03-25T10:00+11:00 -->
 
 ## Skills
 
-> **TL;DR:** 10 skills across 2 categories:
+> **TL;DR:** 11 skills across 2 categories:
 >
 > - **Workflow skills** - `/brainstorm` (structured discovery before planning), `/multi-review` (parallel code review from 3 angles), `/review-memory` (guided memory cleanup with full and compact modes, post-promote contradiction check), `/test-plan` (generate and execute user-facing test checklists, 15-file limit for large diffs), `/vibe-user` (browser-based UX testing as a real user, 10-page cap with checkpoints).
-> - **Tool skills** - `/debug-rules` (audit rule loading via InstructionsLoaded hook, flags CSV bug), `/debug-wp` (WordPress debugging), `/figma` (Figma MCP design-to-code, 3-round visual iteration limit), `/playwright` (browser automation), `/qa-check` (multi-stack QA audit, runs in forked context).
+> - **Tool skills** - `/block-journey` (trace editor and front-end user journeys for a block/component), `/debug-rules` (audit rule loading via InstructionsLoaded hook, flags CSV bug), `/debug-wp` (WordPress debugging), `/figma` (Figma MCP design-to-code, 3-round visual iteration limit), `/playwright` (browser automation), `/qa-check` (multi-stack QA audit, runs in forked context).
 >
 > Skills run in the main context by default. `qa-check` uses `context: fork` so its verbose output doesn't pollute your conversation.
 
@@ -30,6 +30,7 @@ These skills structure how you work with agents. They were built after comparing
 
 These skills wrap specific tools or integrations with structured methodology.
 
+- `block-journey` - Discovers all files for a block or component, traces the editorial and front-end user journeys, and writes a journey document to `.planning/journeys/`. Read-only analysis - does not modify source files. Accepts an optional directory scope (e.g., `/block-journey rte-blocks/accordion`).
 - `debug-rules` - Diagnose rule loading issues. Reads the `InstructionsLoaded` audit log, compares against expected rules in `~/.claude/rules/`, reports what loaded (and why), what didn't, and flags the user-level `paths:` CSV bug if detected. Requires the `log-instructions.sh` hook.
 - `debug-wp` - WordPress debugging workflow: isolate, trace, reproduce, fix
 - `figma` - Figma MCP workflow for design extraction before implementation
@@ -40,6 +41,8 @@ These skills wrap specific tools or integrations with structured methodology.
 
 ```
 skills/
+  block-journey/
+    SKILL.md    ← block/component user journey documentation
   brainstorm/
     SKILL.md    ← structured discovery before planning
   debug-wp/
@@ -186,6 +189,7 @@ How to use this folder in Claude:
 
 | File | What it does |
 |------|--------------|
+| `block-journey/SKILL.md` | Discovers block/component files, traces editorial and front-end user journeys, writes journey document to `.planning/journeys/`. |
 | `brainstorm/SKILL.md` | Structured discovery workflow: context exploration, one-at-a-time interview, approach proposals, discovery brief. |
 | `debug-wp/SKILL.md` | Structured WordPress debugging interview and ranked remediation workflow. |
 | `figma/SKILL.md` | Figma MCP workflow for extracting design context/screenshots/variables before coding. |

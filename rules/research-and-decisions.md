@@ -1,4 +1,4 @@
-<!-- Last updated: 2026-03-23T16:30+11:00 -->
+<!-- Last updated: 2026-03-25T07:00+11:00 -->
 
 # Research Sources & Decision Records
 
@@ -14,6 +14,7 @@
 	- The date is when the source was last verified, not when the decision was made.
 	- Link to the code or config the research drove, e.g. `→ src/auth/middleware.ts` or `→ CLAUDE.md Section 3`.
 - **Not every lookup is research.** Only log sources that informed a decision. Skip syntax checks, package existence verification, and quick doc lookups.
+- **Scope includes global tooling changes.** Research that informs changes to global skills, rules, or workflow files (`~/.claude/skills/`, `~/.claude/rules/`, `~/.claude/CLAUDE.md`) should be logged in `~/.claude/SOURCES.md`. Research that informs project code goes in the project's `.planning/SOURCES.md`. If a single research session informs both, log in both places.
 
 ## Architecture Decision Records (`.planning/adr/`)
 
