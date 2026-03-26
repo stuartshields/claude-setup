@@ -3,6 +3,7 @@ name: block-journey
 description: Discover all files for a block or component, trace the editorial and front-end user journeys, and write a journey document to .planning/journeys/.
 argument-hint: "[directory/]<block-name>"
 disable-model-invocation: true
+effort: medium
 allowed-tools: Read, Grep, Glob, Write, Agent
 ---
 

@@ -67,7 +67,7 @@ Skills live at `~/.claude/skills/` globally, or `.claude/skills/` for project-sp
 
 ### Skill frontmatter
 
-Skills support 10 frontmatter fields:
+Skills support 12 frontmatter fields:
 
 | Field | What it does |
 |-------|-------------|
@@ -78,6 +78,8 @@ Skills support 10 frontmatter fields:
 | `user-invocable` | Set to `false` to hide from the `/` menu. |
 | `allowed-tools` | Tools Claude can use without permission when skill is active. |
 | `model` | Model to use when skill is active. |
+| `effort` | Effort level when skill is active (`low`, `medium`, `high`, `max`). Overrides session effort. `max` is Opus 4.6 only. |
+| `shell` | Shell for `` !`command` `` blocks. `bash` (default) or `powershell`. |
 | `context` | Set to `fork` to run in a forked subagent context. |
 | `agent` | Which subagent to use when `context: fork` is set. |
 | `hooks` | Hooks scoped to this skill's lifecycle. |

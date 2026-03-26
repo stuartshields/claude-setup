@@ -3,6 +3,7 @@ name: debug-rules
 description: Diagnose which rules loaded, which didn't, and why. Reads the InstructionsLoaded audit log and compares against expected rules.
 argument-hint: "[session timestamp or 'latest']"
 disable-model-invocation: true
+effort: low
 allowed-tools: Read, Grep, Glob, Bash
 ---
 <!-- Last updated: 2026-03-23T16:30+11:00 -->
