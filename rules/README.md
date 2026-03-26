@@ -1,101 +1,56 @@
 ---
 title: Rules
 ---
-<!-- Last updated: 2026-03-26T12:00+11:00 -->
+<!-- Last updated: 2026-03-26T14:00+11:00 -->
 
 ## Rules
 
 > **TL;DR:** 15 rule files across 2 loading modes:
 >
-> - **Always-on** (7 files, ~59 bullets) - `discipline.md` (complete implementations, anti-pivot, pattern discovery, regression awareness, verification, context discipline), `debugging.md` (4-step framework, hypothesis validation, anti-loop protocol), `communication.md` (classify-before-acting, question-is-the-task, surface problems), `dependencies.md` (hallucination prevention, dependency hygiene), `security.md` (injection prevention, secrets), `style.md` (tabs, clean code), `tool-usage.md` (Edit retry limit, search budget).
-> - **Conditional** (8 files, scoped by file type) - `architecture.md`, `testing.md`, `ui-ux.md`, `php-wordpress.md`, `environment.md`, `harness-maintenance.md`, `research-and-decisions.md`, `staleness.md`. Load only when working with matching files.
+> - **Always-on** (7 files, ~59 bullets) - `discipline`, `debugging`, `communication`, `dependencies`, `security`, `style`, `tool-usage`. The baseline constraints that apply to every session.
+> - **Scoped** (8 files) - `architecture`, `testing`, `ui-ux`, `php-wordpress`, `environment`, `harness-maintenance`, `research-and-decisions`, `staleness`. Load only when working with matching file types.
 >
 > Rules Claude already follows without instruction are deleted. Rules it keeps breaking get moved to hooks instead.
 
-For what each rule does, why it exists, and how it compares to community patterns, see the [Component Reference](../docs/component-reference.md#rules).
+### The problem
 
-Without rules, you repeat the same instructions every conversation. "Use tabs." "No console.log." "Always parameterize SQL." "Don't add unrequested features." Every. Single. Session.
+Without rules, you repeat the same corrections every conversation. "Use tabs." "Don't add features I didn't ask for." "Always parameterize SQL." "Don't skip the unhappy path." Every session starts from zero.
 
-Rules fix that. Files in `~/.claude/rules/` load automatically at the start of every session - Claude reads them before doing anything else.
+Rules fix that. Files in `~/.claude/rules/` load automatically - Claude reads them before doing anything else. But there's a catch: **more rules doesn't mean better behaviour.** At 152 always-on bullet points, Claude was ignoring rules. Compliance degrades as instruction count rises. The system prompt already adds ~50 instructions, so your rules are competing for the same attention.
 
-How to use this folder in Claude:
+### How I use rules
 
-1. Copy this `rules/` folder to `~/.claude/rules/`
-2. Keep broad rules as always-loaded markdown files
-3. Use frontmatter (`applyTo`/`paths`) on specialized rules so they only load for matching files
+**The instruction budget.** The single most important lesson: keep always-on rules under ~70 bullet points. Currently at ~59 across 7 files. This took deliberate trimming - the original setup had 142 always-on bullets across 10 files. Cutting nearly 60% improved adherence more than any rewrite of the rules themselves.
 
-The current rules here are split into always-loaded and conditional files. That keeps enforcement strict without wasting context on irrelevant stacks.
+**Always-on vs scoped.** Rules that only matter for specific file types use `paths:` frontmatter so they don't load during irrelevant sessions. 8 of 15 files are scoped. `research-and-decisions.md` was always-on for months, loading 20 bullets every session even when no research was happening. Scoping it removed those bullets from sessions where they were noise.
 
-### Design principles (v2026.5)
+**Hooks over prose.** Some rules kept getting ignored no matter how they were worded. "After 5 file reads without a code change, stop" was a rule in `context-management.md`. It didn't work. Now it's `context-drift-guard.sh` - a hook that counts reads and fires a warning mechanically. The rule file was deleted entirely, with its 3 strongest points merged into `discipline.md`. If Claude ignores a rule 2-3 times, the answer isn't better wording - it's converting to a hook.
 
-These rules follow community-validated patterns for instruction compliance:
+**Deduplication with the system prompt.** Claude's system prompt already says "read files before editing" and "use dedicated tools over Bash." Rules that repeated this were wasting slots. Every rule should be specific and additive - something Claude wouldn't do without the instruction.
 
-- **Instruction budget awareness.** Always-loaded rules total ~59 bullet points (down from ~95 in v2026.4, ~142 in v2026.3). The system prompt adds ~50 more. Total stays well under the ~150 ceiling where compliance degrades. Research: [Jaroslawicz et al.](https://dev.to/minatoplanb/i-wrote-200-lines-of-rules-for-claude-code-it-ignored-them-all-4639) - "double instructions, halve compliance."
-- **Hooks over prose for enforcement.** Rules that Claude repeatedly violated have been converted to hooks (`context-drift-guard.sh`, `repeated-approach-guard.sh`, `repeated-bash-guard.sh`). Prose rules are suggestions; hooks are laws.
-- **Positive framing.** Rules tell Claude what TO do, not what to avoid. Flipping negative rules to positive equivalents cuts violations by roughly half.
-- **Deduplication.** Each rule lives in exactly one file. Rules that duplicate system prompt directives are deleted - they waste instruction slots.
-- **Primacy/recency ordering.** Most-violated rules sit at the top and bottom of each file to exploit attention bias.
-- **Aggressive scoping.** Rules that only apply to specific file types use `paths:` frontmatter so they don't load during irrelevant sessions. 8 of 15 rule files are now scoped.
+### One pattern worth stealing
 
-### Files in this folder
+**Scope aggressively, trim ruthlessly.** Most setups load everything always-on and wonder why compliance drops. Start with every rule scoped, then promote to always-on only if it genuinely applies to every session regardless of file type. Count your bullets. If you're over 70 always-on, you're in the zone where adding rules makes behaviour worse, not better.
 
-| File | What it does |
-|------|--------------|
-| `architecture.md` | Modular-first structure guidance (200-line rule, atomic responsibility, monorepo boundaries). |
-| `communication.md` | When to ask vs act, question-is-the-task, surface problems, stop at task boundaries. |
-| `debugging.md` | 4-step debugging framework (reproduce/isolate/fix/validate), hypothesis validation, anti-loop protocol. |
-| `dependencies.md` | Blocks hallucinated packages/URLs and enforces dependency hygiene. |
-| `discipline.md` | Complete implementations, anti-pivot rules, pattern discovery, regression awareness, verification, and context discipline (merged from former context-management.md). |
-| `environment.md` | HTTPS by default, agent/plugin routing guidance (loads for config files). |
-| `harness-maintenance.md` | Research-first protocol for harness changes, instruction budget ceiling, rule quality checks (loads for `~/.claude/` files only). |
-| `php-wordpress.md` | WordPress/PHP security, i18n, query patterns, and PHP standards (loads for `.php`, `composer.json`). |
-| `research-and-decisions.md` | Research source tracking (`.planning/SOURCES.md`) and Architecture Decision Records (loads near `.planning/` files). |
-| `security.md` | Always-on security baseline: injection prevention, URL validation, secret handling. |
-| `staleness.md` | 30-day freshness checks on guidance files, auto-updates timestamps on edit (loads near `.claude/` files). |
-| `style.md` | Code style guardrails (tabs-only, clean code). |
-| `testing.md` | TDD, test quality, mock discipline (loads for code and test files). |
-| `tool-usage.md` | Edit retry limit, search budget. |
-| `ui-ux.md` | Design quality, accessibility, visual/CSS bug protocol (loads for component/view/template files). |
+### What's in here
 
-### Always-loaded rules
+**Always-on** (load every session):
 
-These 7 files load every session (~59 bullets total):
-
-- `communication.md` - classify-before-acting, question-is-the-task, surface problems, stop at boundaries
-- `debugging.md` - 4-step framework, hypothesis validation, anti-loop protocol
-- `dependencies.md` - hallucinated package prevention, dependency hygiene
 - `discipline.md` - complete implementations, anti-pivot, pattern discovery, regression awareness, verification, context discipline
-- `security.md` - injection prevention, secrets handling
+- `debugging.md` - 4-step framework (reproduce/isolate/fix/validate), hypothesis validation, anti-loop protocol
+- `communication.md` - classify-before-acting, question-is-the-task, surface problems, stop at task boundaries
+- `dependencies.md` - hallucination prevention (verify packages exist before referencing), dependency hygiene
+- `security.md` - injection prevention, URL validation, secret handling
 - `style.md` - tabs, clean code
 - `tool-usage.md` - Edit retry limit, search budget
 
-### Conditional rules
+**Scoped** (load when matching files are in play):
 
-These 8 files are scoped by `paths:` frontmatter and only load when relevant files are in play.
-
-**Note:** User-level rules (`~/.claude/rules/`) require CSV format for `paths:` due to a [known bug](https://github.com/anthropics/claude-code/issues/21858). Use `paths: "**/*.vue,**/*.tsx"` not YAML arrays. Run `/debug-rules` to verify loading.
-
-- `architecture.md` - modular-first structure, monorepo guidance (loads for code files)
-- `environment.md` - HTTPS, build tooling, agent routing (loads for config files)
-- `harness-maintenance.md` - research-first protocol for harness changes (loads for `~/.claude/` files only)
-- `php-wordpress.md` - WordPress/PHP standards (loads for `.php`, `composer.json`)
-- `research-and-decisions.md` - source tracking, ADRs (loads near `.planning/` files)
-- `staleness.md` - freshness checks (loads near `.claude/` files)
-- `testing.md` - TDD, test quality, mock discipline (loads for code and test files)
-- `ui-ux.md` - design quality, accessibility (loads for component/view/template files)
-
----
-
-## Continue Reading
-
-[Previous: Governance Workflow](../docs/governance-workflow.md) | [Next: Hooks](../hooks/README.md)
-
-## Quick Links
-
-- [Home](../index.md)
-- [Start Here](../docs/start-here.md)
-- [Core Guide](../docs/core-guide.md)
-- [Governance Workflow](../docs/governance-workflow.md)
-- [Hooks](../hooks/README.md)
-- [Agents](../agents/README.md)
-- [Skills & Memory](../skills/README.md)
+- `architecture.md` - modular-first structure, monorepo guidance
+- `testing.md` - TDD, test quality, mock discipline
+- `ui-ux.md` - design quality, accessibility, visual/CSS bug protocol
+- `php-wordpress.md` - WordPress/PHP security, i18n, query patterns
+- `environment.md` - HTTPS, build tooling, agent routing
+- `harness-maintenance.md` - instruction budget, rule quality checks, hooks-over-prose strategy
+- `research-and-decisions.md` - source tracking, Architecture Decision Records
+- `staleness.md` - 30-day freshness checks on guidance files

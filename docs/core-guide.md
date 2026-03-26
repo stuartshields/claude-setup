@@ -3,9 +3,9 @@ title: Core Guide
 ---
 <!-- Last updated: 2026-03-21 -->
 
-> **TL;DR:** CLAUDE.md gives Claude standing instructions. Rules enforce style and behavior (5 always-loaded, 6 conditional). Hooks enforce rules mechanically - blocking bad writes, catching incomplete work, detecting loops. Agents are specialists (17 custom) for code review, security, testing, and more. Keep always-on instructions under ~100 bullet points or Claude starts ignoring them.
+> **TL;DR:** CLAUDE.md gives Claude standing instructions. Rules enforce style and behavior (7 always-loaded, 8 scoped). Hooks enforce rules mechanically - blocking bad writes, catching incomplete work, detecting loops. Agents are specialists (18 custom) for code review, security, testing, and more. Keep always-on instructions under ~70 bullet points or Claude starts ignoring them.
 
-For a quick table of every rule, hook, agent, and skill with community comparisons, see the [Component Reference](component-reference.md). This guide explains how the pieces fit together.
+Each component type has its own README with the problems it solves and how it's used: [Rules](../rules/README.md), [Hooks](../hooks/README.md), [Agents](../agents/README.md), [Skills](../skills/README.md). This guide explains how the pieces fit together.
 
 ## CLAUDE.md
 

@@ -1,240 +1,53 @@
 ---
 title: Agents
 ---
-<!-- Last updated: 2026-03-23 -->
+<!-- Last updated: 2026-03-26T14:00+11:00 -->
 
 ## Agents
 
-> **TL;DR:** 18 custom agents across four categories:
+> **TL;DR:** 18 custom agents across four roles:
 >
-> - **Read-only agents** - `code-reviewer`, `a11y`, `security`, `perf`, `simplify`, `ui-review`, `migration-reviewer`, `cleanup`, `feasibility-check`, `wp-reviewer`, `wp-perf`, `wp-security`. Structurally blocked from writing files through tool restrictions (no Write/Edit in frontmatter). `code-reviewer` and `wp-reviewer` have additional hook enforcement via `agent-guard-write-block.sh`.
-> - **Builder agents** - `backend-builder`, `frontend-builder`, `test-writer`, `wp`. Run in worktrees with `maxTurns: 30`. All four escalate after 2 failed approaches instead of looping ("When You're Stuck" section).
-> - **Research agents** - `architect` (opus, 25 turns, 8-turn research limit), `feasibility-check` (sonnet, 20 turns, pre-build spec assumption checker).
-> - **Fast agents** - `quick-edit` (haiku, 10 turns, 50-line limit, escalates to sonnet when task is too complex).
->
-> `architect`, `code-reviewer`, and `test-writer` persist memory across sessions. `simplify` runs on sonnet (not haiku) because proving behavioral equivalence needs deeper reasoning.
+> - **Read-only auditors** (12) - `code-reviewer`, `a11y`, `security`, `perf`, `simplify`, `ui-review`, `migration-reviewer`, `cleanup`, `feasibility-check`, `wp-reviewer`, `wp-perf`, `wp-security`. Structurally blocked from writing files.
+> - **Builders** (4) - `backend-builder`, `frontend-builder`, `test-writer`, `wp`. Run in worktrees for parallel execution.
+> - **Researchers** (1) - `architect`. Deep analysis, produces decision documents, never writes implementation code.
+> - **Fast agents** (1) - `quick-edit`. Haiku model, 50-line limit, escalates to sonnet when too complex.
 
-For what each agent does, why it exists, and how it compares to community alternatives, see the [Component Reference](../docs/component-reference.md#agents).
+### The problem
 
-Rules apply to every conversation. But some tasks need a different personality entirely - a code reviewer that only reads and never writes, a security auditor that can use a cheaper model, a WordPress specialist that only loads PHP-related tools. Rules can't do that. Agents can.
+Some tasks need a different personality entirely. A code reviewer that can only read, never write. A security auditor on a cheaper model. A WordPress specialist with PHP-specific tools. Rules can't change what tools are available or what model runs. Agents can.
 
-Agents are markdown files with YAML frontmatter that define specialist subagents. Claude can delegate tasks to them when the work matches. The agent runs with its own instructions, its own tool restrictions, and optionally its own model. It reports back when done.
+### How I use agents
 
-**Tip:** Run `/agents` to create agents interactively, or use `--agents` CLI flag for session-scoped agents.
+**Structural restrictions beat prompt instructions.** The code reviewer's frontmatter lists four tools: `Read, Grep, Glob, Bash`. No `Write`, no `Edit`. A rule saying "never modify code when reviewing" works most of the time. Removing the tools makes it structurally impossible. Two hook guards (`agent-guard-write-block.sh`, `agent-guard-readonly.sh`) add a second layer for agents that need Bash but shouldn't run destructive commands.
 
-### Frontmatter fields
+**Four roles, four patterns:**
 
-| Field | What it does |
-|-------|-------------|
-| `name` | Lowercase-with-hyphens identifier. How you reference the agent. (Required) |
-| `description` | Tells Claude when to delegate to this agent. Quality matters - a vague description means missed delegations. (Required) |
-| `tools` | Comma-separated list of allowed tools. Omit to inherit all tools. |
-| `disallowedTools` | Tools to deny - removed from inherited or specified list. |
-| `model` | `sonnet`, `opus`, `haiku`, or `inherit`. Default: inherit. |
-| `permissionMode` | `default`, `acceptEdits`, `dontAsk`, `bypassPermissions`, or `plan`. Controls permission prompts. |
-| `maxTurns` | Limits agentic turns. Prevents runaway agents from looping. |
-| `skills` | Skills to load into the subagent's context at startup. |
-| `mcpServers` | MCP servers available to this subagent. |
-| `hooks` | Lifecycle hooks scoped to this subagent. |
-| `memory` | Persistent memory scope: `user`, `project`, or `local`. |
-| `background` | Set to `true` to always run as a background task. Default: `false`. |
-| `isolation` | Set to `worktree` to run in a temporary git worktree. |
+*Read-only auditors* are the most common. 12 of 18 agents are read-only. They analyse and report - they never change code. This is the pattern for code review, security audit, accessibility check, performance review, and feasibility checking. The `feasibility-check` agent is worth calling out: it extracts what a spec assumes about the codebase (fields, endpoints, dependencies), greps for each assumption, and reports CONFIRMED / NOT FOUND / CONTRADICTED. Run it before building to catch spec problems early.
 
-### Example: code-reviewer.md
+*Builders* run in worktrees with `maxTurns: 30`. All four escalate after 2 failed approaches instead of looping. Launch multiple builders in parallel with `isolation: "worktree"` when changes don't overlap.
 
-The clearest example of why you'd want an agent instead of a rule. The code reviewer needs to:
+*The architect* has `memory: user` so it accumulates knowledge across projects. It researches approaches and produces structured decision documents - never implementation code. Useful for technology choices and migration strategies.
 
-1. Be read-only - it should never write or edit files, only report
-2. Run on `sonnet` (lighter model) since reviewing doesn't need the most capable model
-3. Have a 25-turn limit to prevent infinite review loops
+*Quick-edit* runs on haiku with a 50-line limit enforced by `agent-guard-max-lines.sh`. For typo fixes, variable renames, config tweaks. Escalates to sonnet if the task is too complex.
 
-Here's its frontmatter:
+**Model routing saves cost.** Not every task needs opus. Code review runs on sonnet. Quick edits run on haiku. Security audits run on opus because the consequences of missing something are high. Match the model to the stakes.
 
-```yaml
----
-name: code-reviewer
-description: General-purpose code reviewer. Examines code for logical errors, race conditions, edge cases, type mismatches, and CLAUDE.md compliance. Read-only - never modifies code. Works on specific files by default; supports git diff review when explicitly requested.
-tools: Read, Grep, Glob, Bash
-model: sonnet
-maxTurns: 25
----
-```
+### When to use an agent vs a skill vs a rule
 
-Four tools only: `Read`, `Grep`, `Glob`, `Bash`. No `Write`, no `Edit`. The model declaration (`sonnet`) makes every code review cheaper than if it ran on `opus`. The `maxTurns: 25` means it can do a thorough review without risking an infinite loop.
+- **Agent** = different capability set. Different model, different tools, different permissions. The task needs isolation or restriction.
+- **Skill** = reusable workflow in the main context. Same model, same tools. The task needs structured steps, not a different personality.
+- **Rule** = always-on constraint. Not a task at all - a behavioural guardrail.
 
-A rule can say "never modify code when reviewing." An agent makes it structurally impossible.
+Rule of thumb: if it's a style preference or a guardrail, it's a rule. If it's a structured procedure, it's a skill. If it's a distinct task needing different capabilities, it's an agent.
 
-### Where agent files live
+### What's in here
 
-This repo's `agents/` directory maps to `~/.claude/agents/`. These are **user-global agents** - available across every project.
+**Read-only auditors:** `a11y`, `code-reviewer`, `cleanup`, `feasibility-check`, `migration-reviewer`, `perf`, `security`, `simplify`, `ui-review`, `wp-perf`, `wp-reviewer`, `wp-security`
 
-For **project-specific agents**, put them in `.claude/agents/` at the project root. Project agents are available only in that project. If you have a database migration specialist that only makes sense for one codebase, put it there rather than polluting your global agent list.
+**Builders:** `backend-builder`, `frontend-builder`, `test-writer`, `wp`
 
-### Rules vs agents: when to use which
+**Research:** `architect`
 
-| Use a rule when... | Use an agent when... |
-|-------------------|---------------------|
-| It's a constraint that always applies | It's a task you'd delegate to a specialist |
-| "Always use tabs" | "Review this code for bugs" |
-| "Never skip tests" | "Audit this for security issues" |
-| "No console.log" | "Rewrite this as a WordPress plugin" |
-
-Rule of thumb: if it's a style preference or a guardrail → rule. If it's a distinct task with a different set of capabilities → agent.
-
-### Subagents vs agent teams
-
-Every agent in this repo is designed as a **subagent** - a focused specialist that does work and reports back. Claude Code also offers **agent teams** (experimental), where multiple Claude instances coordinate through shared task lists and direct messaging. These are different tools for different problems.
-
-**Why these agents are subagents:**
-- Each agent has a single, well-defined role (review code, audit security, write tests)
-- They report findings or deliver artifacts back to the caller - they don't need to discuss with each other
-- Token cost is proportional to the task, not multiplied per teammate
-- Tool restrictions, hooks, and model selection give enough control without team coordination overhead
-
-**When agent teams would add value:**
-- Multiple reviewers need to cross-reference and challenge each other's findings (e.g., a security reviewer flagging that an a11y fix introduces an XSS vector)
-- Debugging with competing hypotheses - agents actively trying to disprove each other's theories
-- Cross-layer feature work where frontend, backend, and test writers need to agree on interfaces in real time
-
-**Current tradeoffs against teams:**
-- Significantly higher token usage (each teammate is a full Claude instance)
-- Experimental status with known limitations (no session resumption, task status lag, slow shutdown)
-- No per-agent effort control, so teammates can't run at different reasoning depths
-
-For now, subagents cover our use cases more efficiently. Revisit teams when token costs improve or per-agent effort levels land.
-
-### Agent-scoped hooks
-
-Agents can define lifecycle hooks in their frontmatter. These hooks run only when the agent is active, enforcing constraints structurally rather than relying on prompt instructions alone.
-
-Two patterns demonstrated in this repo:
-
-**Command blocking** (`code-reviewer.md`) - A PreToolUse hook on `Bash` that regex-matches destructive commands (`rm`, `mv`, `git commit`, etc.) and exits with code 2 to block execution. A second matcher blocks `Write|Edit` entirely. This makes the "read-only" contract enforceable, not just advisory. The logic lives in external scripts (`hooks/agent-guard-readonly.sh` and `hooks/agent-guard-write-block.sh`) to avoid fragile inline YAML.
-
-```yaml
-hooks:
-  PreToolUse:
-    - matcher: "Bash"
-      hooks:
-        - type: command
-          command: "~/.claude/hooks/agent-guard-readonly.sh"
-          timeout: 5
-    - matcher: "Write|Edit"
-      hooks:
-        - type: command
-          command: "~/.claude/hooks/agent-guard-write-block.sh"
-          timeout: 5
-```
-
-**Content validation** (`quick-edit.md`) - A PreToolUse hook on `Write|Edit` that counts lines in the tool input and blocks edits exceeding 50 lines. Enforces the "max 50 lines" escalation rule at the tool level. Logic in `hooks/agent-guard-max-lines.sh`.
-
-```yaml
-hooks:
-  PreToolUse:
-    - matcher: "Write|Edit"
-      hooks:
-        - type: command
-          command: "~/.claude/hooks/agent-guard-max-lines.sh"
-          timeout: 5
-```
-
-Hook syntax: `matcher` is a regex against tool names. `exit 2` blocks the tool call. `exit 0` allows it. `timeout` is in seconds. Prefer external scripts over inline `command: |` blocks - inline YAML is fragile and a parse error silently breaks enforcement.
-
-### Preloading skills
-
-The `skills` field loads skill content into the agent's context at startup. Unlike invoking a skill mid-conversation, preloading injects the full skill instructions before the agent begins work.
-
-```yaml
-skills:
-  - debug-wp
-```
-
-This is used on `wp.md` to preload the `debug-wp` debugging methodology. The tradeoff is context cost - every preloaded skill consumes tokens on every invocation, even when not needed. Only preload skills that are central to the agent's role.
-
-### Allowlist vs denylist tooling
-
-Two approaches to restricting an agent's tools:
-
-**Allowlist** (`tools`) - Explicitly lists every tool the agent can use. Agent can use ONLY these tools. Best when the agent has a narrow, well-defined role.
-
-```yaml
-tools: Read, Grep, Glob  # Only these three - nothing else
-```
-
-**Denylist** (`disallowedTools`) - Agent inherits all tools from the parent session, minus the listed ones. Best when the agent needs most tools but should be blocked from specific capabilities.
-
-```yaml
-disallowedTools: WebSearch, WebFetch  # Everything except these two
-```
-
-Used on `test-writer.md` - test writers should work with the codebase (Read, Write, Edit, Bash, Grep, Glob, and any future tools), but should never browse the web for test patterns. A denylist is more maintainable here than an allowlist that needs updating when new tools are added.
-
-**When to use which:**
-- Use `tools` (allowlist) for restrictive agents: code reviewers, auditors, read-only specialists
-- Use `disallowedTools` (denylist) for permissive agents that need "everything except X"
-- Don't use both on the same agent - pick one approach
-
-### New in recent releases
-
-A few agent-related features worth knowing about:
-
-**Permission modes** - Agents can specify a `permissionMode` to control how tool permissions are handled. `plan` mode lets the agent analyze without modifying files. `dontAsk` auto-denies tools unless pre-approved. `bypassPermissions` skips all prompts (for safe environments). The same five modes (`default`, `acceptEdits`, `plan`, `dontAsk`, `bypassPermissions`) are also available as a global `defaultMode` setting.
-
-**Agent teams** (experimental) - Multiple Claude Code instances coordinating on work. A team lead delegates, teammates work independently with shared task lists and direct messaging. Enabled via `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` or settings. Higher token usage than single sessions. See the [agent teams docs](https://code.claude.com/docs/en/agent-teams).
-
-**PostToolUseFailure** - A hook event that fires after a tool call fails (companion to `PostToolUse` which fires on success). Cannot block since the failure already happened. Useful for logging or alerting on tool failures.
-
-**Plugin hooks** - Plugins can bundle their own hooks via a `hooks/hooks.json` file. When a plugin is enabled, its hooks merge with user and project hooks. This is a plugin-specific mechanism, not a standalone alternative to `settings.json` for regular hook configuration.
-
----
-
-### Files in this folder
-
-How to use this folder in Claude:
-
-1. Copy `agents/` to `~/.claude/agents/`
-2. Run `/agents` to confirm discovery and invocation names
-3. Keep each agent focused and frontmatter-driven (`description`, `tools`, `model`, `maxTurns`, etc.)
-
-| File | What it does | Notable features |
-|------|--------------|------------------|
-| `a11y.md` | Deep WCAG 2.2 accessibility auditor (semantic HTML, keyboard, ARIA, forms, contrast). | read-only |
-| `architect.md` | Deep architectural research and recommendation agent (decision docs, no implementation). | `memory: user` |
-| `backend-builder.md` | Backend implementation specialist for routes, schemas, and server-side services. | `maxTurns: 30` |
-| `cleanup.md` | Dead-code and cruft cleanup specialist. | |
-| `code-reviewer.md` | Read-only reviewer for bugs, edge cases, and CLAUDE.md compliance. | `hooks` (command blocking) |
-| `frontend-builder.md` | Frontend implementation specialist for components/pages/features. | `maxTurns: 30` |
-| `migration-reviewer.md` | Database migration safety reviewer (SQL, ORM, WordPress dbDelta). | read-only |
-| `perf.md` | Performance audit specialist (runtime, bundle, rendering inefficiencies). | |
-| `quick-edit.md` | Fast trivial-edit specialist with strict scope guardrails. | `hooks` (content validation) |
-| `security.md` | Deep security audit specialist adapted to stack context. | |
-| `simplify.md` | Complexity-reduction specialist for over-engineered code. | `model: sonnet` |
-| `test-writer.md` | Test-writing specialist aligned with project test framework/patterns. | `disallowedTools`, `maxTurns: 30` |
-| `ui-review.md` | UI/UX review specialist for usability/accessibility/responsiveness. | |
-| `wp.md` | Principal WordPress implementation specialist (architecture/hooks/REST/editor). | |
-| `wp-perf.md` | WordPress performance specialist (queries, caching, CWV, DB optimization). | |
-| `wp-reviewer.md` | Read-only WordPress code reviewer (PHP/hooks/queries/REST/security standards). | read-only, lean context |
-| `wp-security.md` | WordPress security specialist (sanitization, escaping, nonce/auth/REST risk). | `model: opus` |
-| `feasibility-check.md` | Pre-build spec assumption checker. Extracts what a spec assumes about the codebase, greps for each assumption, reports CONFIRMED/NOT FOUND/CONTRADICTED. | read-only |
+**Fast:** `quick-edit`
 
 `references/` contains supporting reference docs used by WordPress-specialized agents.
-
-`README.md` in this folder is the usage guide and frontmatter reference.
-
----
-
-## Continue Reading
-
-[Previous: Hooks](../hooks/README.md) | [Next: Skills & Memory](../skills/README.md)
-
-## Quick Links
-
-- [Home](../index.md)
-- [Start Here](../docs/start-here.md)
-- [Core Guide](../docs/core-guide.md)
-- [Governance Workflow](../docs/governance-workflow.md)
-- [Rules](../rules/README.md)
-- [Hooks](../hooks/README.md)
-- [Skills & Memory](../skills/README.md)
-
-

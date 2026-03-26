@@ -44,7 +44,6 @@ If you want to suggest changes, see [CONTRIBUTING.md](CONTRIBUTING.md).
 - [Full Documentation](#full-documentation)
 	- [Start Here](docs/start-here.md)
 	- [Core Guide](docs/core-guide.md)
-	- [Component Reference](docs/component-reference.md)
 	- [Governance Review Template](docs/governance-review-template.md)
 	- [Governance Audits](docs/governance/audits/)
 	- [Governance Evidence](docs/governance/evidence/)
@@ -65,14 +64,13 @@ Want to try this now?
 
 That's it. Claude Code automatically loads `~/.claude/CLAUDE.md` at session start, picks up rules from `~/.claude/rules/`, runs hooks from `~/.claude/hooks/`, and makes agents from `~/.claude/agents/` available.
 
-Read the rest of this to understand what each part does and why - so you can adapt it to your own workflow instead of just running mine. For a quick overview of every component with community comparisons, see the [Component Reference](docs/component-reference.md).
+Read the rest of this to understand what each part does and why - so you can adapt it to your own workflow instead of just running mine. Each component type has its own README explaining the problems it solves: [Rules](rules/README.md), [Hooks](hooks/README.md), [Agents](agents/README.md), [Skills](skills/README.md).
 
 ## Recommended Reading Path
 
 1. [Start Here](docs/start-here.md)
 2. [Core Concepts and Workflow: Core Guide](docs/core-guide.md)
-3. [Component Reference: What everything does and why](docs/component-reference.md)
-4. [Governance Process: Governance Workflow](docs/governance-workflow.md)
+3. [Governance Process: Governance Workflow](docs/governance-workflow.md)
 5. [Automation Layer: Hooks](hooks/README.md)
 6. [Agent Roles: Agents](agents/README.md)
 7. [Skills and Memory Model: Skills and Memory](skills/README.md)
