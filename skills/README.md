@@ -72,3 +72,7 @@ Most approaches to session-to-session learning either capture everything automat
 4. **Promote** - permanent learnings get moved to CLAUDE.md or rule files where they're explicit and version-controlled
 
 The memory directory stays lean. Stale entries get removed. The 200-line limit means every slot matters.
+
+---
+
+[Previous: Agents](../agents/README.md) | [Next: Governance Workflow](../docs/governance-workflow.md)

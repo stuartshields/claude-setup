@@ -75,3 +75,7 @@ The principle: **if a behaviour matters enough to write a rule about, and the ru
 **Tracking and observability:** `track-modified-files.sh`, `track-tasks.sh`, `hook-observability-summary.sh`, `log-instructions.sh`
 
 **Policy and notifications:** `block-git-commit.sh`, `check-unfinished-tasks.sh`, `verify-before-stop.sh`, `remind-project-claude.sh`, `stop-dispatcher.sh`, `notification-alert.sh`, `permission-notify.sh`
+
+---
+
+[Previous: Rules](../rules/README.md) | [Next: Agents](../agents/README.md)

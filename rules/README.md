@@ -54,3 +54,7 @@ Rules fix that. Files in `~/.claude/rules/` load automatically - Claude reads th
 - `harness-maintenance.md` - instruction budget, rule quality checks, hooks-over-prose strategy
 - `research-and-decisions.md` - source tracking, Architecture Decision Records
 - `staleness.md` - 30-day freshness checks on guidance files
+
+---
+
+[Previous: Core Guide](../docs/core-guide.md) | [Next: Hooks](../hooks/README.md)

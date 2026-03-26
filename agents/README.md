@@ -51,3 +51,7 @@ Rule of thumb: if it's a style preference or a guardrail, it's a rule. If it's a
 **Fast:** `quick-edit`
 
 `references/` contains supporting reference docs used by WordPress-specialized agents.
+
+---
+
+[Previous: Hooks](../hooks/README.md) | [Next: Skills & Memory](../skills/README.md)

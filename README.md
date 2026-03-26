@@ -70,11 +70,11 @@ Read the rest of this to understand what each part does and why - so you can ada
 
 1. [Start Here](docs/start-here.md)
 2. [Core Guide](docs/core-guide.md)
-3. [Governance Workflow](docs/governance-workflow.md)
-4. [Rules](rules/README.md)
-5. [Hooks](hooks/README.md)
-6. [Agents](agents/README.md)
-7. [Skills and Memory](skills/README.md)
+3. [Rules](rules/README.md)
+4. [Hooks](hooks/README.md)
+5. [Agents](agents/README.md)
+6. [Skills and Memory](skills/README.md)
+7. [Governance Workflow](docs/governance-workflow.md)
 
 ---
 

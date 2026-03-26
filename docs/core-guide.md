@@ -98,8 +98,4 @@ Keep notification hooks personal. Reserve project settings for hooks the whole t
 
 ## Continue Reading
 
-- [Rules](../rules/README.md) - the instruction budget problem and how scoping solves it
-- [Hooks](../hooks/README.md) - enforcement patterns and the prose-to-hook conversion lesson
-- [Agents](../agents/README.md) - specialist roles and when structural restrictions beat prompt instructions
-- [Skills](../skills/README.md) - workflow skills, tool skills, and memory as a lifecycle
-- [Governance Workflow](governance-workflow.md) - keeping your setup healthy over time
+[Next: Rules](../rules/README.md) - the instruction budget problem and how scoping solves it
