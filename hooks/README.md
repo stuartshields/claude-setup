@@ -1,14 +1,14 @@
-<!-- Last updated: 2026-03-21 -->
+<!-- Last updated: 2026-03-26T12:00+11:00 -->
 
 ## Hooks
 
-> **TL;DR:** 22 hooks across 10 lifecycle events:
+> **TL;DR:** 26 hooks across 10 lifecycle events:
 >
 > - **Quality gates** - `check-code-quality.sh`, `project-quality-gates.sh`, `stop-quality-check.sh`. Block bad code before it's written (stubs, console.log, space indentation) and catch incomplete work at session end.
 > - **Agent guards** - `agent-guard-write-block.sh`, `agent-guard-readonly.sh`, `agent-guard-max-lines.sh`. Enforce read-only and scope limits on specific agents through PreToolUse hooks.
-> - **Loop and drift detection** - `detect-perf-degradation.sh`, `drift-review-stop.sh`, `repeated-edit-guard.sh`. Catch reasoning loops, oscillating edits, and cognitive drift before they waste context.
+> - **Loop and drift detection** - `detect-perf-degradation.sh`, `drift-review-stop.sh`, `repeated-edit-guard.sh`, `repeated-bash-guard.sh`, `repeated-approach-guard.sh`, `context-drift-guard.sh`. Catch reasoning loops, oscillating edits, command repetition, write-revert-rewrite cycles, and context drift (consecutive reads without action). The last three replace prose rules that weren't being followed - hooks enforce what rules can't.
 > - **Memory and session lifecycle** - `memory-review-prompt.sh`, `compact-restore.sh`, `pre-compaction-preserve.sh`, `session-cleanup.sh`. Four-trigger memory review (phase completion, session start, low context, wrap-up phrases), compaction state preservation and restoration.
-> - **Tracking and observability** - `track-modified-files.sh`, `track-tasks.sh`, `hook-observability-summary.sh`. Record what changed and when for drift detection and session summaries.
+> - **Tracking and observability** - `track-modified-files.sh`, `track-tasks.sh`, `hook-observability-summary.sh`, `log-instructions.sh`. Record what changed and when for drift detection and session summaries. `log-instructions.sh` logs loaded instructions for the `/debug-rules` skill.
 > - **Policy and notifications** - `block-git-commit.sh`, `check-unfinished-tasks.sh`, `verify-before-stop.sh`, `remind-project-claude.sh`, `stop-dispatcher.sh`, `notification-alert.sh`, `permission-notify.sh`. Commit blocking, task state warnings, CLAUDE.md reminders, and attention alerts.
 >
 > Exit 2 blocks the action, exit 0 allows it, exit 1 is a silent warning.
@@ -218,20 +218,25 @@ How to use this folder in Claude:
 | `check-code-quality.sh` | Deterministic `PreToolUse` quality gate for `Write`/`Edit`. Catches: space indentation, trailing whitespace, console.log, debugger, placeholder comments, TODO stubs, "not implemented" throws, Python pass stubs. |
 | `check-unfinished-tasks.sh` | `Stop` + `UserPromptSubmit` hook that warns/blocks on incomplete task state. |
 | `compact-restore.sh` | `SessionStart` restore hook that reloads pre-compaction saved state. |
+| `context-drift-guard.sh` | `PostToolUse` (`Read\|Grep\|Glob\|Edit\|Write`) hook that warns after 5+ consecutive reads without an edit. Replaces the former `context-management.md` prose rule. Resets on write/edit. |
 | `detect-perf-degradation.sh` | `PostToolUse` + `PostToolUseFailure` hook that detects reasoning loops and error spikes. |
-| `hook-observability-summary.sh` | `PostToolUse` + `PostToolUseFailure` hook that tracks hook outcomes per session and rebuilds an aggregate summary across all sessions every 10th event. |
-| `memory-review-prompt.sh` | Four-trigger memory review: GSD phase completion (`UserPromptSubmit`), accumulated memory on session start (`SessionStart`), low context at 30% remaining (`PostToolUse`), wrap-up phrases like "let's wrap up" or "I think we're done" (`UserPromptSubmit`). Low-context trigger suggests `--compact` mode. Advisory only. |
 | `drift-review-stop.sh` | `Stop` hook that catches common cognitive-drift response patterns. |
+| `hook-observability-summary.sh` | `PostToolUse` + `PostToolUseFailure` hook that tracks hook outcomes per session and rebuilds an aggregate summary across all sessions every 10th event. |
+| `log-instructions.sh` | `SessionStart` hook that logs loaded instructions for the `/debug-rules` skill audit. |
+| `memory-review-prompt.sh` | Four-trigger memory review: GSD phase completion (`UserPromptSubmit`), accumulated memory on session start (`SessionStart`), low context at 30% remaining (`PostToolUse`), wrap-up phrases like "let's wrap up" or "I think we're done" (`UserPromptSubmit`). Low-context trigger suggests `--compact` mode. Advisory only. |
 | `notification-alert.sh` | `Notification` hook for terminal/native attention alerts. |
 | `permission-notify.sh` | `PermissionRequest` hook that plays alert when approval is needed. |
-| `project-quality-gates.sh` | `PostToolUse` (`Write\|Edit`) advisory hook that detects project lint/typecheck/test commands from package.json and config files. Rate-limited to 60s. |
 | `pre-compaction-preserve.sh` | `PreCompact` hook that saves session/project state before compaction. |
+| `project-quality-gates.sh` | `PostToolUse` (`Write\|Edit`) advisory hook that detects project lint/typecheck/test commands from package.json and config files. Rate-limited to 60s. |
 | `remind-project-claude.sh` | `UserPromptSubmit` hook that emits actionable CLAUDE.md reminders. |
+| `repeated-approach-guard.sh` | `PostToolUse` (`Edit\|Write`) hook that detects write-revert-rewrite oscillation by tracking file content hashes. Replaces the former `discipline.md` "watch for write-delete-rewrite" prose rule. |
+| `repeated-bash-guard.sh` | `PreToolUse` (`Bash`) hook that blocks after 3+ identical consecutive Bash commands. Catches re-running linters expecting different output. |
+| `repeated-edit-guard.sh` | `PreToolUse` (`Edit\|Write`) hook that warns on 2nd edit and blocks pattern on 3rd edit to the same file. |
 | `session-cleanup.sh` | `SessionEnd` hook that removes session temp artifacts. |
 | `stop-dispatcher.sh` | Single `Stop` dispatcher that runs stop checks, aggregates all blocking reasons, and returns one final decision. |
 | `stop-quality-check.sh` | `Stop` hook that blocks incomplete-work completion patterns. |
-| `track-modified-files.sh` | `PostToolUse` (`Write|Edit`) tracker for files modified this session. |
-| `track-tasks.sh` | `PostToolUse` (`TaskCreate|TaskUpdate`) tracker for task lifecycle state. |
+| `track-modified-files.sh` | `PostToolUse` (`Write\|Edit`) tracker for files modified this session. |
+| `track-tasks.sh` | `PostToolUse` (`TaskCreate\|TaskUpdate`) tracker for task lifecycle state. |
 | `verify-before-stop.sh` | `UserPromptSubmit` advisory digest for compact, rate-limited verification reminders. |
 
 `README.md` in this folder is the operational guide you're reading now.

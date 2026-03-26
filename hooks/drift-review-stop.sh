@@ -37,7 +37,7 @@ if [ -n "$CWD" ] && [ -d "$CWD" ]; then
 	ARTIFACTS=$(find "$PROJECT_ROOT" -maxdepth 4 \( -name "*.bak" -o -name "*.orig" -o -name "*.tmp" \) \
 		-not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/vendor/*" 2>/dev/null | head -10)
 	if [ -n "$ARTIFACTS" ]; then
-		ISSUES="${ISSUES}LEFTOVER ARTIFACTS - delete these files:\n${ARTIFACTS}\n\n"
+		ISSUES="${ISSUES}LEFTOVER ARTIFACTS — delete these files:\n${ARTIFACTS}\n\n"
 	fi
 fi
 
@@ -51,7 +51,7 @@ while IFS= read -r f; do
 				match($0, /^[0-9]+/)
 				num = substr($0, RSTART, RLENGTH) + 0
 				if (num <= prev_num && num == 1) {
-					# New list starting at 1 - reset tracking
+					# New list starting at 1 — reset tracking
 					delete seen
 					prev_num = 0
 				}
@@ -61,7 +61,7 @@ while IFS= read -r f; do
 				next
 			}
 			/^[[:space:]]*$/ || /^#/ || /^---/ || /^[^0-9]/ {
-				# Non-list line - reset for next list
+				# Non-list line — reset for next list
 				if (in_list) { delete seen; prev_num = 0; in_list = 0 }
 			}
 		' "$f")
@@ -105,10 +105,10 @@ while IFS= read -r f; do
 	case "$f" in
 		*settings.json|*settings.local.json)
 			# Extract hook command paths
-			HOOK_PATHS=$(jq -r '.. | .command? // empty' "$f" 2>/dev/null | grep -oE '~?/[^ "]+\.(sh|js|py)' | sort -u)
+			HOOK_PATHS=$(jq -r '.. | .command? // empty' "$f" 2>/dev/null | grep -oE '(\$HOME|~)?/[^ "]+\.(sh|js|py)' | sort -u)
 			while IFS= read -r hp; do
 				[ -z "$hp" ] && continue
-				RESOLVED=$(echo "$hp" | sed "s|^~|$HOME|")
+				RESOLVED=$(echo "$hp" | sed -e "s|^\\\$HOME|$HOME|" -e "s|^~|$HOME|")
 				if [ ! -f "$RESOLVED" ]; then
 					ISSUES="${ISSUES}BROKEN PATH in ${f}: ${hp} does not exist\n\n"
 				fi
@@ -121,7 +121,7 @@ done < <(sort -u "$TRACK_FILE")
 
 if [ -n "$ISSUES" ]; then
 	touch "$FLAG"
-	printf "COGNITIVE DRIFT DETECTED - fix these before finishing:\n\n%b" "$ISSUES" >&2
+	printf "COGNITIVE DRIFT DETECTED — fix these before finishing:\n\n%b" "$ISSUES" >&2
 	exit 2
 fi
 

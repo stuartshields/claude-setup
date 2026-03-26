@@ -1,14 +1,14 @@
 ---
 title: Rules
 ---
-<!-- Last updated: 2026-03-25T10:00+11:00 -->
+<!-- Last updated: 2026-03-26T12:00+11:00 -->
 
 ## Rules
 
-> **TL;DR:** 16 rule files across 2 loading modes (plus 1 reference template):
+> **TL;DR:** 15 rule files across 2 loading modes:
 >
-> - **Always-on** (10 files) - `debugging.md` (4-step framework, anti-loop, rebuild-vs-patch), `discipline.md` (complete implementations, anti-pivot, scope control, spec challenge), `context-management.md` (context pruning, post-compaction discipline, 5-read limit, subagent delegation), `communication.md` (design discussion checkpoint, classify-before-acting, surface problems), `dependencies.md` (hallucination prevention, one-round verification), `security.md` (input validation, injection prevention, audit scoping), `research-and-decisions.md` (source tracking, ADRs), `staleness.md` (30-day freshness checks), `style.md` (tabs, clean code), `tool-usage.md` (Edit retry limit, Bash discipline, search budget).
-> - **Conditional** (6 files, scoped by file type) - `architecture.md`, `testing.md`, `ui-ux.md` (includes visual/CSS bug protocol), `php-wordpress.md`, `environment.md`, `harness-maintenance.md`. Load only when working with matching files, keeping the always-on count under the ~150 ceiling (including system prompt).
+> - **Always-on** (7 files, ~59 bullets) - `discipline.md` (complete implementations, anti-pivot, pattern discovery, regression awareness, verification, context discipline), `debugging.md` (4-step framework, hypothesis validation, anti-loop protocol), `communication.md` (classify-before-acting, question-is-the-task, surface problems), `dependencies.md` (hallucination prevention, dependency hygiene), `security.md` (injection prevention, secrets), `style.md` (tabs, clean code), `tool-usage.md` (Edit retry limit, search budget).
+> - **Conditional** (8 files, scoped by file type) - `architecture.md`, `testing.md`, `ui-ux.md`, `php-wordpress.md`, `environment.md`, `harness-maintenance.md`, `research-and-decisions.md`, `staleness.md`. Load only when working with matching files.
 >
 > Rules Claude already follows without instruction are deleted. Rules it keeps breaking get moved to hooks instead.
 
@@ -26,55 +26,52 @@ How to use this folder in Claude:
 
 The current rules here are split into always-loaded and conditional files. That keeps enforcement strict without wasting context on irrelevant stacks.
 
-### Design principles (v2026.4)
+### Design principles (v2026.5)
 
 These rules follow community-validated patterns for instruction compliance:
 
-- **Instruction budget awareness.** Always-loaded rules total ~95 bullet points (down from ~128 in v2026.3, ~310 originally). The system prompt adds ~50 more. Total stays under the ~150 ceiling where compliance degrades. Research: [Jaroslawicz et al.](https://dev.to/minatoplanb/i-wrote-200-lines-of-rules-for-claude-code-it-ignored-them-all-4639) - "double instructions, halve compliance."
+- **Instruction budget awareness.** Always-loaded rules total ~59 bullet points (down from ~95 in v2026.4, ~142 in v2026.3). The system prompt adds ~50 more. Total stays well under the ~150 ceiling where compliance degrades. Research: [Jaroslawicz et al.](https://dev.to/minatoplanb/i-wrote-200-lines-of-rules-for-claude-code-it-ignored-them-all-4639) - "double instructions, halve compliance."
+- **Hooks over prose for enforcement.** Rules that Claude repeatedly violated have been converted to hooks (`context-drift-guard.sh`, `repeated-approach-guard.sh`, `repeated-bash-guard.sh`). Prose rules are suggestions; hooks are laws.
 - **Positive framing.** Rules tell Claude what TO do, not what to avoid. Flipping negative rules to positive equivalents cuts violations by roughly half.
-- **Deduplication.** Each rule lives in exactly one file. Rules that duplicate system prompt directives are deleted - they waste instruction slots. Cross-cutting concepts are not repeated across files.
+- **Deduplication.** Each rule lives in exactly one file. Rules that duplicate system prompt directives are deleted - they waste instruction slots.
 - **Primacy/recency ordering.** Most-violated rules sit at the top and bottom of each file to exploit attention bias.
-- **Aggressive scoping.** Rules that only apply to specific file types use `paths:` frontmatter so they don't load during irrelevant sessions. 6 of 16 rule files are now scoped.
+- **Aggressive scoping.** Rules that only apply to specific file types use `paths:` frontmatter so they don't load during irrelevant sessions. 8 of 15 rule files are now scoped.
 
 ### Files in this folder
 
 | File | What it does |
 |------|--------------|
 | `architecture.md` | Modular-first structure guidance (200-line rule, atomic responsibility, monorepo boundaries). |
-| `debugging.md` | Root-cause-first debugging protocol: validate one hypothesis at a time, trace full data flow, no speculative fixes. |
-| `dependencies.md` | Blocks hallucinated packages/URLs and enforces dependency hygiene before adding or referencing anything external. |
-| `context-management.md` | Context pruning (5-read limit, subagent delegation, stay-where-user-points-you) and post-compaction discipline (trust summaries, don't re-read loop). |
-| `discipline.md` | Scope control, anti-overengineering rules, complete implementation checks, and regression awareness guardrails. |
-| `environment.md` | Configuration-file handling rules for build/tooling/env files (`tsconfig`, `.env`, Docker, bundler configs, etc.). |
-| `php-wordpress.md` | WordPress/PHP-specific development standards and conventions for WP projects. |
-| `security.md` | Always-on security baseline: input validation, SQL injection prevention, XSS prevention, secret handling. |
+| `communication.md` | When to ask vs act, question-is-the-task, surface problems, stop at task boundaries. |
+| `debugging.md` | 4-step debugging framework (reproduce/isolate/fix/validate), hypothesis validation, anti-loop protocol. |
+| `dependencies.md` | Blocks hallucinated packages/URLs and enforces dependency hygiene. |
+| `discipline.md` | Complete implementations, anti-pivot rules, pattern discovery, regression awareness, verification, and context discipline (merged from former context-management.md). |
+| `environment.md` | HTTPS by default, agent/plugin routing guidance (loads for config files). |
+| `harness-maintenance.md` | Research-first protocol for harness changes, instruction budget ceiling, rule quality checks (loads for `~/.claude/` files only). |
+| `php-wordpress.md` | WordPress/PHP security, i18n, query patterns, and PHP standards (loads for `.php`, `composer.json`). |
+| `research-and-decisions.md` | Research source tracking (`.planning/SOURCES.md`) and Architecture Decision Records (loads near `.planning/` files). |
+| `security.md` | Always-on security baseline: injection prevention, URL validation, secret handling. |
+| `staleness.md` | 30-day freshness checks on guidance files, auto-updates timestamps on edit (loads near `.claude/` files). |
 | `style.md` | Code style guardrails (tabs-only, clean code). |
-| `testing.md` | Test-first workflow and test quality rules (failing test first, behavior-focused assertions, mock skepticism). Now scoped to code files. |
-| `ui-ux.md` | Frontend UI/UX quality rules with WCAG 2.2 AA accessibility, W3C ARIA-first guidance. Includes visual/CSS bug protocol (moved from debugging.md). |
-| `harness-maintenance.md` | Scoped to `~/.claude/` files only. Enforces external research, instruction budget (~100 always-on bullet ceiling), rule quality checks (positive framing, rationale for non-obvious rules, primacy/recency anchoring), and source tracking when modifying the harness. |
-| `research-and-decisions.md` | Research source tracking (`.planning/SOURCES.md`) and Architecture Decision Records (`.planning/adr/`) for structured project decisions. |
-| `staleness.md` | Tracks last-updated dates on all guidance files. Flags files older than 30 days so AI best practices stay current as models evolve. |
-| `communication.md` | When to ask vs act, design discussion checkpoint, responding to the user, surfacing problems, progress and status. |
-| `tool-usage.md` | Edit retry limit (re-read after 2 failures), Bash discipline (use dedicated tools), WebSearch/WebFetch budget (3 searches, 2 fetches per question). |
+| `testing.md` | TDD, test quality, mock discipline (loads for code and test files). |
+| `tool-usage.md` | Edit retry limit, search budget. |
+| `ui-ux.md` | Design quality, accessibility, visual/CSS bug protocol (loads for component/view/template files). |
 
 ### Always-loaded rules
 
-These 10 files load every session:
+These 7 files load every session (~59 bullets total):
 
-- `context-management.md` - context pruning (5-read limit, subagent delegation, cross-project leash), post-compaction discipline
-- `debugging.md` - 4-step framework, anti-loop protocol, hypothesis-driven investigation, rebuild-vs-patch guidance
-- `dependencies.md` - hallucinated package prevention, one-round verification, dependency hygiene
-- `discipline.md` - complete implementations, anti-pivot rules, scope control, spec challenge, verification
-- `communication.md` - design discussion checkpoint, classify-before-acting, question-is-the-task, interview-first, surface-problems
-- `research-and-decisions.md` - research source tracking, Architecture Decision Records
-- `security.md` - input validation, injection prevention, secrets handling
-- `staleness.md` - 30-day freshness check on all guidance files, auto-updates dates on edit
+- `communication.md` - classify-before-acting, question-is-the-task, surface problems, stop at boundaries
+- `debugging.md` - 4-step framework, hypothesis validation, anti-loop protocol
+- `dependencies.md` - hallucinated package prevention, dependency hygiene
+- `discipline.md` - complete implementations, anti-pivot, pattern discovery, regression awareness, verification, context discipline
+- `security.md` - injection prevention, secrets handling
 - `style.md` - tabs, clean code
-- `tool-usage.md` - Edit retry limit, Bash discipline, search budget
+- `tool-usage.md` - Edit retry limit, search budget
 
 ### Conditional rules
 
-These 6 files are scoped by `paths:` frontmatter and only load when relevant files are in play.
+These 8 files are scoped by `paths:` frontmatter and only load when relevant files are in play.
 
 **Note:** User-level rules (`~/.claude/rules/`) require CSV format for `paths:` due to a [known bug](https://github.com/anthropics/claude-code/issues/21858). Use `paths: "**/*.vue,**/*.tsx"` not YAML arrays. Run `/debug-rules` to verify loading.
 
@@ -82,6 +79,8 @@ These 6 files are scoped by `paths:` frontmatter and only load when relevant fil
 - `environment.md` - HTTPS, build tooling, agent routing (loads for config files)
 - `harness-maintenance.md` - research-first protocol for harness changes (loads for `~/.claude/` files only)
 - `php-wordpress.md` - WordPress/PHP standards (loads for `.php`, `composer.json`)
+- `research-and-decisions.md` - source tracking, ADRs (loads near `.planning/` files)
+- `staleness.md` - freshness checks (loads near `.claude/` files)
 - `testing.md` - TDD, test quality, mock discipline (loads for code and test files)
 - `ui-ux.md` - design quality, accessibility (loads for component/view/template files)
 

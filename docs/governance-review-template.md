@@ -222,9 +222,3 @@ Decision:
 - Recurring failures:
 - Controls at risk:
 - Recommended focus for next cycle:
-
-## Related Docs
-
-- Setup overview: [README](../README.md)
-- Runtime and lifecycle details: [Core Guide](core-guide.md)
-- Hook implementation details: [Hooks README](../hooks/README.md)

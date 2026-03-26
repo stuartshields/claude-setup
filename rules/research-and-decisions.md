@@ -1,4 +1,7 @@
-<!-- Last updated: 2026-03-25T07:00+11:00 -->
+---
+paths: ".planning/**,**/SOURCES.md,**/adr/**"
+---
+<!-- Last updated: 2026-03-26T12:00+11:00 -->
 
 # Research Sources & Decision Records
 

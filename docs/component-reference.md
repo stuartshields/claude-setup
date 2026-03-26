@@ -1,11 +1,11 @@
 ---
 title: Component Reference
 ---
-<!-- Last updated: 2026-03-25T10:00+11:00 -->
+<!-- Last updated: 2026-03-26T12:00+11:00 -->
 
 # Component Reference
 
-> **TL;DR:** This setup has 10+6 rules, 22 hooks, 17 agents, and 11 skills. This page explains what each one does, why it exists, and how it compares to what the community builds. Use it to decide which parts to adopt and which to skip.
+> **TL;DR:** This setup has 7+8 rules, 26 hooks, 18 agents, and 11 skills. This page explains what each one does, why it exists, and how it compares to what the community builds. Use it to decide which parts to adopt and which to skip.
 
 The individual READMEs ([rules](../rules/README.md), [hooks](../hooks/README.md), [agents](../agents/README.md), [skills](../skills/README.md)) explain how each system works. This page is the quick-scan reference for what each component does and why it's here.
 
@@ -71,7 +71,7 @@ Prompt instructions control Claude's behaviour most of the time. But under press
 
 The agent guard hooks show the difference clearly. Telling an agent "you are read-only, do not modify files" in its system prompt works most of the time. A PreToolUse hook that exits 2 on Write/Edit calls works every time. The prompt sets intent, the hook guarantees it.
 
-This setup has 22 hooks across 10 lifecycle events. Most community setups have 3-6 and use them for formatting and commit blocking. The agent guards, stop gates, task tracking, drift detection, and observability hooks here go further than what I've found elsewhere.
+This setup has 26 hooks across 10 lifecycle events. Most community setups have 3-6 and use them for formatting and commit blocking. The agent guards, stop gates, task tracking, drift detection, and observability hooks here go further than what I've found elsewhere. Several hooks (`context-drift-guard.sh`, `repeated-approach-guard.sh`, `repeated-bash-guard.sh`) were converted from prose rules that weren't being reliably followed - hooks enforce what rules can't.
 
 ### Workflow skills that structure how you work
 
@@ -116,8 +116,8 @@ Some protections only work if you remember to invoke them. This setup has severa
 - **Dependency hallucination prevention** forces Claude to verify package names and URLs exist before referencing them. I haven't seen this pattern in other community setups.
 - **Spec challenge** (discipline.md) flags contradictory, ambiguous, or impossible requirements before building. A bad spec produces confidently wrong output that passes all your gates. The [`feasibility-check`](../agents/feasibility-check.md) agent extends this mechanically - it extracts what a spec assumes about the codebase (fields, endpoints, dependencies, patterns), greps for each assumption, and reports CONFIRMED/NOT FOUND/CONTRADICTED. Nobody else has pre-build spec assumption checking. Pimzino's spec-workflow validates spec format (are requirements testable?), not spec correctness (does this field actually exist?).
 - **Builder escalation** - all four builder agents (backend, frontend, test-writer, wp) stop and report after 2 failed approaches instead of burning remaining turns on variations of a failing approach. Superpowers has status codes (DONE/BLOCKED/NEEDS_CONTEXT) for this. Ours is simpler but covers the main case.
-- **Context management** ([`context-management.md`](../rules/context-management.md)) prevents the most common context waste patterns: re-reading files already in context, unscoped exploration, duplicating subagent work, and the post-compaction re-read loop. Broken out from discipline.md so these rules get their own primacy/recency anchoring instead of sitting in the attention dead zone of a 76-line file. Nobody else has a dedicated context management rule file.
-- **Discipline rules** (anti-pivot, scope control, spec challenge) prevent Claude's most common implementation failure modes without needing a specific skill or agent invocation.
+- **Context drift enforcement** - the `context-drift-guard.sh` hook warns after 5+ consecutive read-only tool calls without an edit, replacing the former `context-management.md` prose rule. The `repeated-approach-guard.sh` hook tracks file content hashes to detect write-revert-rewrite oscillation. These moved from prose to hooks because Claude wasn't reliably following the prose versions.
+- **Discipline rules** (anti-pivot, pattern discovery, verification) prevent Claude's most common implementation failure modes without needing a specific skill or agent invocation.
 
 ### WordPress depth
 
@@ -149,13 +149,13 @@ When Claude researches something externally (WebSearch, WebFetch, Context7) and 
 1. **Avoid re-researching.** Before looking something up, Claude checks SOURCES.md first - the answer may already be documented from a prior session.
 2. **Know when sources go stale.** The per-entry date records when the source was last verified, not when the decision was made. If you're revisiting a library choice 3 months later, you can see whether the research is still fresh or needs re-checking.
 
-This is defined in [`research-and-decisions.md`](../rules/research-and-decisions.md) - an always-loaded rule that also covers Architecture Decision Records (`.planning/adr/`). ADRs capture architectural choices with context, options considered, and consequences so future sessions don't reverse decisions without understanding why they were made. I haven't seen source tracking with verification dates or structured ADRs in other Claude Code setups.
+This is defined in [`research-and-decisions.md`](../rules/research-and-decisions.md) - a conditional rule (scoped to `.planning/` files) that also covers Architecture Decision Records (`.planning/adr/`). ADRs capture architectural choices with context, options considered, and consequences so future sessions don't reverse decisions without understanding why they were made. I haven't seen source tracking with verification dates or structured ADRs in other Claude Code setups.
 
 ---
 
 ## Rules
 
-Rules are markdown files that load into Claude's context and shape how it behaves. Ten load on every session (always-on), six load conditionally based on file paths.
+Rules are markdown files that load into Claude's context and shape how it behaves. Seven load on every session (always-on, ~59 bullets), eight load conditionally based on file paths.
 
 ### Always-on rules
 
@@ -164,13 +164,12 @@ These load every session regardless of project. They define the baseline behavio
 | Rule | What it does | Why it exists | Community comparison |
 |------|-------------|---------------|---------------------|
 | [`debugging.md`](../rules/debugging.md) | 4-step framework: Reproduce, Isolate, Fix, Validate. Anti-loop protocol (stop after 2 failed attempts). Rebuild-vs-patch guidance. Confirmation bias prevention. | Without this, Claude jumps straight to fixing without confirming the root cause. The anti-loop protocol prevents it from trying the same broken approach repeatedly. The rebuild rule acknowledges that sometimes starting fresh is faster than patching - research shows an incorrect first hypothesis biases you against correct solutions found later. | Superpowers has a `systematic-debugging` skill with similar 4-phase approach. Ours is always-loaded so it applies even without invoking a skill. The write-delete-rewrite detection is unique to this setup. Visual/CSS bug protocol moved to `ui-ux.md` (conditional, loads only for frontend files). |
-| [`discipline.md`](../rules/discipline.md) | Complete implementations, anti-pivot rules, scope control, spec challenge, regression awareness. | Prevents Claude from pivoting to easier approaches, skipping hard parts, making bonus changes, or building against a bad spec. Context management rules were split to their own file for better attention weight. | I haven't found an equivalent that covers this breadth. ECC has a `coding-style` rule that partially overlaps. The anti-pivot and spec challenge patterns are unique to this setup. |
-| [`context-management.md`](../rules/context-management.md) | Context pruning (5-read limit, trust earlier reads, subagent delegation, cross-project leash), post-compaction discipline (trust summaries, don't re-read loop). | Broken out from discipline.md. These rules sat in the middle of a 76-line file - the attention dead zone. Own file gives them primacy/recency anchoring. | Nobody else has a dedicated context management rule. Most setups rely on the system prompt's built-in context guidance. |
+| [`discipline.md`](../rules/discipline.md) | Complete implementations, anti-pivot rules, pattern discovery, regression awareness, verification, context discipline. | Prevents Claude from pivoting to easier approaches, skipping hard parts, or building without searching for existing patterns. Context discipline (merged from former context-management.md) covers compaction trust and request re-reading. Context drift enforcement moved to `context-drift-guard.sh` hook. | I haven't found an equivalent that covers this breadth. ECC has a `coding-style` rule that partially overlaps. The anti-pivot and pattern discovery rules are unique to this setup. |
 | [`style.md`](../rules/style.md) | Tabs only, Edit tool tab handling, no console.log, clean code. | Claude defaults to spaces and leaves debug statements. The Edit tool tab handling section prevents a known Claude Code bug where Edit fails on indented lines. | ECC has language-specific style rules (TypeScript, Python, Go). Ours is language-agnostic and focused on the tab/Edit tool interaction that trips up most setups. |
 | [`dependencies.md`](../rules/dependencies.md) | Verify packages/URLs exist before referencing. One-round verification (search once, don't try name variations). Ask before adding dependencies. | Claude hallucates package names - "sounds right" is the #1 source. This rule forces verification via WebSearch or `npm search` before writing an import, and limits it to one search round to prevent spiralling into alternative packages without asking. | I haven't found an equivalent in other setups. ECC covers dependency security in their `security` rule but not hallucination prevention. |
 | [`security.md`](../rules/security.md) | Input validation, parameterised queries, output escaping, secrets in env vars. | Baseline security patterns for every session. Lightweight - use the `security` agent for deep audits. | Trail of Bits has 35 security plugins - the community gold standard. Our rule is lighter but always-on, which means it applies even when you don't think to invoke a security review. |
-| [`research-and-decisions.md`](../rules/research-and-decisions.md) | Research source tracking (`.planning/SOURCES.md`) and Architecture Decision Records (`.planning/adr/`). | Prevents re-researching the same topics across sessions. ADRs capture why decisions were made so future sessions don't reverse them without knowing the context. | I haven't found an equivalent in other setups. Most setups track decisions in CLAUDE.md inline rather than structured records. |
-| [`staleness.md`](../rules/staleness.md) | Tracks `<!-- Last updated -->` dates across all guidance files. Flags files older than 30 days. | AI best practices evolve fast. Rules written 3 months ago may reference deprecated features or outdated patterns. This catches drift automatically. | I haven't found an equivalent in other setups. |
+| ~~`research-and-decisions.md`~~ | Moved to conditional rules (scoped to `.planning/` files). | | |
+| ~~`staleness.md`~~ | Moved to conditional rules (scoped to `.claude/` files). | | |
 | [`communication.md`](../rules/communication.md) | Design discussion checkpoint, classify-before-acting, question-is-the-task, words-before-tools on failure, interview-first when ambiguous. | Prevents Claude from jumping to implementation during design discussions, silently retrying failed operations, or springboarding from answers into unrequested actions. Split from discipline.md to separate interaction behaviour from implementation behaviour. | ECC's `/plan` command requires explicit approval before execution. Ours handles the informal case where there's no formal plan to approve. |
 | [`tool-usage.md`](../rules/tool-usage.md) | Edit retry limit (re-read after 2 failures), Bash discipline (use dedicated tools instead), WebSearch/WebFetch budget (3 searches, 2 fetches per question). | Prevents Claude from retrying failing Edit calls with whitespace variations (a common loop), using Bash for operations that have dedicated tools (reduces user visibility), and spiralling through search queries hoping for better results. | I haven't found an equivalent in other setups. Most rely on the system prompt's built-in tool guidance. |
 
@@ -188,6 +187,8 @@ These load only when you're working with matching file types. They add domain-sp
 | [`php-wordpress.md`](../rules/php-wordpress.md) | PHP/WordPress files | Theme/plugin structure, hooks, custom post types, WP security. | I haven't found an equivalentat this depth. |
 | [`environment.md`](../rules/environment.md) | Config files | Dev/production config patterns. | Trail of Bits has `devcontainer-setup`. |
 | [`harness-maintenance.md`](../rules/harness-maintenance.md) | `~/.claude/` files | Rules for editing the harness itself: research first, instruction budget, conflict checking. | ECC has a `harness-optimizer` agent (similar concept, different approach). |
+| [`research-and-decisions.md`](../rules/research-and-decisions.md) | `.planning/` files | Research source tracking (`.planning/SOURCES.md`) and Architecture Decision Records (`.planning/adr/`). Formerly always-on - scoped to reduce instruction budget. | I haven't found an equivalent in other setups. |
+| [`staleness.md`](../rules/staleness.md) | `.claude/` files | Tracks `<!-- Last updated -->` dates. Flags files older than 30 days. Formerly always-on - scoped to reduce instruction budget. | I haven't found an equivalent in other setups. |
 
 ---
 
@@ -217,7 +218,11 @@ Hooks are shell scripts that intercept Claude's actions at specific lifecycle po
 
 | Hook | When it fires | What it does | Community comparison |
 |------|--------------|-------------|---------------------|
-| [`detect-perf-degradation.sh`](../hooks/detect-perf-degradation.sh) | PostToolUse + PostToolUseFailure | Detects reasoning loops (same tool 3x in 10 calls) and error spikes (5+ failures in 10 calls). | I haven't found an equivalentas a hook. Performance is typically handled by agents/skills, not hooks. |
+| [`detect-perf-degradation.sh`](../hooks/detect-perf-degradation.sh) | PostToolUse + PostToolUseFailure | Detects reasoning loops (same tool 3x in 10 calls) and error spikes (5+ failures in 10 calls). | I haven't found an equivalent as a hook. Performance is typically handled by agents/skills, not hooks. |
+| [`repeated-edit-guard.sh`](../hooks/repeated-edit-guard.sh) | PreToolUse (Edit/Write) | Warns on 2nd edit, escalates on 3rd edit to the same file. Catches workaround chains. | I haven't found an equivalent in other setups. |
+| [`repeated-bash-guard.sh`](../hooks/repeated-bash-guard.sh) | PreToolUse (Bash) | Blocks after 3+ identical consecutive Bash commands. Catches re-running linters expecting different output. | I haven't found an equivalent in other setups. |
+| [`repeated-approach-guard.sh`](../hooks/repeated-approach-guard.sh) | PostToolUse (Edit/Write) | Tracks file content hashes to detect write-revert-rewrite oscillation. Converted from prose rule in discipline.md that wasn't being followed. | I haven't found an equivalent in other setups. |
+| [`context-drift-guard.sh`](../hooks/context-drift-guard.sh) | PostToolUse (Read/Grep/Glob/Edit/Write) | Warns after 5+ consecutive reads without an edit. Converted from prose rule in former context-management.md. Resets counter on write/edit. | I haven't found an equivalent in other setups. |
 | [`block-git-commit.sh`](../hooks/block-git-commit.sh) | PreToolUse (Bash) | Blocks `git commit` and destructive Bash patterns. | Common community pattern. Trail of Bits has safety hooks blocking dangerous commands. |
 
 ### Memory and session lifecycle
@@ -236,6 +241,7 @@ Hooks are shell scripts that intercept Claude's actions at specific lifecycle po
 | [`track-modified-files.sh`](../hooks/track-modified-files.sh) | PostToolUse (Write/Edit) | Logs files modified this session. | I haven't found an equivalent in other setups. |
 | [`track-tasks.sh`](../hooks/track-tasks.sh) | PostToolUse (TaskCreate/TaskUpdate) | Tracks task lifecycle state. | I haven't found an equivalent in other setups. |
 | [`hook-observability-summary.sh`](../hooks/hook-observability-summary.sh) | PostToolUse + PostToolUseFailure | Tracks hook outcomes and rebuilds aggregate summary every 10th event. | I haven't found an equivalent in other setups. |
+| [`log-instructions.sh`](../hooks/log-instructions.sh) | SessionStart | Logs loaded instructions for the `/debug-rules` skill audit. | I haven't found an equivalent in other setups. |
 
 ### Agent guards
 

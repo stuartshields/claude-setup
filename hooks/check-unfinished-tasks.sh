@@ -1,10 +1,10 @@
 #!/bin/bash
-# Stop + UserPromptSubmit hook - warns about incomplete tasks.
+# Stop + UserPromptSubmit hook — warns about incomplete tasks.
 # Stop: blocks Claude from finishing (exit 2) so it addresses remaining work.
 # UserPromptSubmit: injects reminder only on task-state changes/new-request pivots.
 # Safety: after 2 consecutive Stop blocks within 30s, downgrades to non-blocking warning.
 
-# Read only needed fields from stdin - avoid buffering full payload (screenshots = multi-MB base64)
+# Read only needed fields from stdin — avoid buffering full payload (screenshots = multi-MB base64)
 read -r SESSION_ID EVENT PROMPT < <(jq -r '[.session_id // "", .hook_event_name // "", .prompt // ""] | @tsv')
 
 [ -z "$SESSION_ID" ] && exit 0
@@ -16,7 +16,7 @@ MISMATCH_STATE="/tmp/claude-task-state-mismatch-${SESSION_ID}.txt"
 if [ -s "$MISMATCH_STATE" ]; then
 	MISMATCH_MSG=$(cat "$MISMATCH_STATE" 2>/dev/null)
 	if [ "$EVENT" = "Stop" ]; then
-		echo "TASK STATE MISMATCH: $MISMATCH_MSG - Resolve task mapping before finishing (update with a valid taskId)." >&2
+		echo "TASK STATE MISMATCH: $MISMATCH_MSG — Resolve task mapping before finishing (update with a valid taskId)." >&2
 		exit 2
 	fi
 	MISMATCH_CACHE="/tmp/claude-task-mismatch-prompt-${SESSION_ID}.ts"
@@ -28,7 +28,7 @@ if [ -s "$MISMATCH_STATE" ]; then
 		fi
 	fi
 	echo "$NOW" > "$MISMATCH_CACHE" 2>/dev/null
-	echo "TASK STATE WARNING: $MISMATCH_MSG - Use a valid taskId on TaskUpdate so unfinished-task checks remain reliable."
+	echo "TASK STATE WARNING: $MISMATCH_MSG — Use a valid taskId on TaskUpdate so unfinished-task checks remain reliable."
 	exit 0
 fi
 
@@ -53,15 +53,15 @@ if [ "$EVENT" = "Stop" ]; then
 
 	if [ "$COUNT" -gt 2 ]; then
 		# Downgrade to non-blocking after 2 blocks
-		echo "UNFINISHED TASKS ($PENDING remaining): $SUBJECTS - You've been reminded multiple times. Finish these or tell the user you're leaving them incomplete." >&2
+		echo "UNFINISHED TASKS ($PENDING remaining): $SUBJECTS — You've been reminded multiple times. Finish these or tell the user you're leaving them incomplete." >&2
 		exit 0
 	fi
 
-	echo "UNFINISHED TASKS ($PENDING remaining): $SUBJECTS - Complete these or mark them done (TaskUpdate status=completed) before finishing." >&2
+	echo "UNFINISHED TASKS ($PENDING remaining): $SUBJECTS — Complete these or mark them done (TaskUpdate status=completed) before finishing." >&2
 	exit 2
 fi
 
-# UserPromptSubmit - emit only on state changes, explicit pivot hints, or sparse heartbeat.
+# UserPromptSubmit — emit only on state changes, explicit pivot hints, or sparse heartbeat.
 STATE_CACHE="/tmp/claude-task-prompt-${SESSION_ID}.state"
 NOW=$(date +%s)
 STATE_KEY="${PENDING}|$(printf '%s' "$SUBJECTS" | md5)"
@@ -81,5 +81,5 @@ if [ "$STATE_KEY" = "$LAST_KEY" ] && [ "$IS_NEW_REQUEST" = false ] && [ $((NOW -
 fi
 
 echo "${NOW}|${STATE_KEY}" > "$STATE_CACHE" 2>/dev/null
-echo "ACTIVE TASKS ($PENDING in progress): $SUBJECTS - If this is a new request, add it to your task list and finish current work first."
+echo "ACTIVE TASKS ($PENDING in progress): $SUBJECTS — If this is a new request, add it to your task list and finish current work first."
 exit 0
