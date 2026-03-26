@@ -3,6 +3,7 @@ name: review-memory
 description: Review auto-memory for the current project. Shows accumulated learnings, identifies noise, and helps promote permanent patterns to CLAUDE.md, rules, or skills.
 argument-hint: "[optional: '--compact' for quick low-context review]"
 disable-model-invocation: true
+effort: medium
 allowed-tools: Read, Grep, Glob, Write, Edit
 ---
 

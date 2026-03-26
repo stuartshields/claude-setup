@@ -34,16 +34,5 @@ Use this page as your entry point, then follow the reading path below.
 
 ## Continue Reading
 
-[Next: Core Guide](core-guide.md) - how the pieces fit together
-[Then: Component Reference](component-reference.md) - what every rule, hook, agent, and skill does, why it exists, and how it compares to what the community builds
+[Next: Core Guide](core-guide.md) - how the pieces fit together, then on to [Rules](../rules/README.md) → [Hooks](../hooks/README.md) → [Agents](../agents/README.md) → [Skills](../skills/README.md) → [Governance](governance-workflow.md)
 
-## Quick Links
-
-- [Home](../index.md)
-- [Core Guide](core-guide.md)
-- [Component Reference](component-reference.md)
-- [Governance Workflow](governance-workflow.md)
-- [Rules](../rules/README.md)
-- [Hooks](../hooks/README.md)
-- [Agents](../agents/README.md)
-- [Skills & Memory](../skills/README.md)

@@ -3,6 +3,7 @@ name: multi-review
 description: Orchestrates parallel code review from three angles (maintainability, performance, security) by spawning subagents, then consolidates findings into a single report.
 argument-hint: "[files, branch, or diff range to review]"
 disable-model-invocation: true
+effort: high
 allowed-tools: Read, Grep, Glob, Bash, Agent
 ---
 

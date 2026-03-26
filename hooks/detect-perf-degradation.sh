@@ -1,8 +1,8 @@
 #!/bin/bash
-# PostToolUse + PostToolUseFailure hook - detects reasoning loops and error spikes.
+# PostToolUse + PostToolUseFailure hook — detects reasoning loops and error spikes.
 # Advisory only (exit 0). Warnings to stdout become system reminders.
 
-# Single jq call to extract only what we need - avoids buffering full payload
+# Single jq call to extract only what we need — avoids buffering full payload
 IFS=$'\t' read -r SESSION_ID TOOL_NAME EVENT TOOL_INPUT < <(jq -r '[.session_id // "", .tool_name // "", .hook_event_name // "", (.tool_input | tostring) // ""] | @tsv')
 
 [ -z "$SESSION_ID" ] && exit 0
@@ -14,7 +14,7 @@ LOG_FILE="/tmp/claude-perf-${SESSION_ID}.log"
 STATUS="ok"
 [ "$EVENT" = "PostToolUseFailure" ] && STATUS="fail"
 
-# Hash input - first 8 chars for dedup (macOS: md5 reads from pipe, outputs 32-char hex directly)
+# Hash input — first 8 chars for dedup (macOS: md5 reads from pipe, outputs 32-char hex directly)
 INPUT_HASH=$(printf '%s' "$TOOL_INPUT" | md5 | cut -c1-8)
 
 # Append: tool_name|input_hash|status

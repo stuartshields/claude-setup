@@ -1,5 +1,5 @@
 #!/bin/bash
-# PreCompact hook - saves project state to /tmp before compaction.
+# PreCompact hook — saves project state to /tmp before compaction.
 # The SessionStart compact hook reads this file to restore context.
 
 INPUT=$(cat)

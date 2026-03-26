@@ -22,12 +22,12 @@ If you want a practical setup with rules, hooks, agents, and governance docs you
 ## Recommended Reading Path
 
 1. [Start Here](docs/start-here.md)
-2. [Core Concepts and Workflow: Core Guide](docs/core-guide.md)
-3. [Governance Process: Governance Workflow](docs/governance-workflow.md)
-4. [Persistent Instructions: Rules Reference](rules/README.md)
-5. [Automation Layer: Hooks Reference](hooks/README.md)
-6. [Agent Roles: Agents Reference](agents/README.md)
-7. [Skills and Memory Model: Skills and Memory](skills/README.md)
+2. [Core Guide](docs/core-guide.md)
+3. [Rules](rules/README.md)
+4. [Hooks](hooks/README.md)
+5. [Agents](agents/README.md)
+6. [Skills and Memory](skills/README.md)
+7. [Governance Workflow](docs/governance-workflow.md)
 
 ## Notes
 

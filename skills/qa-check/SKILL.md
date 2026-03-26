@@ -2,6 +2,7 @@
 name: qa-check
 description: Auto-detects the project's tech stack, then audits for Accessibility, Performance, and Code Quality. Works across WordPress/PHP, Python, Node/JS, and static web projects.
 disable-model-invocation: true
+effort: high
 allowed-tools: Read, Grep, Glob
 context: fork
 agent: Explore

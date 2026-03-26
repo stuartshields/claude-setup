@@ -56,7 +56,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "rm -f /tmp/claude-remind-* /tmp/claude-edit-count-* 2>/dev/null; exit 0"
+            "command": "rm -f /tmp/claude-remind-* /tmp/claude-edit-count-* /tmp/claude-last-bash-* /tmp/claude-bash-repeat-* /tmp/claude-read-count-* /tmp/claude-file-hashes-* 2>/dev/null; exit 0"
           }
         ]
       },
@@ -123,6 +123,15 @@
             "command": "~/.claude/hooks/repeated-edit-guard.sh"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/repeated-bash-guard.sh"
+          }
+        ]
       }
     ],
     "Stop": [
@@ -183,10 +192,12 @@
         ]
       },
       {
+        "matcher": "Bash|Edit|Write|MultiEdit|Agent|Task",
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/Users/stuart/.claude/hooks/gsd-context-monitor.js\""
+            "command": "node \"/Users/stuart/.claude/hooks/gsd-context-monitor.js\"",
+            "timeout": 10
           }
         ]
       },
@@ -217,6 +228,24 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/detect-perf-degradation.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Grep|Glob|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/context-drift-guard.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/repeated-approach-guard.sh"
           }
         ]
       }

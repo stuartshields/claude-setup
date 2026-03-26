@@ -3,6 +3,7 @@ name: brainstorm
 description: Structured discovery workflow. Explores context, interviews the user with clarifying questions, proposes approaches with trade-offs, and writes a discovery brief before any planning begins.
 argument-hint: "[topic or problem to explore]"
 disable-model-invocation: true
+effort: high
 allowed-tools: Read, Grep, Glob, Bash, Write, Agent
 ---
 

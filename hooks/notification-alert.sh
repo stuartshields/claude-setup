@@ -1,5 +1,5 @@
 #!/bin/bash
-# Notification hook - alerts when Claude needs attention.
+# Notification hook — alerts when Claude needs attention.
 # Fires on: permission_prompt, idle_prompt, auth_success, elicitation_dialog.
 # Cannot block or modify notifications.
 
