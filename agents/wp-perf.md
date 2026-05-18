@@ -2,6 +2,7 @@
 name: wp-perf
 description: WordPress performance specialist following Human Made and 10up standards. Use for auditing query performance, caching strategy, asset loading, Core Web Vitals, and database optimization in WordPress projects. Handles both greenfield and inherited legacy codebases.
 tools: Read, Grep, Glob, Bash
+permissionMode: plan
 model: sonnet
 maxTurns: 20
 ---

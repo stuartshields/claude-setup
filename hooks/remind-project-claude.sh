@@ -62,7 +62,16 @@ fi
 
 [ -z "$NOTES" ] && exit 0
 
-STATE_KEY=$(printf '%s' "$NOTES" | md5)
+# State key tracks *which conditions* are firing, not their values. Age and
+# changed-file count vary continuously but the actionable signal is binary:
+# is CLAUDE.md stale? is the churn high? Hashing $NOTES re-fires every time
+# either count drifts, which produces per-prompt noise in long sessions.
+HAS_STALE=0
+HAS_CHURN=0
+[ "$AGE_DAYS" -gt 14 ] && HAS_STALE=1
+[ "$CHANGED_FILES" -gt 8 ] && HAS_CHURN=1
+STATE_KEY="s${HAS_STALE}c${HAS_CHURN}"
+
 NOW=$(date +%s)
 LAST_TS="0"
 LAST_KEY=""
@@ -70,8 +79,9 @@ if [ -s "$CACHE_FILE" ]; then
 	IFS='|' read -r LAST_TS LAST_KEY < "$CACHE_FILE"
 fi
 
-# Re-emit only when state changes, or every 15m as a sparse reminder.
-if [ "$STATE_KEY" = "$LAST_KEY" ] && [ $((NOW - LAST_TS)) -lt 900 ]; then
+# Re-emit only when conditions change, or every 60m as a sparse heartbeat.
+# Was 15m — too frequent for reminders whose subject doesn't change mid-session.
+if [ "$STATE_KEY" = "$LAST_KEY" ] && [ $((NOW - LAST_TS)) -lt 3600 ]; then
 	exit 0
 fi
 

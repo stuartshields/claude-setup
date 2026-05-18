@@ -1,5 +1,133 @@
 # Changelog
 
+Tracks changes to harness config: rules, agents, skills, hooks, settings, and global CLAUDE.md.
+
+## 2026-05-17
+
+### Audit pass 4 — clean-code alignment + Node 22 enforcement
+- **`CLAUDE.md` Section 3 "AGENT ROUTING"**: added 7-bullet decision tree mapping common intents → specific agents. Closes the "27 agents, which one?" routing ambiguity at the main-session level. Per [Nimbalyst 2026 Subagents Guide](https://nimbalyst.com/blog/claude-code-subagents-guide/) + [Rick Hightower's coordination patterns](https://medium.com/@richardhightower/claude-code-subagents-and-main-agent-coordination-a-complete-guide-to-ai-agent-delegation-patterns-a4f88ae8f46c) — community consensus is that agents are deliberately context-walled, so the lever for reducing overlap is routing INTO them, not sharing rules INSIDE them
+- **4 agent descriptions sharpened** to disambiguate adjacent specialists:
+  - `code-reviewer`: now specifies "single files or focused diffs" + redirects to `architect-reviewer` for multi-file/pre-merge
+  - `architect-reviewer`: now specifies "multi-file PR or pre-merge review" + redirects to `code-reviewer` for single-file
+  - `cleanup`: now "code that shouldn't exist" + redirects to `simplify` for code that exists but is over-built
+  - `simplify`: now "live code with unnecessary complexity" + redirects to `cleanup` for unused/dead code
+- **Agents NOT consolidated (with reasoning)**: kept `wp-reviewer` / `wp-security` / `wp-perf` separate (WordPress is a real domain with idiom-specific failure modes per concern); kept `migration-reviewer`, `api-contract-reviewer`, `history-reviewer`, `test-coverage-reviewer` as genuine specialists. Context isolation is the platform feature, not the bug
+- **`rules/discipline.md`**: added "Boy-scout the surface, not the diff" bullet to "Surface, Don't Dismiss". Codifies the *noticing* half of the Boy Scout Rule (scan ±20 lines for decay while editing) without importing the [clean-code-skills boy-scout SKILL.md](https://github.com/ertugrul-dmr/clean-code-skills/blob/main/skills/typescript/boy-scout/SKILL.md) — that skill mandates silent auto-application, which directly contradicts the "silently expanding scope is the mirror failure" rule already on the books. Budget: 54 → 55 always-on bullets
+- **`rules/environment.md`**: clarified Node 22 default to cover the active-shell case explicitly. New bullet 1: "Default to Node 22 in the active shell" — if `node --version` major ≠ 22 AND no project pin exists, run `nvm use 22` before any install/dev/build. Earlier wording was framed as "new projects only" and missed the common case of an existing project on a session with the wrong shell version
+- **`rules/code-quality.md`**: new always-on rule (5 bullets). Establishes write-time principles for DRY, single responsibility, no defensive scaffolding, delete-don't-comment dead code, named constants over magic numbers. Existing coverage (`simplify` agent, `code-reviewer` agent, `check-code-quality.sh` hook) operates at review/cleanup time; this rule fires while code is being written. Always-on budget remains under the 70 ceiling
+- **`rules/environment.md`**: added "Node Version" section. New Node projects pin to 22 via `.nvmrc` + `engines.node: ">=22"`. Existing pins (`.nvmrc`, `engines.node`, `.tool-versions`, `volta.node`) win — Claude surfaces divergence rather than auto-switching. `nvm install` requires user consent
+- **`CLAUDE.md`**: bootstrap step 3 now writes Node 22 pin for Node projects. Step 4 references `code-quality.md` so local CLAUDE.md authors know clean-code expectations live at the global layer
+- **`rules/README.md`**: count corrected 13 → 14. Always-on now lists 6 files
+- **Audit cross-referenced** against [clean-code-skills](https://github.com/ertugrul-dmr/clean-code-skills) (C1-C5, F1-F4, G1-G36, N1-N7), [Anthropic Skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices), [Progressive Disclosure pattern](https://deepwiki.com/daymade/claude-code-skills/3.3-progressive-disclosure-pattern), [Nimbalyst 2026 Subagents Guide](https://nimbalyst.com/blog/claude-code-subagents-guide/), [HumanLayer: Writing a good CLAUDE.md](https://www.humanlayer.dev/blog/writing-a-good-claude-md). Validated patterns against community rather than single-source
+
+### Deliberately NOT changed (with reasoning)
+- **Agents (27 files)**: `code-reviewer`, `simplify`, `cleanup` already cover the clean-code-skills checklist (large functions, dead code, redundancy, defensive checks, magic numbers, deep nesting, SRP via 200-line rule). Editing 27 files for marginal gain violates "smallest viable change" and risks regression. Verified by reading `simplify.md`, `code-reviewer.md`, `cleanup.md` end-to-end
+- **Skills (~21 files)**: sampled `debugging`, `pre-flight-environment`, `audit-vs-fix-discipline`. Frontmatter is specific + trigger-laden + third-person. All under the 500-line progressive-disclosure threshold. No structural changes needed
+- **`check-code-quality.sh` hook**: already enforces tabs, no `console.log`, no debugger, no `// ...` placeholders, no stub TODOs, no "throw not implemented" at write-time. Adding more patterns would false-positive on legitimate refactors
+
+### Drift surfaced and fixed (same session)
+- **Project mirror sync**: copied `rules/input-validation.md` (since 2026-04-23 in global) and `rules/swift-testing.md` (since 2026-05-10) into the repo — both were missing. `rules/README.md` count corrected 14 → 16, always-on `6 → 7` (input-validation added), scoped `8 → 9` (swift-testing added)
+- **`rules/discipline.md` sync**: mirror was missing the "Surface, Don't Dismiss" section (4 bullets, added to global on 2026-05-15). Overwrote mirror with global. Now identical
+- **`hooks/check-code-quality.sh`**: diffed mirror vs global — identical. No drift to fix
+- **`rules/README.md` in global**: confirmed it does not exist (only the project mirror has one). Likely intentional — the showcase repo documents what users see. Left as-is
+
+## 2026-05-15
+
+### Audit pass 1 — sync + schema upgrade
+- **Synced repo against live `~/.claude/`**: copied `api-contract-reviewer`, `history-reviewer`, `test-coverage-reviewer` into the repo (these existed live since 2026-04-02 but were never mirrored)
+- **agents/README.md**: bumped count 24 → 27. Added the three reviewers to the read-only auditors group. Updated the "Read-only auditors" prose to describe what each adds beyond `code-reviewer`
+- **README.md (live)**: replaced inline "What's Changed" section with pointer to `CHANGELOG.md`. The repo restructured to a separate changelog on 2026-03-22 but the live copy still had inline history with stale `fix-indentation.sh`/`stop-wrapper.sh` claims
+- **hooks/repeated-bash-guard.sh, repeated-edit-guard.sh, context-drift-guard.sh**: switched from unofficial `CLAUDE_SESSION_ID` to canonical stdin `.session_id` extraction with `CLAUDE_CODE_SESSION_ID` env var fallback (2.1.132+). The old env var didn't exist, so session IDs were silently collapsing to `"unknown"`
+- **13 read-only auditor agents**: added `permissionMode: plan` frontmatter (added in Claude Code 2.1.126). Total agents using the field: 3 → 16
+- **settings.json**: pinned `worktree.baseRef: "fresh"` (default flipped twice in April/May; explicit avoids future surprise)
+- **hooks/posttool-dispatcher.sh**: new dispatcher consolidating 8 PostToolUse hook entries into 1. Single stdin buffer, parallel-array matcher table, sub-hooks invoked by tool name. Settings.json PostToolUse collapsed 8 → 1. PostToolUseFailure left unchanged
+
+### Audit pass 2 — community best-practice alignment
+- **10 agents rewrote descriptions** to follow the Nimbalyst 2026 triage pattern ("Use when [condition]. Reports [output shape]."): `a11y`, `api-contract-reviewer`, `code-reviewer`, `feasibility-check`, `history-reviewer`, `migration-reviewer`, `test-coverage-reviewer`, `wp-reviewer`, `quick-edit`, `backend-builder`. Source: [Nimbalyst Practical 2026 Subagents Guide](https://nimbalyst.com/blog/claude-code-subagents-guide/)
+- **skills/multi-review**: deleted (live + repo). Superseded by `skills/review` which spawns 8 specialist reviewers vs `multi-review`'s 3. Both were user-invocable (`disable-model-invocation: true`), making `multi-review` a strict subset
+- **skills/README.md**: updated TL;DR count 13 → 15. Added `clean-worktrees`, `review`, `swift-concurrency-review` (previously unlisted). Rewrote `/multi-review` paragraph to describe `/review`'s 8-specialist approach. Removed `/multi-review` from effort-routing list
+
+### Audit pass 3 — relaxing over-strict hooks
+- **hooks/verify-before-stop.sh**: state key stabilised to `"has_changes"` (was `$TOTAL_CHANGED` count). Heartbeat raised 5m → 30m. Fixed: every Edit/Write that changed the uncommitted-file count was re-firing the `VERIFICATION: N files...` reminder, producing per-prompt noise on long sessions
+- **hooks/remind-project-claude.sh**: state key now binary `s{0|1}c{0|1}` (staleness × churn) instead of md5(NOTES). Heartbeat raised 15m → 60m. Fixed: CLAUDE.md age stays constant mid-session but changed-file count drift was re-firing the reminder
+- **hooks/check-unfinished-tasks.sh**: UserPromptSubmit heartbeat raised 5m → 15m for steady-state task lists
+- **hooks/stop-quality-check.sh**: removed 3 low-precision patterns (deferred work, listed-without-fixing, "too many issues" excuse). Kept the 2 high-precision blocks (pre-existing-issue rationalisation, success-without-verification). The removed patterns false-positived on legitimate trade-off discussion and scope-boundary explanations. Smoke-tested: 4/4 cases (legitimate discussion, rationalisation, unverified claim, verified claim) all classify correctly
+- **hooks/block-git-commit.sh**: added allowlist for `rm -rf` under harness subdirectories with at least one subpath segment. Permits `rm -rf ~/.claude/skills/foo/` (single-target authorized cleanup) while still blocking `rm -rf ~/.claude/`, pipelines (`cd /tmp && rm -rf .`), and unrelated paths. 14/15 smoke tests pass; one pre-existing limitation around quoted echo strings is unchanged (regex can't distinguish quoted-string content from real command boundaries)
+- **hooks/repeated-edit-guard.sh**: thresholds raised 2/3 → 3/5. Diagnosis check now at 3rd edit, workaround warning at 5th. Multi-step refactors and review-feedback workflows legitimately edit the same file 2-3 times
+- **hooks/context-drift-guard.sh**: thresholds raised 5/7 → 8/12. Investigation-heavy work (audits, multi-file review) routinely hit the old thresholds during normal operation
+
+### Bug fix discovered during this session
+- **hooks/track-tasks.sh**: fixed read-modify-write race condition. Parallel `TaskUpdate` calls in one message could both read the state file, both write `${STATE}.tmp`, and last write would lose the earlier change. The bug surfaced when the Stop hook reported task #13 as unfinished despite it being marked completed. Added `mkdir`-based atomic lock around the state-file read-modify-write window (POSIX-portable, works on macOS + Linux). Smoke-tested with two concurrent hook invocations — both updates persist correctly. State file for the affected session patched directly to unblock
+
+### Skipped (with reasoning recorded)
+- **Hook `args: []` exec form refactor**: investigated and skipped. Exec form doesn't expand `~`, which would break 18 `~/.claude/hooks/...` entries. The bug class exec form fixes (shell quoting of paths with spaces / args with special chars) doesn't apply since your hooks take no arguments and have safe paths. Verdict: not worth the breakage risk
+- **`tool-usage` skill → rules/discipline.md**: skipped — conflicts with the user's own `rules/harness-maintenance.md` ("Conditional procedures belong in skills, not rules"). `tool-usage` IS conditional (when Edit fails, when search budget hit)
+- **Debug skill consolidation (`debugging`, `debug-rules`, `debug-wp`)**: investigated and rejected. The three are genuinely distinct in scope (general framework / rule-load diagnostics / WordPress interview); not overlap
+
+
+
+## 2026-05-10
+
+- **rules/swift-testing.md**: new scoped rule for Swift Testing patterns (paths-scoped to `*.swift`)
+- **skills/swift-concurrency-review/**: new skill for reviewing Swift 5.5+ concurrency code (post-await state races, TOCTOU, cancellation handling, consumer-Task ownership)
+
+## 2026-04-28
+
+- **hooks/block-git-commit.sh**: hardened against further destructive-bash patterns and data exfiltration vectors
+
+## 2026-04-23
+
+- **rules/input-validation.md**: new always-on rule for input validation at trust boundaries (size ceilings, bounded numerics, authenticated vs payload identity, length/charset discipline, validate-before-persist ordering)
+
+## 2026-04-11
+
+- **CLAUDE.md**: refreshed (timestamp bumped to 2026-04-06T01:25+11:00)
+
+## 2026-04-08
+
+- **rules/debugging.md → skills/debugging/**: moved out of always-on rules into a model-invocable skill. Trigger phrases include "broken", "not working", "bug", "error", "still broken", "/trace"
+- **rules/tool-usage.md → skills/tool-usage/**: moved out of always-on rules into a skill. Procedural conditionals don't belong in always-on context
+- **hooks/repeated-bash-guard.sh**: removed `exit 2` blocking, kept advisory output. anthropics/claude-code#24327 causes Claude to stop responding when this hook blocks instead of acting on feedback
+- **hooks/repeated-edit-guard.sh**: updated workaround-chain message to point at the `debugging` skill (was pointing at deleted `rules/debugging.md`)
+- **rules/harness-maintenance.md**: expanded positive-framing exceptions for trap rules and safety rails
+- **hooks/rtk-rewrite.sh, gsd-phase-boundary.sh, gsd-session-state.sh, gsd-validate-commit.sh**: refreshes
+
+## 2026-04-06
+
+- **rules/dependencies.md**: tightened hallucinated-reference prevention (verify package name, version, import path)
+- **rules/security.md**: condensed to baseline patterns (parameterized SQL, framework escaping, URL allowlist, secrets, supply chain)
+- **rules/testing.md**: refreshed
+- **hooks/memory-review-prompt.sh**: updated cadence
+
+## 2026-04-02
+
+- **agents/api-contract-reviewer.md**: new read-only reviewer for REST/GraphQL/RPC contracts
+- **agents/history-reviewer.md**: new read-only reviewer using `git blame`/`log` to catch accidentally reverted fixes
+- **agents/test-coverage-reviewer.md**: new read-only reviewer for test gaps and assertion quality
+- **skills/review/SKILL.md**: refreshed
+
+## 2026-04-01
+
+- **agents/architect-reviewer, browser-qa-agent, claude-architect, git-agent, perf, pr-writer, seed-generator, code-reviewer**: metadata refresh (consistent frontmatter, descriptions, `permissionMode` where appropriate)
+- **skills/clean-worktrees/**: new skill for removing stale agent worktrees and orphaned branches
+
+## 2026-03-26
+
+- **rules/staleness.md, communication.md, discipline.md, research-and-decisions.md**: refreshes
+- **hooks/drift-review-stop.sh, context-drift-guard.sh, repeated-approach-guard.sh**: refreshes
+- **skills/block-journey, brainstorm, debug-rules, multi-review, qa-check, review-memory**: SKILL.md refreshes
+
+## 2026-03-25
+
+- **skills/figma/SKILL.md**: added Responsive Gate section (multi-breakpoint workflow) and Post-Implementation Spec Audit section (Playwright-based visual verification loop) — sources tracked in `SOURCES.md`
+
+## 2026-03-23
+
+- **agents/backend-builder, frontend-builder, test-writer, wp, feasibility-check, architect, security**: refreshes
+- **skills/test-plan, vibe-user**: refreshes
+- **rules/architecture.md, environment.md, php-wordpress.md, ui-ux.md**: refreshes
+- **hooks/log-instructions.sh**: refresh
+
 ## 2026-03-22
 
 ### Synced from global `~/.claude/`

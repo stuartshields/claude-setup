@@ -1,6 +1,6 @@
 ---
 name: quick-edit
-description: Fast agent for trivial single-file edits - typo fixes, variable renames, small function additions, config tweaks. Uses haiku for speed. Hard guardrails prevent scope creep and context rot. Escalates to sonnet if task is too complex.
+description: Fast haiku-powered agent for trivial single-file edits. Use for typo fixes, variable renames, small function additions, or config tweaks that are clearly scoped — typically under 50 lines. Hard guardrails prevent scope creep and context rot. Escalates to sonnet if the task turns out to be more complex than expected. Returns the modified file path.
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: haiku
 maxTurns: 10

@@ -1,10 +1,10 @@
-<!-- Last updated: 2026-03-26T12:00+11:00 -->
+<!-- Last updated: 2026-05-17T09:41+10:00 -->
 
 # GLOBAL PROTOCOL (v2026.2)
 
 ## 0. SHORTCUTS & TRIGGERS
 - **Bootstrap Trigger**: If the current directory lacks a `CLAUDE.md`, immediately perform **DYNAMIC PROJECT INITIALIZATION**.
-- **"Trace"** or **"/trace"**: Perform a deep-trace audit per the debugging rules in `~/.claude/rules/debugging.md`.
+- **"Trace"** or **"/trace"**: Perform a deep-trace audit per the `debugging` skill (`~/.claude/skills/debugging/SKILL.md`).
 
 ## 1. MANDATORY WORKFLOW
 - **Verify**: After implementing, run the project's build/test/lint command. If it fails, diagnose and fix before moving on. Never mark work as done without verifying it runs.
@@ -16,12 +16,21 @@
 - **Condition: No local CLAUDE.md**:
 	1. Scan configs (`package.json`, `requirements.txt`, etc.).
 	2. Identify stack & commands (build/test/lint).
-	3. Create local `CLAUDE.md` with project-specific conventions.
+	3. **If Node project:** ensure `.nvmrc` pins `22` and `package.json` has `"engines": { "node": ">=22" }`. Run `nvm use 22` before any install/dev command. Honour an existing pin and surface divergence — see `rules/environment.md` "Node Version".
+	4. Create local `CLAUDE.md` with project-specific conventions. Code-quality expectations (DRY, single responsibility, no defensive scaffolding, no commented-out code, named constants) live in `~/.claude/rules/code-quality.md` and apply across all projects.
 - **Condition: Local CLAUDE.md exists but is legacy**:
 	1. Strip redundant rules (global rules in `~/.claude/rules/` are auto-loaded).
 	2. Keep only project-specific conventions.
 	3. Standardize indents to Tabs.
 
-## 3. STYLE DEFAULTS
-- **JavaScript**: ES6+ only. Use ES Modules (`import`/`export`), arrow functions, `const`/`let` (never `var`), template literals, destructuring, async/await. No CommonJS (`require`/`module.exports`).
-- **CSS**: TailwindCSS v4 with the TailwindCSS CLI (`@tailwindcss/cli`). CSS-first config (`@theme` in `input.css`), no `tailwind.config.js`.
+## 3. AGENT ROUTING
+
+Default to the main session. Spawn an agent only when a pattern below matches; pick the most specific.
+
+- **Multi-file PR / pre-merge review**: `architect-reviewer` (spawns code-reviewer + security + perf in parallel, consolidates, drives fixes).
+- **Single-file or single-diff review**: `code-reviewer` directly.
+- **WordPress code**: `wp-reviewer` / `wp-security` / `wp-perf` — pick by concern. Not `code-reviewer`.
+- **API / REST / GraphQL contract changes**: `api-contract-reviewer` (breaking-change detection).
+- **DB migration before apply**: `migration-reviewer`. **Git-history-aware diff** (did this revert a prior fix?): `history-reviewer`.
+- **Dead code / orphans**: `cleanup`. **Over-engineered / nested code**: `simplify`. **Test coverage gaps**: `test-coverage-reviewer`.
+- **Parallel builders for cross-cutting work**: `frontend-builder` + `backend-builder` with `isolation: "worktree"`. **Trivial edit (<50 lines)**: `quick-edit`.

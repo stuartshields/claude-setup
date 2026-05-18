@@ -1,16 +1,16 @@
 ---
 title: Rules
 ---
-<!-- Last updated: 2026-03-26T14:00+11:00 -->
+<!-- Last updated: 2026-05-17T09:41+10:00 -->
 
 ## Rules
 
-> **TL;DR:** 15 rule files across 2 loading modes:
+> **TL;DR:** 16 rule files across 2 loading modes:
 >
-> - **Always-on** (7 files, ~59 bullets) - `discipline`, `debugging`, `communication`, `dependencies`, `security`, `style`, `tool-usage`. The baseline constraints that apply to every session.
-> - **Scoped** (8 files) - `architecture`, `testing`, `ui-ux`, `php-wordpress`, `environment`, `harness-maintenance`, `research-and-decisions`, `staleness`. Load only when working with matching file types.
+> - **Always-on** (7 files, ~55 bullets) - `discipline`, `communication`, `dependencies`, `security`, `style`, `input-validation`, `code-quality`. The baseline constraints that apply to every session.
+> - **Scoped** (9 files) - `architecture`, `testing`, `ui-ux`, `php-wordpress`, `environment`, `harness-maintenance`, `research-and-decisions`, `staleness`, `swift-testing`. Load only when working with matching file types.
 >
-> Rules Claude already follows without instruction are deleted. Rules it keeps breaking get moved to hooks instead.
+> Rules Claude already follows without instruction are deleted. Rules it keeps breaking get moved to hooks instead. Conditional procedures (debugging, tool-failure recovery) were moved to skills so they lazy-load only when needed.
 
 ### The problem
 
@@ -20,7 +20,7 @@ Rules fix that. Files in `~/.claude/rules/` load automatically - Claude reads th
 
 ### How I use rules
 
-**The instruction budget.** The single most important lesson: keep always-on rules under ~70 bullet points. Currently at ~59 across 7 files. This took deliberate trimming - the original setup had 142 always-on bullets across 10 files. Cutting nearly 60% improved adherence more than any rewrite of the rules themselves.
+**The instruction budget.** The single most important lesson: keep always-on rules under ~70 bullet points. Currently at ~40 across 5 files. This took deliberate trimming - the original setup had 142 always-on bullets across 10 files. Cutting ~72% improved adherence more than any rewrite of the rules themselves. The latest cut moved `debugging` and `tool-usage` out of rules entirely - both were conditional procedures ("when debugging...", "when Edit fails...") that don't belong in always-on context. They're skills now.
 
 **Always-on vs scoped.** Rules that only matter for specific file types use `paths:` frontmatter so they don't load during irrelevant sessions. 8 of 15 files are scoped. `research-and-decisions.md` was always-on for months, loading 20 bullets every session even when no research was happening. Scoping it removed those bullets from sessions where they were noise.
 
@@ -37,12 +37,12 @@ Rules fix that. Files in `~/.claude/rules/` load automatically - Claude reads th
 **Always-on** (load every session):
 
 - `discipline.md` - complete implementations, anti-pivot, pattern discovery, regression awareness, verification, context discipline
-- `debugging.md` - 4-step framework (reproduce/isolate/fix/validate), hypothesis validation, anti-loop protocol
 - `communication.md` - classify-before-acting, question-is-the-task, surface problems, stop at task boundaries
 - `dependencies.md` - hallucination prevention (verify packages exist before referencing), dependency hygiene
 - `security.md` - injection prevention, URL validation, secret handling
 - `style.md` - tabs, clean code
-- `tool-usage.md` - Edit retry limit, search budget
+- `input-validation.md` - validate at trust boundaries (peer frames, webhooks, IPC), authenticated vs payload identity
+- `code-quality.md` - DRY, single responsibility, no defensive scaffolding, no commented-out code, named constants
 
 **Scoped** (load when matching files are in play):
 
@@ -50,10 +50,11 @@ Rules fix that. Files in `~/.claude/rules/` load automatically - Claude reads th
 - `testing.md` - TDD, test quality, mock discipline
 - `ui-ux.md` - design quality, accessibility, visual/CSS bug protocol
 - `php-wordpress.md` - WordPress/PHP security, i18n, query patterns
-- `environment.md` - HTTPS, build tooling, agent routing
+- `environment.md` - Node version (pin 22), HTTPS, build tooling, agent routing
 - `harness-maintenance.md` - instruction budget, rule quality checks, hooks-over-prose strategy
 - `research-and-decisions.md` - source tracking, Architecture Decision Records
 - `staleness.md` - 30-day freshness checks on guidance files
+- `swift-testing.md` - no force-unwraps, no Task.sleep for absence assertions, TestClock over wall clock
 
 ---
 

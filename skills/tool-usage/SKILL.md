@@ -1,4 +1,8 @@
-<!-- Last updated: 2026-03-26T12:00+11:00 -->
+---
+name: tool-usage
+description: Recovery protocol for tool failures and search budgets. Use when Edit fails repeatedly on the same target, when hooks may have modified file contents between operations, or when WebSearch/WebFetch is not converging on an answer.
+---
+<!-- Last updated: 2026-04-08T00:00+11:00 -->
 
 # Tool Usage
 

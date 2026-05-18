@@ -76,7 +76,10 @@ if echo "$PROMPT" | grep -qiE '(^|[[:space:]])(new request|new task|separate tas
 	IS_NEW_REQUEST=true
 fi
 
-if [ "$STATE_KEY" = "$LAST_KEY" ] && [ "$IS_NEW_REQUEST" = false ] && [ $((NOW - LAST_TS)) -lt 300 ]; then
+# Heartbeat raised from 5m → 15m. Active task changes still re-fire (state key
+# differs); but in steady-state with the same task list, 5m re-emission was too
+# noisy for sessions that don't pivot.
+if [ "$STATE_KEY" = "$LAST_KEY" ] && [ "$IS_NEW_REQUEST" = false ] && [ $((NOW - LAST_TS)) -lt 900 ]; then
 	exit 0
 fi
 

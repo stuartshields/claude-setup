@@ -1,6 +1,6 @@
 ---
 name: wp-reviewer
-description: Read-only WordPress code reviewer following Human Made and 10up standards. Reviews PHP, hooks, queries, REST endpoints, and block code for correctness, security, and standards compliance. Lighter context than the full wp agent. For implementation work, use wp instead.
+description: WordPress code reviewer following Human Made and 10up standards. Use when reviewing PHP, hooks, queries, REST endpoints, or block code in a WordPress project — lighter context than the full wp agent. Read-only. Reports correctness, security, and standards-compliance issues by severity with file:line references. For implementation work, use wp instead.
 tools: Read, Grep, Glob, Bash
 permissionMode: plan
 model: sonnet

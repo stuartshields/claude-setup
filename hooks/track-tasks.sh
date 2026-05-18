@@ -5,7 +5,6 @@
 # Buffer stdin for multi-field extraction (TaskCreate needs subject + response id)
 TMPINPUT=$(mktemp)
 cat > "$TMPINPUT"
-trap 'rm -f "$TMPINPUT"' EXIT
 
 IFS=$'\t' read -r SESSION_ID TOOL < <(jq -r '[.session_id // "", .tool_name // ""] | @tsv' < "$TMPINPUT")
 
@@ -13,6 +12,28 @@ IFS=$'\t' read -r SESSION_ID TOOL < <(jq -r '[.session_id // "", .tool_name // "
 
 STATE="/tmp/claude-tasks-${SESSION_ID}.json"
 MISMATCH_STATE="/tmp/claude-task-state-mismatch-${SESSION_ID}.txt"
+
+# Serialize concurrent TaskCreate/TaskUpdate hooks against the state file.
+# Parallel tool calls (e.g. two TaskUpdate batched in one message) otherwise race:
+# both read state, both write tmp, last write loses earlier change. Use mkdir as
+# atomic lock primitive (POSIX, works on macOS + Linux). Hold for the brief
+# read-modify-write window only.
+LOCK="/tmp/claude-tasks-${SESSION_ID}.lock"
+TRIES=0
+while ! mkdir "$LOCK" 2>/dev/null; do
+	TRIES=$((TRIES + 1))
+	# Bail out after 2s of contention — stale lock from a crashed prior run
+	if [ "$TRIES" -gt 40 ]; then
+		# Steal a stale lock (older than 5s)
+		if [ -d "$LOCK" ]; then
+			LOCK_AGE=$(( $(date +%s) - $(stat -f %m "$LOCK" 2>/dev/null || stat -c %Y "$LOCK" 2>/dev/null || date +%s) ))
+			[ "$LOCK_AGE" -gt 5 ] && rmdir "$LOCK" 2>/dev/null
+		fi
+		break
+	fi
+	sleep 0.05
+done
+trap 'rmdir "$LOCK" 2>/dev/null; rm -f "$TMPINPUT"' EXIT
 
 case "$TOOL" in
 	TaskCreate)

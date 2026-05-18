@@ -17,7 +17,8 @@
       "Read(next.config.*)",
       "Read(composer.json)",
       "Read(phpunit.xml*)",
-      "Read(.php-cs-fixer*)"
+      "Read(.php-cs-fixer*)",
+      "Bash(curl http://localhost:*)"
     ],
     "deny": [
       "Read(.env)",
@@ -49,6 +50,7 @@
       "Read(**/__pycache__/**)"
     ]
   },
+  "model": "opus[1m]",
   "hooks": {
     "SessionStart": [
       {
@@ -66,14 +68,6 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/compact-restore.sh"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"/Users/stuart/.claude/hooks/gsd-check-update.js\""
           }
         ]
       },
@@ -132,6 +126,15 @@
             "command": "~/.claude/hooks/repeated-bash-guard.sh"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/stuart/.claude/hooks/rtk-rewrite.sh"
+          }
+        ]
       }
     ],
     "Stop": [
@@ -146,68 +149,11 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/track-modified-files.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/project-quality-gates.sh",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Bash|Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/hook-observability-summary.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "TaskCreate|TaskUpdate",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/track-tasks.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash|Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/detect-perf-degradation.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash|Edit|Write|MultiEdit|Agent|Task",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"/Users/stuart/.claude/hooks/gsd-context-monitor.js\"",
+            "command": "~/.claude/hooks/posttool-dispatcher.sh",
             "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": "Bash|Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/memory-review-prompt.sh",
-            "timeout": 5
           }
         ]
       }
@@ -228,24 +174,6 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/detect-perf-degradation.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "Read|Grep|Glob|Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/context-drift-guard.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/repeated-approach-guard.sh"
           }
         ]
       }
@@ -272,6 +200,14 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/verify-before-stop.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/remind-handoff.sh"
           }
         ]
       },
@@ -328,14 +264,15 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "node \"/Users/stuart/Personal/co2-status-line/src/statusline.js\" --wrap 'node \"/Users/stuart/.claude/hooks/gsd-statusline.js\"'"
+    "command": "node \"/Users/stuart/.claude/hooks/statusline-chain.js\""
   },
   "enabledPlugins": {
     "frontend-design@claude-code-plugins": true,
     "claude-hud@claude-hud": true,
     "swift-lsp@claude-plugins-official": true,
     "figma@claude-plugins-official": false,
-    "rust-analyzer-lsp@claude-plugins-official": true
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "claude-co2-status-line": {
@@ -343,6 +280,16 @@
         "source": "github",
         "repo": "stuartshields/claude-co2-status-line"
       }
+    },
+    "thedotmack": {
+      "source": {
+        "source": "github",
+        "repo": "thedotmack/claude-mem"
+      }
     }
+  },
+  "autoDreamEnabled": true,
+  "worktree": {
+    "baseRef": "fresh"
   }
 }

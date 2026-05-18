@@ -39,15 +39,18 @@ if [ "$TOTAL_CHANGED" -gt 0 ]; then
 fi
 
 if [ -n "$NOTES" ]; then
-	STATE_KEY="${TOTAL_CHANGED}"
+	# State key is the *condition* firing, not the count value. "27 uncommitted" and
+	# "31 uncommitted" carry the same signal — every Edit shouldn't re-fire the reminder.
+	STATE_KEY="has_changes"
 	LAST_TS="0"
 	LAST_KEY=""
 	if [ -s "$CACHE_FILE" ]; then
 		IFS='|' read -r LAST_TS LAST_KEY < "$CACHE_FILE"
 	fi
 
-	# Emit when state changes, or as a sparse reminder every 5 minutes.
-	if [ "$STATE_KEY" = "$LAST_KEY" ] && [ $((NOW - LAST_TS)) -lt 300 ]; then
+	# Emit once when the condition first appears, then sparsely (30 min heartbeat).
+	# Long audit/refactor sessions otherwise get the same reminder every turn.
+	if [ "$STATE_KEY" = "$LAST_KEY" ] && [ $((NOW - LAST_TS)) -lt 1800 ]; then
 		exit 0
 	fi
 

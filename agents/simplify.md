@@ -1,7 +1,8 @@
 ---
 name: simplify
-description: Analyzes code for unnecessary complexity and suggests concrete simplifications. Use when code feels over-engineered, deeply nested, or harder to read than it should be.
+description: Analyzes live code for unnecessary complexity and suggests concrete simplifications. Use when code feels over-engineered, deeply nested, or harder to read than it should be. For finding code that's unused or dead (should not exist at all), use `cleanup` instead.
 tools: Read, Grep, Glob
+permissionMode: plan
 model: sonnet
 maxTurns: 15
 ---

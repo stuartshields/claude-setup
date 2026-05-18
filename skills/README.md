@@ -1,14 +1,15 @@
 ---
 title: Skills & Memory
 ---
-<!-- Last updated: 2026-03-26T14:00+11:00 -->
+<!-- Last updated: 2026-05-15T15:45+10:00 -->
 
 ## Skills
 
-> **TL;DR:** 11 skills across 2 categories:
+> **TL;DR:** 16 skills across 3 categories:
 >
-> - **Workflow skills** - `/brainstorm`, `/multi-review`, `/review-memory`, `/test-plan`, `/vibe-user`. Structure how you work with Claude - discovery, review, testing, memory management.
-> - **Tool skills** - `/block-journey`, `/debug-rules`, `/debug-wp`, `/figma`, `/playwright`, `/qa-check`. Wrap specific tools or integrations with structured methodology.
+> - **Workflow skills** - `/brainstorm`, `/handoff`, `/review`, `/review-memory`, `/test-plan`, `/vibe-user`. Structure how you work with Claude - discovery, review, testing, memory management, session handover.
+> - **Tool skills** - `/block-journey`, `/clean-worktrees`, `/debug-rules`, `/debug-wp`, `/figma`, `/playwright`, `/qa-check`. Wrap specific tools or integrations with structured methodology.
+> - **Procedural skills** - `debugging`, `tool-usage`, `swift-concurrency-review`. Auto-invoked conditional procedures. Loaded only when the situation matches their trigger, keeping the always-on instruction budget lean.
 
 ### The problem
 
@@ -22,7 +23,7 @@ Skills capture the reasoning once. You invoke it, the skill runs the procedure, 
 
 `/brainstorm` stops Claude from jumping to implementation. It interviews you one question at a time, proposes approaches with trade-offs, and writes a discovery brief. The interview is the point - it forces both you and Claude to understand the problem before committing to a solution.
 
-`/multi-review` spawns three review agents in parallel (maintainability, performance, security). The consolidated report notes conflicts when agents disagree - "perf says inline this, maintainability says extract it" - so you make the trade-off, not the agent.
+`/review` spawns 8 parallel specialist reviewers (correctness, security, accessibility, performance, UI, API contracts, test coverage, git history) against the current diff. The consolidated report ranks findings by severity and notes conflicts when reviewers disagree - "perf says inline this, maintainability says extract it" - so you make the trade-off, not the agents.
 
 `/vibe-user` opens your app in a browser and explores it as a real user. It blocks source code reading - the whole point is a fresh perspective. You built it, so you know too much. This skill surfaces problems you'd never notice.
 
@@ -34,7 +35,7 @@ Several of these were inspired by patterns from [Ivan Kristianto](https://github
 
 **Tool skills wrap integrations.** `/figma` structures the Figma MCP workflow. `/playwright` structures browser automation. `/debug-wp` runs a structured WordPress debugging interview. `/qa-check` runs a multi-stack quality audit in a forked context so its verbose output doesn't pollute your conversation.
 
-**Effort routing.** Skills set their own effort level so heavy analysis runs at `high` effort even if the session default is lower. `/multi-review`, `/qa-check`, and `/brainstorm` run at high. `/debug-rules` runs at low - it's a mechanical log comparison. This saves tokens on simple skills without compromising quality on complex ones.
+**Effort routing.** Skills set their own effort level so heavy analysis runs at `high` effort even if the session default is lower. `/review`, `/qa-check`, and `/brainstorm` run at high. `/debug-rules` runs at low - it's a mechanical log comparison. This saves tokens on simple skills without compromising quality on complex ones.
 
 ### When to use a skill vs a rule vs an agent
 
@@ -46,9 +47,11 @@ If you're writing the same instructions more than twice, it's a skill. If it's a
 
 ### What's in here
 
-**Workflow:** `brainstorm`, `multi-review`, `review-memory`, `test-plan`, `vibe-user`
+**Workflow:** `brainstorm`, `handoff`, `review`, `review-memory`, `test-plan`, `vibe-user`
 
-**Tool:** `block-journey`, `debug-rules`, `debug-wp`, `figma`, `playwright`, `qa-check`
+**Tool:** `block-journey`, `clean-worktrees`, `debug-rules`, `debug-wp`, `figma`, `playwright`, `qa-check`
+
+**Procedural:** `debugging`, `tool-usage`, `swift-concurrency-review`
 
 ---
 

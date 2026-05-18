@@ -2,6 +2,7 @@
 name: security
 description: Deep security audit adapted to the project's tech stack. Reads project config to tailor checks. Use before deploys, after adding auth/payment/user-input features, or for periodic review.
 tools: Read, Grep, Glob, Bash
+permissionMode: plan
 model: opus
 maxTurns: 25
 ---

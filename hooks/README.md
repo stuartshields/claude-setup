@@ -1,18 +1,18 @@
 ---
 title: Hooks
 ---
-<!-- Last updated: 2026-03-26T14:00+11:00 -->
+<!-- Last updated: 2026-05-15T15:45+10:00 -->
 
 ## Hooks
 
-> **TL;DR:** 26 hooks across 6 categories:
+> **TL;DR:** 27 hooks across 6 categories:
 >
 > - **Quality gates** - `check-code-quality`, `project-quality-gates`, `stop-quality-check`. Block bad code before it's written and catch incomplete work at session end.
 > - **Loop and drift detection** - `detect-perf-degradation`, `drift-review-stop`, `repeated-edit-guard`, `repeated-bash-guard`, `repeated-approach-guard`, `context-drift-guard`. Catch reasoning loops, oscillating edits, command repetition, and context drift. The last three replaced prose rules that weren't being followed.
 > - **Agent guards** - `agent-guard-write-block`, `agent-guard-readonly`, `agent-guard-max-lines`. Make "read-only" structurally enforced, not just a suggestion.
 > - **Memory and session lifecycle** - `memory-review-prompt`, `compact-restore`, `pre-compaction-preserve`, `session-cleanup`. Memory review at natural breakpoints, compaction state preservation.
 > - **Tracking and observability** - `track-modified-files`, `track-tasks`, `hook-observability-summary`, `log-instructions`. What changed, when, and why.
-> - **Policy and notifications** - `block-git-commit`, `check-unfinished-tasks`, `verify-before-stop`, `remind-project-claude`, `stop-dispatcher`, `notification-alert`, `permission-notify`. Commit blocking, task state warnings, and attention alerts.
+> - **Policy and notifications** - `block-git-commit`, `check-unfinished-tasks`, `verify-before-stop`, `remind-handoff`, `remind-project-claude`, `stop-dispatcher`, `notification-alert`, `permission-notify`. Commit blocking, task state warnings, and attention alerts.
 
 ### The problem
 
@@ -74,7 +74,7 @@ The principle: **if a behaviour matters enough to write a rule about, and the ru
 
 **Tracking and observability:** `track-modified-files.sh`, `track-tasks.sh`, `hook-observability-summary.sh`, `log-instructions.sh`
 
-**Policy and notifications:** `block-git-commit.sh`, `check-unfinished-tasks.sh`, `verify-before-stop.sh`, `remind-project-claude.sh`, `stop-dispatcher.sh`, `notification-alert.sh`, `permission-notify.sh`
+**Policy and notifications:** `block-git-commit.sh`, `check-unfinished-tasks.sh`, `verify-before-stop.sh`, `remind-handoff.sh`, `remind-project-claude.sh`, `stop-dispatcher.sh`, `notification-alert.sh`, `permission-notify.sh`
 
 ---
 

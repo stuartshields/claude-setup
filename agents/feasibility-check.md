@@ -1,7 +1,8 @@
 ---
 name: feasibility-check
-description: Verifies spec assumptions against the actual codebase before building. Extracts what the spec assumes exists (fields, endpoints, dependencies, patterns) and checks if each assumption holds. Read-only - never modifies code.
+description: Pre-build feasibility checker. Use when you have a spec, plan, or requirements doc and want to confirm the codebase can support it before writing code. Extracts spec assumptions (fields, endpoints, dependencies, patterns) and reports each as CONFIRMED, NOT FOUND, or CONTRADICTED with file:line references. Read-only.
 tools: Read, Grep, Glob
+permissionMode: plan
 model: sonnet
 maxTurns: 20
 ---
