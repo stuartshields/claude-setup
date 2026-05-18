@@ -1,13 +1,13 @@
 ---
 title: Skills & Memory
 ---
-<!-- Last updated: 2026-05-19T12:00+10:00 -->
+<!-- Last updated: 2026-05-19T14:30+10:00 -->
 
 ## Skills
 
-> **TL;DR:** 17 skills across 3 categories:
+> **TL;DR:** 15 skills across 3 categories:
 >
-> - **Workflow skills** - `/brainstorm`, `/handoff`, `/review`, `/review-memory`, `/test-plan`, `/vibe-user`. Structure how you work with Claude - discovery, review, testing, memory management, session handover.
+> - **Workflow skills** - `/handoff`, `/review-memory`, `/test-plan`, `/vibe-user`. Structure how you work with Claude - testing, memory management, session handover. Brainstorming and multi-agent code review are now handled by the `superpowers` plugin and the `architect-reviewer` agent respectively.
 > - **Tool skills** - `/block-journey`, `/clean-worktrees`, `/debug-rules`, `/debug-wp`, `/figma`, `/playwright`, `/qa-check`. Wrap specific tools or integrations with structured methodology.
 > - **Procedural skills** - `audit-vs-fix-discipline`, `debugging`, `tool-usage`, `swift-concurrency-review`. Auto-invoked conditional procedures. Loaded only when the situation matches their trigger, keeping the always-on instruction budget lean.
 
@@ -21,9 +21,7 @@ Skills capture the reasoning once. You invoke it, the skill runs the procedure, 
 
 **Workflow skills structure how you interact with Claude.** These are the ones that changed how I work:
 
-`/brainstorm` stops Claude from jumping to implementation. It interviews you one question at a time, proposes approaches with trade-offs, and writes a discovery brief. The interview is the point - it forces both you and Claude to understand the problem before committing to a solution.
-
-`/review` spawns 8 parallel specialist reviewers (correctness, security, accessibility, performance, UI, API contracts, test coverage, git history) against the current diff. The consolidated report ranks findings by severity and notes conflicts when reviewers disagree - "perf says inline this, maintainability says extract it" - so you make the trade-off, not the agents.
+Brainstorming and multi-specialist code review used to live here as local skills, but they overlapped with two things I already had: the `superpowers` plugin's `brainstorming` skill, and the `architect-reviewer` agent which spawns code-reviewer + security + perf in parallel. I deleted the local versions to remove the duplication. See [community-comparison.md](../docs/community-comparison.md) for the reasoning.
 
 `/vibe-user` opens your app in a browser and explores it as a real user. It blocks source code reading - the whole point is a fresh perspective. You built it, so you know too much. This skill surfaces problems you'd never notice.
 
@@ -35,7 +33,7 @@ Several of these were inspired by patterns from [Ivan Kristianto](https://github
 
 **Tool skills wrap integrations.** `/figma` structures the Figma MCP workflow. `/playwright` structures browser automation. `/debug-wp` runs a structured WordPress debugging interview. `/qa-check` runs a multi-stack quality audit in a forked context so its verbose output doesn't pollute your conversation.
 
-**Effort routing.** Skills set their own effort level so heavy analysis runs at `high` effort even if the session default is lower. `/review`, `/qa-check`, and `/brainstorm` run at high. `/debug-rules` runs at low - it's a mechanical log comparison. This saves tokens on simple skills without compromising quality on complex ones.
+**Effort routing.** Skills set their own effort level so heavy analysis runs at `high` effort even if the session default is lower. `/qa-check` runs at high. `/debug-rules` runs at low - it's a mechanical log comparison. This saves tokens on simple skills without compromising quality on complex ones.
 
 ### When to use a skill vs a rule vs an agent
 
@@ -47,7 +45,7 @@ If you're writing the same instructions more than twice, it's a skill. If it's a
 
 ### What's in here
 
-**Workflow:** `brainstorm`, `handoff`, `review`, `review-memory`, `test-plan`, `vibe-user`
+**Workflow:** `handoff`, `review-memory`, `test-plan`, `vibe-user`
 
 **Tool:** `block-journey`, `clean-worktrees`, `debug-rules`, `debug-wp`, `figma`, `playwright`, `qa-check`
 

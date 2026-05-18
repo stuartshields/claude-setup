@@ -156,6 +156,14 @@
             "command": "/Users/stuart/.claude/hooks/rtk-rewrite.sh"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/auto-approve-personal.sh"
+          }
+        ]
       }
     ],
     "Stop": [
@@ -214,22 +222,6 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/remind-project-claude.sh"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/check-unfinished-tasks.sh"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/verify-before-stop.sh"
           }
         ]
       },

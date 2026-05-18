@@ -46,6 +46,7 @@ If you want to suggest changes, see [CONTRIBUTING.md](CONTRIBUTING.md).
 	- [Start Here](docs/start-here.md)
 	- [Core Guide](docs/core-guide.md)
 	- [Plugins](docs/plugins.md)
+	- [How This Differs From Community Practice](docs/community-comparison.md)
 	- [Governance Review Template](docs/governance-review-template.md)
 	- [Governance Audits](docs/governance/audits/)
 	- [Governance Evidence](docs/governance/evidence/)

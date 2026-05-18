@@ -1,7 +1,7 @@
 ---
 title: Hooks
 ---
-<!-- Last updated: 2026-05-19T12:00+10:00 -->
+<!-- Last updated: 2026-05-19T14:30+10:00 -->
 
 ## Hooks
 
@@ -12,7 +12,7 @@ title: Hooks
 > - **Agent guards** - `agent-guard-write-block`, `agent-guard-readonly`, `agent-guard-max-lines`. Make "read-only" structurally enforced, not just a suggestion.
 > - **Memory and session lifecycle** - `memory-review-prompt`, `compact-restore`, `pre-compaction-preserve`, `session-cleanup`. Memory review at natural breakpoints, compaction state preservation.
 > - **Tracking and observability** - `posttool-dispatcher`, `track-modified-files`, `track-tasks`, `hook-observability-summary`, `log-instructions`. What changed, when, and why.
-> - **Policy and notifications** - `block-git-commit`, `check-unfinished-tasks`, `verify-before-stop`, `remind-handoff`, `remind-project-claude`, `stop-dispatcher`, `notification-alert`, `permission-notify`. Commit blocking, task state warnings, and attention alerts.
+> - **Policy and notifications** - `block-git-commit`, `auto-approve-personal`, `check-unfinished-tasks`, `remind-handoff`, `remind-project-claude`, `stop-dispatcher`, `notification-alert`, `permission-notify`. Commit blocking, scoped permission auto-approval, task state enforcement at Stop, and attention alerts.
 
 ### The problem
 
@@ -62,6 +62,18 @@ I deleted the file. Merged 3 essential points into `discipline.md`. Converted th
 
 The principle: **if a behaviour matters enough to write a rule about, and the rule keeps getting ignored, convert it to a hook.** Prose rules are suggestions. Hooks are laws.
 
+### Scoped auto-approval
+
+`auto-approve-personal.sh` is a `PreToolUse` hook that emits `permissionDecision: allow` JSON for any tool call when the working directory is under `~/Personal/` - except for `~/Personal/project-claude-setup/`, which it explicitly excludes.
+
+Why I use it: personal projects under `~/Personal/` are low-stakes throwaway work. Demos, experiments, side projects. The permission prompt is friction I don't need there. The hook removes it in exactly the scope where it's safe to.
+
+Why `project-claude-setup` is excluded: this repo is the source of truth for my global Claude configuration. Mistakes here leak into every other project I work on. The permission prompt becomes a meaningful checkpoint, so the hook deliberately skips its own auto-approval for this directory.
+
+**This pattern is intentionally narrow.** Do not register this hook (or any similar shape) for any project that touches secrets, customer data, production credentials, or anything you can't revert by `git reset`. Auto-approval bypasses the only deterministic gate Claude Code has between "tool call is about to fire" and "tool call ran" - if you allow it where it shouldn't be allowed, there's no other guard.
+
+If you adopt this setup, change `$HOME/Personal/` to your own trusted-projects directory and audit the exclusion list against the kinds of work you actually do there. The same shape works for `~/scratch/`, `~/experiments/`, or any path you treat as a sandbox.
+
 ### What's in here
 
 **Quality gates:** `check-code-quality.sh`, `project-quality-gates.sh`, `stop-quality-check.sh`, `tab-edit-guard.sh`, `tab-read-reminder.sh`, `bash-tab-warn.sh`
@@ -74,7 +86,7 @@ The principle: **if a behaviour matters enough to write a rule about, and the ru
 
 **Tracking and observability:** `posttool-dispatcher.sh`, `track-modified-files.sh`, `track-tasks.sh`, `hook-observability-summary.sh`, `log-instructions.sh`
 
-**Policy and notifications:** `block-git-commit.sh`, `check-unfinished-tasks.sh`, `verify-before-stop.sh`, `remind-handoff.sh`, `remind-project-claude.sh`, `stop-dispatcher.sh`, `notification-alert.sh`, `permission-notify.sh`
+**Policy and notifications:** `block-git-commit.sh`, `auto-approve-personal.sh`, `check-unfinished-tasks.sh`, `remind-handoff.sh`, `remind-project-claude.sh`, `stop-dispatcher.sh`, `notification-alert.sh`, `permission-notify.sh`
 
 ---
 

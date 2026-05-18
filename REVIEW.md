@@ -1,4 +1,4 @@
-<!-- Last updated: 2026-05-19T12:00+10:00 -->
+<!-- Last updated: 2026-05-19T14:30+10:00 -->
 
 # REVIEW.md — Audit/review calibration for project-claude-setup
 
@@ -38,7 +38,6 @@
 - **"Missing test coverage" / "no CI"** — by design. The repo is config/docs, not application code. Don't flag.
 - **Intentional divergences from `~/.claude/`** documented in `MEMORY.md`:
   - `@RTK.md` import in global `CLAUDE.md` but not in mirror — personal-only.
-  - `auto-approve-personal.sh` hook in global `settings.json` but not in mirror — personal-only.
   - Some `gsd-*` historical references in `CHANGELOG.md` — historical record, not active behaviour.
 
 ## Documentation calibration
