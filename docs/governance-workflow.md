@@ -63,8 +63,10 @@ What to check:
 
 Controls token and latency overhead from plugin sprawl. Each MCP server and plugin adds tool definitions to your context window even when unused. Plugins enabled globally in `~/.claude/settings.json` load everywhere unless disabled per-project.
 
+The current inventory lives in [docs/plugins.md](plugins.md) — that file documents each enabled plugin's use-case, the disabled-by-default exceptions, and the extra marketplaces.
+
 What to check:
-- Maximum plugin budget documented with rationale
+- Maximum plugin budget documented with rationale (see `docs/plugins.md`)
 - Each enabled plugin has an owner, use-case, and keep/remove decision
 - Per-project `.claude/settings.json` disables plugins not needed for that project (e.g., Figma on backend-only projects)
 - Review cadence defined and current cycle logged

@@ -1,7 +1,7 @@
 ---
 title: Rules
 ---
-<!-- Last updated: 2026-05-17T09:41+10:00 -->
+<!-- Last updated: 2026-05-19T12:00+10:00 -->
 
 ## Rules
 
@@ -20,9 +20,9 @@ Rules fix that. Files in `~/.claude/rules/` load automatically - Claude reads th
 
 ### How I use rules
 
-**The instruction budget.** The single most important lesson: keep always-on rules under ~70 bullet points. Currently at ~40 across 5 files. This took deliberate trimming - the original setup had 142 always-on bullets across 10 files. Cutting ~72% improved adherence more than any rewrite of the rules themselves. The latest cut moved `debugging` and `tool-usage` out of rules entirely - both were conditional procedures ("when debugging...", "when Edit fails...") that don't belong in always-on context. They're skills now.
+**The instruction budget.** The single most important lesson: keep always-on rules under ~70 bullet points. Currently at ~55 across 7 files. This took deliberate trimming - the original setup had 142 always-on bullets across 10 files. Cutting ~60% improved adherence more than any rewrite of the rules themselves. The latest cut moved `debugging` and `tool-usage` out of rules entirely - both were conditional procedures ("when debugging...", "when Edit fails...") that don't belong in always-on context. They're skills now.
 
-**Always-on vs scoped.** Rules that only matter for specific file types use `paths:` frontmatter so they don't load during irrelevant sessions. 8 of 15 files are scoped. `research-and-decisions.md` was always-on for months, loading 20 bullets every session even when no research was happening. Scoping it removed those bullets from sessions where they were noise.
+**Always-on vs scoped.** Rules that only matter for specific file types use `paths:` frontmatter so they don't load during irrelevant sessions. 9 of 16 files are scoped. `research-and-decisions.md` was always-on for months, loading 20 bullets every session even when no research was happening. Scoping it removed those bullets from sessions where they were noise.
 
 **Hooks over prose.** Some rules kept getting ignored no matter how they were worded. "After 5 file reads without a code change, stop" was a rule in `context-management.md`. It didn't work. Now it's `context-drift-guard.sh` - a hook that counts reads and fires a warning mechanically. The rule file was deleted entirely, with its 3 strongest points merged into `discipline.md`. If Claude ignores a rule 2-3 times, the answer isn't better wording - it's converting to a hook.
 

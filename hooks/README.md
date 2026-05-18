@@ -5,9 +5,9 @@ title: Hooks
 
 ## Hooks
 
-> **TL;DR:** 29 hooks across 6 categories:
+> **TL;DR:** 32 hooks across 6 categories:
 >
-> - **Quality gates** - `check-code-quality`, `project-quality-gates`, `stop-quality-check`. Block bad code before it's written and catch incomplete work at session end.
+> - **Quality gates** - `check-code-quality`, `project-quality-gates`, `stop-quality-check`, `tab-edit-guard`, `tab-read-reminder`, `bash-tab-warn`. Block bad code before it's written, surface tab/space indent mismatches on Edit with corrective feedback, and warn when sed/awk/perl is about to touch a tab-indented file.
 > - **Loop and drift detection** - `detect-perf-degradation`, `drift-review-stop`, `repeated-edit-guard`, `repeated-bash-guard`, `repeated-approach-guard`, `context-drift-guard`. Catch reasoning loops, oscillating edits, command repetition, and context drift. The last three replaced prose rules that weren't being followed.
 > - **Agent guards** - `agent-guard-write-block`, `agent-guard-readonly`, `agent-guard-max-lines`. Make "read-only" structurally enforced, not just a suggestion.
 > - **Memory and session lifecycle** - `memory-review-prompt`, `compact-restore`, `pre-compaction-preserve`, `session-cleanup`. Memory review at natural breakpoints, compaction state preservation.
@@ -64,7 +64,7 @@ The principle: **if a behaviour matters enough to write a rule about, and the ru
 
 ### What's in here
 
-**Quality gates:** `check-code-quality.sh`, `project-quality-gates.sh`, `stop-quality-check.sh`
+**Quality gates:** `check-code-quality.sh`, `project-quality-gates.sh`, `stop-quality-check.sh`, `tab-edit-guard.sh`, `tab-read-reminder.sh`, `bash-tab-warn.sh`
 
 **Loop and drift detection:** `detect-perf-degradation.sh`, `drift-review-stop.sh`, `repeated-edit-guard.sh`, `repeated-bash-guard.sh`, `repeated-approach-guard.sh`, `context-drift-guard.sh`
 

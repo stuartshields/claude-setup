@@ -47,7 +47,10 @@
       "Read(**/*.sqlite*)",
       "Read(**/*.db)",
       "Read(**/vendor/**)",
-      "Read(**/__pycache__/**)"
+      "Read(**/__pycache__/**)",
+      "Bash(sed -i:*)",
+      "Bash(perl -i:*)",
+      "Bash(perl -pi:*)"
     ]
   },
   "model": "opus[1m]",
@@ -114,6 +117,15 @@
         "hooks": [
           {
             "type": "command",
+            "command": "~/.claude/hooks/tab-edit-guard.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
             "command": "~/.claude/hooks/repeated-edit-guard.sh"
           }
         ]
@@ -124,6 +136,15 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/repeated-bash-guard.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/bash-tab-warn.sh"
           }
         ]
       },
@@ -154,6 +175,15 @@
             "type": "command",
             "command": "~/.claude/hooks/posttool-dispatcher.sh",
             "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/tab-read-reminder.sh"
           }
         ]
       }
@@ -279,12 +309,6 @@
       "source": {
         "source": "github",
         "repo": "stuartshields/claude-co2-status-line"
-      }
-    },
-    "thedotmack": {
-      "source": {
-        "source": "github",
-        "repo": "thedotmack/claude-mem"
       }
     }
   },
