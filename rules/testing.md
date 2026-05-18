@@ -1,7 +1,7 @@
 ---
 paths: "**/*.test.*,**/*.spec.*,**/__tests__/**,**/test/**,**/tests/**,**/*.js,**/*.ts,**/*.tsx,**/*.jsx,**/*.py,**/*.php,**/*.go,**/*.rs"
 ---
-<!-- Last updated: 2026-03-23T10:30+11:00 -->
+<!-- Last updated: 2026-04-06T01:25+11:00 -->
 
 # Testing
 
@@ -35,6 +35,7 @@ paths: "**/*.test.*,**/*.spec.*,**/__tests__/**,**/test/**,**/tests/**,**/*.js,*
 - **AAA pattern:** Arrange -> Act -> Assert.
 - **One behavior per test.** Multiple assertions are fine if they verify the same behavior.
 - **Test names are documentation.** Bad: "should work". Good: "returns cafes sorted by distance ascending".
+- **Empty-implementation smell.** Tests must fail when the code under test is deleted — if they still pass, the test is asserting nothing.
 
 ## Stack-Specific Defaults
 > Match the project's existing patterns. These are overridden by project conventions.

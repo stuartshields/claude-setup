@@ -1,6 +1,6 @@
 ---
 name: block-journey
-description: Discover all files for a block or component, trace the editorial and front-end user journeys, and write a journey document to .planning/journeys/.
+description: Discover all files for a block or component, trace the editorial and front-end user journeys, and write a journey document to docs/journeys/.
 argument-hint: "[directory/]<block-name>"
 disable-model-invocation: true
 effort: medium
@@ -71,9 +71,9 @@ Read each discovered file. Build a mental model of:
 
 ### Step 3: Write the Journey Document
 
-Write to the **current project's** `.planning/journeys/` directory (relative to the working directory). Create the directory if it doesn't exist.
+Write to the **current project's** `docs/journeys/` directory (relative to the working directory). Create the directory if it doesn't exist.
 
-Write to `.planning/journeys/<block-name>.md` using the template below. Adapt sections to what actually exists — skip sections that don't apply (e.g., no "Front-End Journey" if the block has no interactive JS).
+Write to `docs/journeys/<block-name>.md` using the template below. Adapt sections to what actually exists — skip sections that don't apply (e.g., no "Front-End Journey" if the block has no interactive JS).
 
 ---
 
@@ -157,8 +157,8 @@ After writing the file, summarise what was documented and note any gaps:
 
 ## Rules
 
-- **Do NOT modify source files.** This skill is read-only analysis + one write to `.planning/journeys/` in the current project.
-- **Always write to the current working directory's `.planning/journeys/`.** This skill is global but its output is project-local.
+- **Do NOT modify source files.** This skill is read-only analysis + one write to `docs/journeys/` in the current project.
+- **Always write to the current working directory's `docs/journeys/`.** This skill is global but its output is project-local.
 - **Do NOT assume file types.** Discover what exists. The block might use `.js`, `.jsx`, `.tsx`, `.php`, `.vue`, or anything else.
 - **Do NOT hardcode plugin paths.** Search from the working directory. Use the directory scope from `$ARGUMENTS` if provided (e.g., `rtm-blocks/faq`), but fall back to broad search if nothing is found there.
 - **Follow the dependency chain.** If a file imports a shared component, include that component in the analysis. Stop at two levels deep — note deeper dependencies without reading them.

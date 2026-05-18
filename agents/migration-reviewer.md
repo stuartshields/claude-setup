@@ -1,7 +1,8 @@
 ---
 name: migration-reviewer
-description: Database migration safety reviewer. Checks SQL migrations (D1, MySQL, PostgreSQL, SQLite), WordPress dbDelta, and ORM migrations (Knex, Drizzle, Prisma) for destructive operations, backward compatibility, rollback plans, index coverage, data integrity, ordering, and performance risks.
+description: Database migration safety reviewer. Use before applying any SQL migration (D1, MySQL, PostgreSQL, SQLite), WordPress dbDelta, or ORM migration (Knex, Drizzle, Prisma) to production. Checks for destructive operations, backward compatibility, rollback plans, index coverage, data integrity, ordering, and performance risks. Read-only. Reports issues by severity with migration file:line references.
 tools: Read, Grep, Glob, Bash
+permissionMode: plan
 model: sonnet
 maxTurns: 15
 ---

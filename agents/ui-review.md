@@ -2,6 +2,7 @@
 name: ui-review
 description: Reviews frontend UI/UX for usability, accessibility, responsive design, and interaction quality. Use after building or changing UI components, pages, or user flows.
 tools: Read, Grep, Glob
+permissionMode: plan
 model: sonnet
 maxTurns: 20
 ---

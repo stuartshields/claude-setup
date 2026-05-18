@@ -1,11 +1,11 @@
 ---
 paths: ".claude/rules/**,.claude/hooks/**,.claude/agents/*.md,.claude/skills/**,.claude/CLAUDE.md,.claude/settings.*"
 ---
-<!-- Last updated: 2026-03-26T12:00+11:00 -->
+<!-- Last updated: 2026-05-19T12:00+10:00 -->
 
 # Harness Maintenance Protocol
 
-> Applies when modifying rules, hooks, agents, skills, settings, or global CLAUDE.md - not project work or GSD.
+> Applies when modifying rules, hooks, agents, skills, settings, or global CLAUDE.md - not project work.
 
 ## Research Before Changing
 - **IMPORTANT: Do not use training data for harness decisions.** Always validate with external sources (WebSearch/WebFetch) before modifying rules, hooks, agents, or skills. Training data is stale and may reflect outdated Claude Code behavior, deprecated APIs, or patterns that no longer apply.
@@ -14,10 +14,11 @@ paths: ".claude/rules/**,.claude/hooks/**,.claude/agents/*.md,.claude/skills/**,
 - **Check existing research first.** Read `~/.claude/projects/-Users-stuart--claude/memory/reference_harness_research.md` before searching - the topic may already have sources from a prior session.
 
 ## Instruction Budget
-- **Always-on ceiling: ~70 bullet points across unscoped rule files.** The system prompt adds ~50 more. Total should stay under ~120. Current count: ~59 always-on bullets across 7 files.
+- **Always-on ceiling: ~70 bullet points across unscoped rule files.** The system prompt adds ~50 more. Total should stay under ~120. Current count: ~40 always-on bullets across 5 files.
 - **Before adding a new rule:** count always-on bullet points (`grep -c '^\s*-' ~/.claude/rules/*.md` for unscoped files). If at/near 70, scope or consolidate before adding.
 - **Delete rules Claude already follows without instruction.** If removing a rule wouldn't change behavior, it's wasting a slot.
-- **Scope rules by path** when they only apply to specific file types. Use `paths:` frontmatter. Currently 8 of 15 rule files are scoped.
+- **Scope rules by path** when they only apply to specific file types. Use `paths:` frontmatter. Currently 8 of 13 rule files are scoped.
+- **Conditional procedures belong in skills, not rules.** If a rule only applies "when debugging", "when Edit fails", "when researching" - it's a skill. Skills lazy-load; rules load on every turn.
 
 ## Hooks Over Prose
 - **If a rule is violated 2-3 times, move enforcement to a hook.** Prose rules are suggestions; hooks are laws. Meta-cognitive rules ("if you catch yourself doing X, stop") are especially weak as prose - convert them to hooks that detect the pattern mechanically.

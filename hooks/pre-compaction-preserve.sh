@@ -25,13 +25,7 @@ if [ -f "$CLAUDE_MD" ]; then
 	RESTORE="${RESTORE}PROJECT CLAUDE.md (first 50 lines):\n${SUMMARY}\n\n"
 fi
 
-# 2. Project state
-STATE_MD="$PROJECT_ROOT/.planning/STATE.md"
-if [ -f "$STATE_MD" ]; then
-	RESTORE="${RESTORE}PROJECT STATE.md:\n$(cat "$STATE_MD")\n\n"
-fi
-
-# 3. Uncommitted changes
+# 2. Uncommitted changes
 if git -C "$PROJECT_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 	CHANGED=$(git -C "$PROJECT_ROOT" diff --name-only 2>/dev/null)
 	STAGED=$(git -C "$PROJECT_ROOT" diff --cached --name-only 2>/dev/null)
@@ -42,12 +36,12 @@ if git -C "$PROJECT_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 		RESTORE="${RESTORE}\n"
 	fi
 
-	# 4. Recent commits
+	# 3. Recent commits
 	RECENT=$(git -C "$PROJECT_ROOT" log --oneline -3 2>/dev/null)
 	[ -n "$RECENT" ] && RESTORE="${RESTORE}RECENT COMMITS:\n${RECENT}\n\n"
 fi
 
-# 5. Build/test commands
+# 4. Build/test commands
 if [ -f "$PROJECT_ROOT/package.json" ]; then
 	BUILD=$(jq -r '.scripts.build // empty' "$PROJECT_ROOT/package.json" 2>/dev/null)
 	TEST=$(jq -r '.scripts.test // empty' "$PROJECT_ROOT/package.json" 2>/dev/null)

@@ -2,7 +2,7 @@
 layout: default
 title: Claude Code Setup
 ---
-<!-- Last updated: 2026-03-21 -->
+<!-- Last updated: 2026-05-19T12:00+10:00 -->
 
 # Claude Code Setup
 
@@ -38,12 +38,15 @@ If you want to suggest changes, see [CONTRIBUTING.md](CONTRIBUTING.md).
 - [Read Online](#read-online)
 - [Changelog](CHANGELOG.md)
 - [Contributing](CONTRIBUTING.md)
+- [Audit Calibration (REVIEW.md)](REVIEW.md)
 - [Who This Is For](#who-this-is-for)
 - [Quick Start](#quick-start)
 - [Recommended Reading Path](#recommended-reading-path)
 - [Full Documentation](#full-documentation)
 	- [Start Here](docs/start-here.md)
 	- [Core Guide](docs/core-guide.md)
+	- [Plugins](docs/plugins.md)
+	- [How This Differs From Community Practice](docs/community-comparison.md)
 	- [Governance Review Template](docs/governance-review-template.md)
 	- [Governance Audits](docs/governance/audits/)
 	- [Governance Evidence](docs/governance/evidence/)
@@ -74,7 +77,8 @@ Read the rest of this to understand what each part does and why - so you can ada
 4. [Hooks](hooks/README.md)
 5. [Agents](agents/README.md)
 6. [Skills and Memory](skills/README.md)
-7. [Governance Workflow](docs/governance-workflow.md)
+7. [Plugins](docs/plugins.md)
+8. [Governance Workflow](docs/governance-workflow.md)
 
 ---
 

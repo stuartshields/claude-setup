@@ -1,7 +1,8 @@
 ---
 name: cleanup
-description: Finds dead code, unused exports, orphaned files, stale dependencies, and other cruft that accumulates in codebases over time. Use for periodic hygiene or before major refactors.
+description: Finds code that shouldn't exist — dead code, unused exports, orphaned files, stale dependencies, and accumulated cruft. Use for periodic hygiene or before major refactors. For code that exists and runs but is over-built or unnecessarily complex, use `simplify` instead.
 tools: Read, Grep, Glob, Bash
+permissionMode: plan
 background: true
 model: sonnet
 maxTurns: 20

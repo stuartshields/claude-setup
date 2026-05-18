@@ -17,7 +17,8 @@
       "Read(next.config.*)",
       "Read(composer.json)",
       "Read(phpunit.xml*)",
-      "Read(.php-cs-fixer*)"
+      "Read(.php-cs-fixer*)",
+      "Bash(curl http://localhost:*)"
     ],
     "deny": [
       "Read(.env)",
@@ -46,9 +47,13 @@
       "Read(**/*.sqlite*)",
       "Read(**/*.db)",
       "Read(**/vendor/**)",
-      "Read(**/__pycache__/**)"
+      "Read(**/__pycache__/**)",
+      "Bash(sed -i:*)",
+      "Bash(perl -i:*)",
+      "Bash(perl -pi:*)"
     ]
   },
+  "model": "opus[1m]",
   "hooks": {
     "SessionStart": [
       {
@@ -66,14 +71,6 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/compact-restore.sh"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"/Users/stuart/.claude/hooks/gsd-check-update.js\""
           }
         ]
       },
@@ -120,6 +117,15 @@
         "hooks": [
           {
             "type": "command",
+            "command": "~/.claude/hooks/tab-edit-guard.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
             "command": "~/.claude/hooks/repeated-edit-guard.sh"
           }
         ]
@@ -130,6 +136,32 @@
           {
             "type": "command",
             "command": "~/.claude/hooks/repeated-bash-guard.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/bash-tab-warn.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/stuart/.claude/hooks/rtk-rewrite.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/auto-approve-personal.sh"
           }
         ]
       }
@@ -146,68 +178,20 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/track-modified-files.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/project-quality-gates.sh",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Bash|Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/hook-observability-summary.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "TaskCreate|TaskUpdate",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/track-tasks.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash|Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/detect-perf-degradation.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash|Edit|Write|MultiEdit|Agent|Task",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"/Users/stuart/.claude/hooks/gsd-context-monitor.js\"",
+            "command": "~/.claude/hooks/posttool-dispatcher.sh",
             "timeout": 10
           }
         ]
       },
       {
-        "matcher": "Bash|Edit|Write",
+        "matcher": "Read",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/memory-review-prompt.sh",
-            "timeout": 5
+            "command": "~/.claude/hooks/tab-read-reminder.sh"
           }
         ]
       }
@@ -230,24 +214,6 @@
             "command": "~/.claude/hooks/detect-perf-degradation.sh"
           }
         ]
-      },
-      {
-        "matcher": "Read|Grep|Glob|Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/context-drift-guard.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/repeated-approach-guard.sh"
-          }
-        ]
       }
     ],
     "UserPromptSubmit": [
@@ -263,15 +229,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/check-unfinished-tasks.sh"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/verify-before-stop.sh"
+            "command": "~/.claude/hooks/remind-handoff.sh"
           }
         ]
       },
@@ -328,14 +286,15 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "node \"/Users/stuart/Personal/co2-status-line/src/statusline.js\" --wrap 'node \"/Users/stuart/.claude/hooks/gsd-statusline.js\"'"
+    "command": "node \"/Users/stuart/.claude/hooks/statusline-chain.js\""
   },
   "enabledPlugins": {
     "frontend-design@claude-code-plugins": true,
     "claude-hud@claude-hud": true,
     "swift-lsp@claude-plugins-official": true,
     "figma@claude-plugins-official": false,
-    "rust-analyzer-lsp@claude-plugins-official": true
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "claude-co2-status-line": {
@@ -344,5 +303,9 @@
         "repo": "stuartshields/claude-co2-status-line"
       }
     }
+  },
+  "autoDreamEnabled": true,
+  "worktree": {
+    "baseRef": "fresh"
   }
 }

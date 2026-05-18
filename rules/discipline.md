@@ -1,4 +1,4 @@
-<!-- Last updated: 2026-03-26T12:00+11:00 -->
+<!-- Last updated: 2026-05-19T12:00+10:00 -->
 
 # Discipline
 
@@ -6,6 +6,16 @@
 - **Implement fully or flag to the user.** Write real logic in every function. If genuinely blocked, say so — do not silently skip it.
 - **Handle the unhappy path.** Every API call needs error handling. Every form needs validation. Every async op needs loading + error states.
 - **Edge cases you notice are part of the implementation.** Handle them before moving on. Noticing and leaving is incomplete work.
+
+## IMPORTANT: Surface, Don't Dismiss
+- **Issues you notice outside your task MUST be surfaced — not silently skipped, not silently fixed.** Name them in your response with `file:line` and let the user choose whether to handle them now, later, or never.
+- **These phrases mean you decided for the user — surface instead**: `pre-existing`, `unrelated`, `out of scope`, `not part of this task/PR`, `I'll leave that alone`. They're fine AFTER you've surfaced; they're a red flag when used to skip surfacing. Bypassing user judgement is how a fix silently ships a regression.
+- **Notice → flag → ask.** When you choose not to act on a finding, say what you noticed, where, and why you're not acting — then ask. Don't bury it as a parenthetical or omit it entirely.
+- **Silently expanding scope is the mirror failure.** "Fixing it while I'm here" loses user judgement the same way silent dismissal does. Stay in scope; flag the adjacent finding separately.
+- **Boy-scout the surface, not the diff.** When editing a file, scan ±20 lines for obvious decay (dead imports, magic numbers, commented-out blocks, naming drift). Surface what you see in the response — don't widen the edit to fix them. The user picks what to action.
+
+## IMPORTANT: Don't Manufacture Findings
+- **A clean audit/review is valid — don't invent findings to fill tiers.** Confidence gate: ≥80% sure with `file:line` and a concrete failure mode, or drop. Speculation belongs in "Suggested follow-ups", not findings. **Mirror to Surface, Don't Dismiss:** surface what you *actually* see, don't invent what you didn't. See `audit-vs-fix-discipline` skill for the full calibration check.
 
 ## IMPORTANT: Do Not Pivot to Avoid Hard Work
 - **"Simpler approach" is not an escape hatch.** If the correct fix requires rebuilding a function or restructuring logic — do that. Pivoting to a workaround is avoidance, not simplicity.

@@ -1,11 +1,11 @@
 ---
 title: Core Guide
 ---
-<!-- Last updated: 2026-03-26T14:00+11:00 -->
+<!-- Last updated: 2026-05-19T12:00+10:00 -->
 
 > **TL;DR:** CLAUDE.md gives Claude standing instructions. Rules add persistent constraints (7 always-loaded, 8 scoped). Hooks enforce those constraints mechanically. Agents delegate to specialists. Skills capture reusable workflows. Keep always-on instructions under ~70 bullet points or Claude starts ignoring them.
 
-Each component type has its own README: [Rules](../rules/README.md), [Hooks](../hooks/README.md), [Agents](../agents/README.md), [Skills](../skills/README.md). This guide explains how the pieces fit together.
+Each component type has its own README: [Rules](../rules/README.md), [Hooks](../hooks/README.md), [Agents](../agents/README.md), [Skills](../skills/README.md), [Plugins](plugins.md). This guide explains how the pieces fit together.
 
 ## CLAUDE.md
 
@@ -23,8 +23,6 @@ The section I rely on most is the mandatory workflow:
   the current task, test commands and results, key decisions.
 - **CLAUDE.md is the Source of Truth**: Before making changes, read the
   project's CLAUDE.md. If your changes diverge, ask first.
-- **Complexity Routing**: 6+ files → structured planning. 3-5 files → plan
-  in .planning/PLAN.md. Under 3 → just do it.
 ```
 
 Without these rules, Claude frequently writes speculative code, skips verification, and adds "helpful" extras you didn't ask for. With them, it behaves predictably.
@@ -63,6 +61,8 @@ The four layers build on each other:
 **Agents** delegate to specialists. A code reviewer that can only read, never write. A security auditor on a cheaper model. A quick-edit agent on haiku with a 50-line limit. Agents have their own tools, model, and permissions - structurally different from asking the main session to "review this code." See [Agents](../agents/README.md) for the four roles.
 
 **Skills** capture reusable workflows. Brainstorming interviews, parallel code reviews, user testing, memory management. When you find yourself writing the same instructions more than twice, it's a skill. See [Skills](../skills/README.md) for workflow vs tool skills.
+
+**Plugins** are externally-distributed bundles that add skills, tools, or behaviour to every session. They live outside this repo (installed via `/plugin install`) and are toggled in `settings.json`. Each enabled plugin loads tool definitions into every session whether or not you use them, so the budget matters. See [Plugins](plugins.md) for the current inventory, why each one is enabled (or disabled), and per-project override guidance.
 
 ### When to use what
 

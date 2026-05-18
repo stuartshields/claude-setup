@@ -1,9 +1,17 @@
-.planning/
 .claude/
 .DS_Store
 **/.DS_Store
 Thumbs.db
 .playwright-mcp/
+
+# Override ~/.gitignore_global which excludes /docs/ globally — this project IS documentation.
+!/docs/
+!/docs/**
+
+# Re-apply universal noise ignores inside docs/ (the negation above overrode them).
+docs/**/.DS_Store
+docs/**/Thumbs.db
+docs/**/*.log
 
 # Generated runtime logs and observability outputs
 logs/
