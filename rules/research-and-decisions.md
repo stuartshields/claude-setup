@@ -1,25 +1,25 @@
 ---
-paths: ".planning/**,**/SOURCES.md,**/adr/**"
+paths: "**/SOURCES.md,**/adr/**"
 ---
-<!-- Last updated: 2026-03-26T12:00+11:00 -->
+<!-- Last updated: 2026-05-19T12:00+10:00 -->
 
 # Research Sources & Decision Records
 
-## Research Sources (`.planning/SOURCES.md`)
+## Research Sources (`docs/SOURCES.md`)
 
 ### Before Searching
-- **Check existing sources first.** Before any WebSearch/WebFetch, check if `.planning/SOURCES.md` exists in the project root. Read it — the answer may already be documented from a prior session.
+- **Check existing sources first.** Before any WebSearch/WebFetch, check if `docs/SOURCES.md` exists in the project root. Read it — the answer may already be documented from a prior session.
 
 ### During Research
-- **Track external research per project.** When WebSearch/WebFetch informs a decision (library choice, architecture pattern, bug fix, API usage, bug report workaround), append the source to `.planning/SOURCES.md` in the project root. This includes research done during debugging - if a GitHub issue or community post changes your approach, log it immediately, not after the fix.
-- **Create `.planning/SOURCES.md` on first use.** Group entries by topic.
+- **Track external research per project.** When WebSearch/WebFetch informs a decision (library choice, architecture pattern, bug fix, API usage, bug report workaround), append the source to `docs/SOURCES.md` in the project root. This includes research done during debugging - if a GitHub issue or community post changes your approach, log it immediately, not after the fix.
+- **Create `docs/SOURCES.md` on first use.** Group entries by topic.
 - **Entry format:** `- [Title](URL) - what decision/file it influenced (YYYY-MM-DD)`
 	- The date is when the source was last verified, not when the decision was made.
 	- Link to the code or config the research drove, e.g. `→ src/auth/middleware.ts` or `→ CLAUDE.md Section 3`.
 - **Not every lookup is research.** Only log sources that informed a decision. Skip syntax checks, package existence verification, and quick doc lookups.
-- **Scope includes global tooling changes.** Research that informs changes to global skills, rules, or workflow files (`~/.claude/skills/`, `~/.claude/rules/`, `~/.claude/CLAUDE.md`) should be logged in `~/.claude/SOURCES.md`. Research that informs project code goes in the project's `.planning/SOURCES.md`. If a single research session informs both, log in both places.
+- **Scope includes global tooling changes.** Research that informs changes to global skills, rules, or workflow files (`~/.claude/skills/`, `~/.claude/rules/`, `~/.claude/CLAUDE.md`) should be logged in `~/.claude/SOURCES.md`. Research that informs project code goes in the project's `docs/SOURCES.md`. If a single research session informs both, log in both places.
 
-## Architecture Decision Records (`.planning/adr/`)
+## Architecture Decision Records (`docs/adr/`)
 
 ### When to Write an ADR
 - Choosing between competing libraries, frameworks, or approaches
@@ -29,7 +29,7 @@ paths: ".planning/**,**/SOURCES.md,**/adr/**"
 - **Do not write ADRs for:** style preferences, trivial choices, or decisions already explained in CLAUDE.md
 
 ### Before Deciding
-- **Check existing ADRs first.** Before making an architectural choice, check if `.planning/adr/` exists and read relevant records. A previous session may have already evaluated the same options.
+- **Check existing ADRs first.** Before making an architectural choice, check if `docs/adr/` exists and read relevant records. A previous session may have already evaluated the same options.
 
 ### File Format
 - **Filename:** `NNNN-short-title.md` (e.g. `0001-use-css-first-tailwind.md`)

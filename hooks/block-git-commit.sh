@@ -8,8 +8,7 @@ command=$(jq -r '.tool_input.command // empty' 2>/dev/null)
 
 # --- Git commit blocking (~/Work only) ---
 if [[ "$PWD" == "$HOME/Work"* ]]; then
-	if [[ "$command" =~ git[[:space:]]+(.*[[:space:]]+)?commit ]] || \
-	   [[ "$command" =~ gsd-tools[^[:space:]]*[[:space:]]+commit ]]; then
+	if [[ "$command" =~ git[[:space:]]+(.*[[:space:]]+)?commit ]]; then
 		echo "BLOCKED: Git commits are disabled in ~/Work. Stage your changes manually and commit when ready." >&2
 		exit 2
 	fi

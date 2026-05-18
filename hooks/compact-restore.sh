@@ -40,11 +40,6 @@ if [ -f "$CLAUDE_MD" ]; then
 	RESTORE="${RESTORE}PROJECT CLAUDE.md (first 50 lines):\n$(head -50 "$CLAUDE_MD")\n\n"
 fi
 
-STATE_MD="$PROJECT_ROOT/.planning/STATE.md"
-if [ -f "$STATE_MD" ]; then
-	RESTORE="${RESTORE}PROJECT STATE.md:\n$(cat "$STATE_MD")\n\n"
-fi
-
 if git -C "$PROJECT_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 	CHANGED=$(git -C "$PROJECT_ROOT" diff --name-only 2>/dev/null)
 	STAGED=$(git -C "$PROJECT_ROOT" diff --cached --name-only 2>/dev/null)

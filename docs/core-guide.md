@@ -1,7 +1,7 @@
 ---
 title: Core Guide
 ---
-<!-- Last updated: 2026-03-26T14:00+11:00 -->
+<!-- Last updated: 2026-05-19T12:00+10:00 -->
 
 > **TL;DR:** CLAUDE.md gives Claude standing instructions. Rules add persistent constraints (7 always-loaded, 8 scoped). Hooks enforce those constraints mechanically. Agents delegate to specialists. Skills capture reusable workflows. Keep always-on instructions under ~70 bullet points or Claude starts ignoring them.
 
@@ -23,8 +23,6 @@ The section I rely on most is the mandatory workflow:
   the current task, test commands and results, key decisions.
 - **CLAUDE.md is the Source of Truth**: Before making changes, read the
   project's CLAUDE.md. If your changes diverge, ask first.
-- **Complexity Routing**: 6+ files → structured planning. 3-5 files → plan
-  in .planning/PLAN.md. Under 3 → just do it.
 ```
 
 Without these rules, Claude frequently writes speculative code, skips verification, and adds "helpful" extras you didn't ask for. With them, it behaves predictably.

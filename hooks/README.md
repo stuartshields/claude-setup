@@ -1,17 +1,17 @@
 ---
 title: Hooks
 ---
-<!-- Last updated: 2026-05-15T15:45+10:00 -->
+<!-- Last updated: 2026-05-19T12:00+10:00 -->
 
 ## Hooks
 
-> **TL;DR:** 27 hooks across 6 categories:
+> **TL;DR:** 29 hooks across 6 categories:
 >
 > - **Quality gates** - `check-code-quality`, `project-quality-gates`, `stop-quality-check`. Block bad code before it's written and catch incomplete work at session end.
 > - **Loop and drift detection** - `detect-perf-degradation`, `drift-review-stop`, `repeated-edit-guard`, `repeated-bash-guard`, `repeated-approach-guard`, `context-drift-guard`. Catch reasoning loops, oscillating edits, command repetition, and context drift. The last three replaced prose rules that weren't being followed.
 > - **Agent guards** - `agent-guard-write-block`, `agent-guard-readonly`, `agent-guard-max-lines`. Make "read-only" structurally enforced, not just a suggestion.
 > - **Memory and session lifecycle** - `memory-review-prompt`, `compact-restore`, `pre-compaction-preserve`, `session-cleanup`. Memory review at natural breakpoints, compaction state preservation.
-> - **Tracking and observability** - `track-modified-files`, `track-tasks`, `hook-observability-summary`, `log-instructions`. What changed, when, and why.
+> - **Tracking and observability** - `posttool-dispatcher`, `track-modified-files`, `track-tasks`, `hook-observability-summary`, `log-instructions`. What changed, when, and why.
 > - **Policy and notifications** - `block-git-commit`, `check-unfinished-tasks`, `verify-before-stop`, `remind-handoff`, `remind-project-claude`, `stop-dispatcher`, `notification-alert`, `permission-notify`. Commit blocking, task state warnings, and attention alerts.
 
 ### The problem
@@ -52,7 +52,7 @@ fi
 
 **3. Catch incomplete work at Stop (stop gates).** `stop-quality-check.sh` scans Claude's final message for signs of incomplete work: deferred follow-ups ("in a follow-up"), unverified success claims ("all done" with no test output), and "too many issues" excuses. When triggered, it blocks the stop and feeds the issues back. Claude sees the list and addresses them before finishing.
 
-All Stop hooks funnel through `stop-dispatcher.sh` - a single entry point that runs checks sequentially, aggregates all blocking reasons, and returns one decision. This keeps Stop deterministic while spreading non-blocking reminders across earlier lifecycle events.
+All Stop hooks funnel through `stop-dispatcher.sh` - a single entry point that runs checks sequentially, aggregates all blocking reasons, and returns one decision. This keeps Stop deterministic while spreading non-blocking reminders across earlier lifecycle events. `posttool-dispatcher.sh` does the same for PostToolUse - one buffered read fans out to 8 sub-hooks based on tool name, replacing 8 separate hook entries.
 
 ### The lesson that changed everything
 
@@ -72,7 +72,7 @@ The principle: **if a behaviour matters enough to write a rule about, and the ru
 
 **Memory and session lifecycle:** `memory-review-prompt.sh`, `compact-restore.sh`, `pre-compaction-preserve.sh`, `session-cleanup.sh`
 
-**Tracking and observability:** `track-modified-files.sh`, `track-tasks.sh`, `hook-observability-summary.sh`, `log-instructions.sh`
+**Tracking and observability:** `posttool-dispatcher.sh`, `track-modified-files.sh`, `track-tasks.sh`, `hook-observability-summary.sh`, `log-instructions.sh`
 
 **Policy and notifications:** `block-git-commit.sh`, `check-unfinished-tasks.sh`, `verify-before-stop.sh`, `remind-handoff.sh`, `remind-project-claude.sh`, `stop-dispatcher.sh`, `notification-alert.sh`, `permission-notify.sh`
 

@@ -1,9 +1,8 @@
 #!/bin/bash
-# Memory review prompt - single script handling four lifecycle events.
-# Trigger 1 (UserPromptSubmit): GSD phase completion in GSD projects.
+# Memory review prompt - single script handling three lifecycle events.
+# Trigger 1 (UserPromptSubmit): Wrap-up phrases indicating session end.
 # Trigger 2 (SessionStart): Accumulated memory files from prior sessions.
 # Trigger 3 (PostToolUse): Context at 30% remaining with 3+ new memory files.
-# Trigger 4 (UserPromptSubmit): Wrap-up phrases indicating session end.
 # Advisory only - never blocks. Rate-limited to avoid noise.
 
 INPUT=$(cat)
@@ -54,50 +53,21 @@ count_new_memory() {
 	echo "$COUNT"
 }
 
-# ── Trigger 1: GSD phase completion (UserPromptSubmit only) ──
+# ── Trigger 1: Wrap-up phrases (UserPromptSubmit only) ──
 
 if [ "$EVENT" = "UserPromptSubmit" ]; then
-	# Rate limit: once per session for this trigger
-	SESSION_CACHE="/tmp/claude-memory-review-${SESSION_ID}"
-	[ -f "$SESSION_CACHE" ] && exit 0
+	# Rate limit: once per session for wrap-up detection
+	WRAPUP_CACHE="/tmp/claude-memory-wrapup-${SESSION_ID}"
+	[ -f "$WRAPUP_CACHE" ] && exit 0
 
-	STATE_FILE="$PROJECT_ROOT/.planning/STATE.md"
-	if [ -f "$STATE_FILE" ]; then
-		PHASE_STATUS=$(grep -m1 '^Status:' "$STATE_FILE" 2>/dev/null | sed 's/^Status: *//')
-		PHASE_ID=$(grep -m1 '^Phase:' "$STATE_FILE" 2>/dev/null | sed 's/^Phase: *//')
+	USER_PROMPT=$(echo "$INPUT" | jq -r '.prompt // ""' | tr '[:upper:]' '[:lower:]')
 
-		if [[ "$PHASE_STATUS" =~ [Cc]omplete ]]; then
-			PHASE_CACHE="${MEMORY_DIR}/.last-review-phase"
-			if [ -f "$PHASE_CACHE" ]; then
-				LAST_PHASE=$(cat "$PHASE_CACHE" 2>/dev/null)
-				if [ "$LAST_PHASE" != "$PHASE_ID" ]; then
-					TRIGGER="phase"
-					echo "$PHASE_ID" > "$PHASE_CACHE" 2>/dev/null
-				fi
-			else
-				TRIGGER="phase"
-				mkdir -p "$MEMORY_DIR" 2>/dev/null
-				echo "$PHASE_ID" > "$PHASE_CACHE" 2>/dev/null
-			fi
-		fi
-	fi
-
-	# ── Trigger 4: Wrap-up phrases (UserPromptSubmit only) ──
-
-	if [ -z "$TRIGGER" ]; then
-		# Rate limit: once per session for wrap-up detection
-		WRAPUP_CACHE="/tmp/claude-memory-wrapup-${SESSION_ID}"
-		[ -f "$WRAPUP_CACHE" ] && exit 0
-
-		USER_PROMPT=$(echo "$INPUT" | jq -r '.prompt // ""' | tr '[:upper:]' '[:lower:]')
-
-		# Match wrap-up phrases (case-insensitive, anchored to avoid mid-task false positives)
-		if echo "$USER_PROMPT" | grep -qiE "(let'?s wrap up$|let'?s finish up$|i think we'?re done|that'?s it for today|that'?s all for now|i'?m wrapping up$|i'?m done for now|end of session|call it a day|that'?s everything|good stopping point|let'?s stop here)"; then
-			NEW_COUNT=$(count_new_memory)
-			if [ "$NEW_COUNT" -ge 1 ]; then
-				TRIGGER="wrapup"
-				touch "$WRAPUP_CACHE" 2>/dev/null
-			fi
+	# Match wrap-up phrases (case-insensitive, anchored to avoid mid-task false positives)
+	if echo "$USER_PROMPT" | grep -qiE "(let'?s wrap up$|let'?s finish up$|i think we'?re done|that'?s it for today|that'?s all for now|i'?m wrapping up$|i'?m done for now|end of session|call it a day|that'?s everything|good stopping point|let'?s stop here)"; then
+		NEW_COUNT=$(count_new_memory)
+		if [ "$NEW_COUNT" -ge 1 ]; then
+			TRIGGER="wrapup"
+			touch "$WRAPUP_CACHE" 2>/dev/null
 		fi
 	fi
 fi
@@ -106,7 +76,7 @@ fi
 
 if [ "$EVENT" = "SessionStart" ]; then
 	# Only fire on startup, clear, or compact - not resume
-	SESSION_TYPE=$(echo "$INPUT" | jq -r '.session_type // ""')
+	SESSION_TYPE=$(echo "$INPUT" | jq -r '.source // ""')
 	if [ "$SESSION_TYPE" = "resume" ]; then
 		exit 0
 	fi
@@ -175,17 +145,9 @@ fi
 
 [ -z "$TRIGGER" ] && exit 0
 
-# Mark session as prompted (trigger 1 only - triggers 2, 3, 4 have their own rate limits)
-if [ "$TRIGGER" = "phase" ]; then
-	touch "/tmp/claude-memory-review-${SESSION_ID}" 2>/dev/null
-fi
-
 MEMORY_COUNT=$(find "$MEMORY_DIR" -name '*.md' -not -name 'MEMORY.md' 2>/dev/null | wc -l | tr -d ' ')
 
 case "$TRIGGER" in
-	phase)
-		echo "Phase complete. Review auto-memory (${MEMORY_COUNT} topic files). Promote permanent learnings to CLAUDE.md, rules, or skills. Remove noise. Run /review-memory for guided review."
-		;;
 	memory)
 		echo "Auto-memory has ${NEW_COUNT} new topic files since last review. Run /review-memory to review, promote, and clean up."
 		;;

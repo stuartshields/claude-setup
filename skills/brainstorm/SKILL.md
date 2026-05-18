@@ -26,7 +26,7 @@ Before asking any questions, read the relevant project files to understand what 
 - `CLAUDE.md` in the project root (conventions, stack, architecture)
 - `package.json`, `requirements.txt`, or equivalent (dependencies, scripts)
 - Existing code in the area related to `$ARGUMENTS` (Grep/Glob for relevant files)
-- `.planning/SOURCES.md` if it exists (prior research on this or related topics)
+- `docs/SOURCES.md` if it exists (prior research on this or related topics)
 
 Summarise what you found in 3-5 bullet points. This grounds the conversation in reality rather than assumptions.
 
@@ -68,10 +68,7 @@ Let the user pick. Do not recommend one over the others unless asked.
 
 ### Step 4: Write Discovery Brief
 
-Once the user has chosen an approach, write a brief to the appropriate location:
-
-- If `.planning/` exists in the project root, write to `.planning/discovery/YYYY-MM-DD-<topic-slug>.md`
-- Otherwise, write to `docs/discovery/YYYY-MM-DD-<topic-slug>.md`
+Once the user has chosen an approach, write a brief to `docs/discovery/YYYY-MM-DD-<topic-slug>.md`.
 
 Create the directory if it does not exist.
 

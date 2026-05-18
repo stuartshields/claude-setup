@@ -1,11 +1,11 @@
 ---
 paths: ".claude/rules/**,.claude/hooks/**,.claude/agents/*.md,.claude/skills/**,.claude/CLAUDE.md,.claude/settings.*"
 ---
-<!-- Last updated: 2026-03-26T12:00+11:00 -->
+<!-- Last updated: 2026-05-19T12:00+10:00 -->
 
 # Harness Maintenance Protocol
 
-> Applies when modifying rules, hooks, agents, skills, settings, or global CLAUDE.md - not project work or GSD.
+> Applies when modifying rules, hooks, agents, skills, settings, or global CLAUDE.md - not project work.
 
 ## Research Before Changing
 - **IMPORTANT: Do not use training data for harness decisions.** Always validate with external sources (WebSearch/WebFetch) before modifying rules, hooks, agents, or skills. Training data is stale and may reflect outdated Claude Code behavior, deprecated APIs, or patterns that no longer apply.
