@@ -5,19 +5,9 @@ description: Global Claude Code configuration with rules, hooks, agents, and gov
 
 # Claude Code Setup
 
-This is the landing page for my Claude Code setup. The repo mirrors the global `~/.claude/` model.
+A practical Claude Code setup - rules, hooks, agents, and governance docs you can actually maintain. The repo mirrors the global `~/.claude/` model: clone it, copy the contents to `~/.claude/`, and the config applies across every project.
 
-If you want a practical setup with rules, hooks, agents, and governance docs you can actually maintain, start with the Start Here doc and follow the reading path below.
-
-## Quick Links
-
-- [Start Here](docs/start-here.md)
-- [Core Guide](docs/core-guide.md)
-- [Governance Workflow](docs/governance-workflow.md)
-- [Rules Reference](rules/README.md)
-- [Hooks Reference](hooks/README.md)
-- [Agents Reference](agents/README.md)
-- [Skills and Memory](skills/README.md)
+Start with the Start Here doc, then follow the reading path.
 
 ## Recommended Reading Path
 

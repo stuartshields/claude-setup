@@ -1,7 +1,7 @@
 ---
 title: Governance Workflow
 ---
-<!-- Last updated: 2026-05-19T12:00+10:00 -->
+<!-- Last updated: 2026-05-29T12:00+10:00 -->
 
 # Governance Workflow
 
@@ -63,7 +63,7 @@ What to check:
 
 Controls token and latency overhead from plugin sprawl. Each MCP server and plugin adds tool definitions to your context window even when unused. Plugins enabled globally in `~/.claude/settings.json` load everywhere unless disabled per-project.
 
-The current inventory lives in [docs/plugins.md](plugins.md) — that file documents each enabled plugin's use-case, the disabled-by-default exceptions, and the extra marketplaces.
+The current inventory lives in [docs/plugins.md](plugins.md) - that file documents each enabled plugin's use-case, the disabled-by-default exceptions, and the extra marketplaces.
 
 What to check:
 - Maximum plugin budget documented with rationale (see `docs/plugins.md`)
