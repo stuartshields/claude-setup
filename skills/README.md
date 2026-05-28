@@ -1,15 +1,15 @@
 ---
 title: Skills & Memory
 ---
-<!-- Last updated: 2026-05-19T14:30+10:00 -->
+<!-- Last updated: 2026-05-23T11:00+10:00 -->
 
 ## Skills
 
-> **TL;DR:** 15 skills across 3 categories:
+> **TL;DR:** 16 skills across 3 categories:
 >
 > - **Workflow skills** - `/handoff`, `/review-memory`, `/test-plan`, `/vibe-user`. Structure how you work with Claude - testing, memory management, session handover. Brainstorming and multi-agent code review are now handled by the `superpowers` plugin and the `architect-reviewer` agent respectively.
 > - **Tool skills** - `/block-journey`, `/clean-worktrees`, `/debug-rules`, `/debug-wp`, `/figma`, `/playwright`, `/qa-check`. Wrap specific tools or integrations with structured methodology.
-> - **Procedural skills** - `audit-vs-fix-discipline`, `debugging`, `tool-usage`, `swift-concurrency-review`. Auto-invoked conditional procedures. Loaded only when the situation matches their trigger, keeping the always-on instruction budget lean.
+> - **Procedural skills** - `audit-vs-fix-discipline`, `debugging`, `module-depth-review`, `swift-concurrency-review`, `tool-usage`. Auto-invoked conditional procedures. Loaded only when the situation matches their trigger, keeping the always-on instruction budget lean.
 
 ### The problem
 
@@ -49,7 +49,7 @@ If you're writing the same instructions more than twice, it's a skill. If it's a
 
 **Tool:** `block-journey`, `clean-worktrees`, `debug-rules`, `debug-wp`, `figma`, `playwright`, `qa-check`
 
-**Procedural:** `audit-vs-fix-discipline`, `debugging`, `tool-usage`, `swift-concurrency-review`
+**Procedural:** `audit-vs-fix-discipline`, `debugging`, `module-depth-review`, `swift-concurrency-review`, `tool-usage`
 
 ---
 

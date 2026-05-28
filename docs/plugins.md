@@ -1,7 +1,7 @@
 ---
 title: Plugins
 ---
-<!-- Last updated: 2026-05-19T12:00+10:00 -->
+<!-- Last updated: 2026-05-29T12:00+10:00 -->
 
 ## Plugins
 
@@ -19,11 +19,11 @@ The fix is boring: keep a list, give every plugin a reason, review on the govern
 
 #### `superpowers@claude-plugins-official`
 
-**Use-case:** workflow discipline — brainstorming → spec → plan → execution.
+**Use-case:** workflow discipline - brainstorming → spec → plan → execution.
 
 Provides the skill set this setup leans on for any non-trivial task: `superpowers:brainstorming`, `superpowers:writing-plans`, `superpowers:executing-plans`, `superpowers:subagent-driven-development`, `superpowers:systematic-debugging`, `superpowers:test-driven-development`, `superpowers:dispatching-parallel-agents`, `superpowers:using-git-worktrees`, `superpowers:requesting-code-review`, `superpowers:receiving-code-review`, `superpowers:verification-before-completion`, `superpowers:finishing-a-development-branch`, `superpowers:using-superpowers`, `superpowers:writing-skills`.
 
-The `superpowers:brainstorming` skill has a hard gate: any creative work (new features, components, behavioural changes) must go through brainstorm → design → plan before implementation. This is intentional — it's the main behavioural shift this plugin gives you.
+The `superpowers:brainstorming` skill has a hard gate: any creative work (new features, components, behavioural changes) must go through brainstorm → design → plan before implementation. This is intentional - it's the main behavioural shift this plugin gives you.
 
 Plan artifacts live in `docs/superpowers/plans/YYYY-MM-DD-<feature>.md`. Spec artifacts live in `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`. Both are committed.
 
@@ -67,13 +67,13 @@ Enables LSP-backed code navigation, diagnostics, and type information for Rust c
 
 **Status:** explicitly `false` in `settings.json`.
 
-**Why off:** the repo's `/figma` skill at `skills/figma/SKILL.md` wraps Figma MCP directly with a structured methodology (responsive gate, post-implementation spec audit). The plugin would duplicate that surface area and add tool definitions to every session — including sessions that have nothing to do with Figma.
+**Why off:** the repo's `/figma` skill at `skills/figma/SKILL.md` wraps Figma MCP directly with a structured methodology (responsive gate, post-implementation spec audit). The plugin would duplicate that surface area and add tool definitions to every session - including sessions that have nothing to do with Figma.
 
 **To enable:** flip to `true` in `~/.claude/settings.json` or in a per-project `.claude/settings.json`. The skill and plugin can coexist if you need both.
 
 ### Extra marketplaces
 
-Marketplaces registered for plugin discovery. Registering a marketplace does not install plugins from it — install is a separate step.
+Marketplaces registered for plugin discovery. Registering a marketplace does not install plugins from it - install is a separate step.
 
 #### `stuartshields/claude-co2-status-line`
 
@@ -83,7 +83,7 @@ Marketplace for the carbon-tracking status line variant used in this setup. The 
 
 1. Use `/plugin marketplace add <owner>/<repo>` to register a marketplace if needed.
 2. Use `/plugin install <plugin>@<marketplace>` to install.
-3. Edit `~/.claude/settings.json` `enabledPlugins` to toggle on or off — this is what determines whether the plugin's tools load each session.
+3. Edit `~/.claude/settings.json` `enabledPlugins` to toggle on or off - this is what determines whether the plugin's tools load each session.
 4. Add or update the entry in this file (the doc you're reading) with use-case, owner, and keep/remove decision.
 5. If disabling a plugin you previously used, scan the repo for skill references that might now resolve nowhere.
 
@@ -95,11 +95,11 @@ Plugins enabled globally load in every session. Disable per-project in `.claude/
 - The plugin overlaps with a project-specific approach you'd rather use.
 - Context budget is tight and a plugin you don't use is adding noticeable tool-definition overhead.
 
-The disable looks the same as the global one — set the entry to `false` in `enabledPlugins` in the project's `.claude/settings.json`.
+The disable looks the same as the global one - set the entry to `false` in `enabledPlugins` in the project's `.claude/settings.json`.
 
 ### Plugin-provided skills vs repo skills
 
-Plugins ship their own skills (e.g. `superpowers:brainstorming`, `claude-hud:configure`). These are separate from the 17 skills documented in [skills/README.md](../skills/README.md), which live in this repo's `skills/` directory. When you invoke a skill with a `<plugin>:<skill>` prefix, you're using a plugin-provided skill; bare names refer to the repo's own.
+Plugins ship their own skills (e.g. `superpowers:brainstorming`, `claude-hud:configure`). These are separate from the 16 skills documented in [skills/README.md](../skills/README.md), which live in this repo's `skills/` directory. When you invoke a skill with a `<plugin>:<skill>` prefix, you're using a plugin-provided skill; bare names refer to the repo's own.
 
 ---
 

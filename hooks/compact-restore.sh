@@ -2,6 +2,8 @@
 # SessionStart compact hook — reads PreCompact saved state if available,
 # otherwise rebuilds context from filesystem.
 
+source "$(dirname "${BASH_SOURCE[0]}")/restore-context-lib.sh"
+
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty')
 CWD=$(echo "$INPUT" | jq -r '.cwd // ""')
@@ -32,40 +34,7 @@ fi
 
 # Fallback: rebuild from filesystem
 PROJECT_ROOT=$(git -C "$CWD" rev-parse --show-toplevel 2>/dev/null || echo "$CWD")
-RESTORE=""
 
-CLAUDE_MD="$PROJECT_ROOT/CLAUDE.md"
-[ ! -f "$CLAUDE_MD" ] && CLAUDE_MD="$PROJECT_ROOT/.claude/CLAUDE.md"
-if [ -f "$CLAUDE_MD" ]; then
-	RESTORE="${RESTORE}PROJECT CLAUDE.md (first 50 lines):\n$(head -50 "$CLAUDE_MD")\n\n"
-fi
-
-if git -C "$PROJECT_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-	CHANGED=$(git -C "$PROJECT_ROOT" diff --name-only 2>/dev/null)
-	STAGED=$(git -C "$PROJECT_ROOT" diff --cached --name-only 2>/dev/null)
-	if [ -n "$CHANGED" ] || [ -n "$STAGED" ]; then
-		RESTORE="${RESTORE}UNCOMMITTED CHANGES:\n"
-		[ -n "$STAGED" ] && RESTORE="${RESTORE}Staged: ${STAGED}\n"
-		[ -n "$CHANGED" ] && RESTORE="${RESTORE}Modified: ${CHANGED}\n"
-		RESTORE="${RESTORE}\n"
-	fi
-
-	RECENT=$(git -C "$PROJECT_ROOT" log --oneline -3 2>/dev/null)
-	[ -n "$RECENT" ] && RESTORE="${RESTORE}RECENT COMMITS:\n${RECENT}\n\n"
-fi
-
-if [ -f "$PROJECT_ROOT/package.json" ]; then
-	BUILD=$(jq -r '.scripts.build // empty' "$PROJECT_ROOT/package.json" 2>/dev/null)
-	TEST=$(jq -r '.scripts.test // empty' "$PROJECT_ROOT/package.json" 2>/dev/null)
-	LINT=$(jq -r '.scripts.lint // empty' "$PROJECT_ROOT/package.json" 2>/dev/null)
-	if [ -n "$BUILD" ] || [ -n "$TEST" ] || [ -n "$LINT" ]; then
-		RESTORE="${RESTORE}PROJECT COMMANDS:"
-		[ -n "$BUILD" ] && RESTORE="${RESTORE} build='${BUILD}'"
-		[ -n "$TEST" ] && RESTORE="${RESTORE} test='${TEST}'"
-		[ -n "$LINT" ] && RESTORE="${RESTORE} lint='${LINT}'"
-		RESTORE="${RESTORE}\n"
-	fi
-fi
-
+RESTORE=$(build_restore_context "$PROJECT_ROOT")
 [ -n "$RESTORE" ] && printf "POST-COMPACTION CONTEXT RESTORE:\n%b" "$RESTORE"
 exit 0

@@ -47,12 +47,29 @@ Link to at least two relevant docs from this set when they apply:
 
 ## Style
 
-Match the existing tone in this repo:
+For the general rules, follow the Google, Microsoft, or GitLab developer style guides. Two kinds of files in this repo, two sets of rules on top:
 
-- plain language
-- practical examples
-- no marketing wording
-- no filler
+- **CLAUDE.md is context, not documentation.** It loads every session, so keep it lean: only what Claude can't infer from the code, and pair every prohibition with a direction ("never X; do Y instead").
+- **READMEs and docs are for humans.** Prose, tables, and worked examples belong here.
+
+**Tone**
+
+- Educational, not prescriptive. "Here's why this works", not "Do this."
+- No em-dashes. Use ` - ` (space-dash-space) for parenthetical breaks.
+- No AI filler (this ensures, leveraging, utilize, comprehensive, robust, seamless).
+- Sound like a senior dev explaining their setup to a colleague.
+
+**Structure**
+
+- Open on value, not provenance. Lead with what the reader gets, not where the code came from.
+- One concern per section. Don't restate the same list under two headings. Prerequisites collapse to a single "Requirements" block.
+- Examples past ~30 lines lift out to their own file with a 1-2 line teaser.
+- Component READMEs (agents/, hooks/, rules/, skills/) open with a `> **TL;DR:**` block of categorised bullets. Copy the format from an existing one.
+
+**Bullets and sentences**
+
+- 3-5 bullets per section. Past that, split the section or collapse bullets that restate each other.
+- One screen line per bullet. Active voice, one idea per sentence.
 
 ## Final Check Before Opening PR
 

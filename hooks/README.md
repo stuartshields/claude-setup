@@ -82,7 +82,7 @@ If you adopt this setup, change `$HOME/Personal/` to your own trusted-projects d
 
 **Agent guards:** `agent-guard-write-block.sh`, `agent-guard-readonly.sh`, `agent-guard-max-lines.sh`
 
-**Memory and session lifecycle:** `memory-review-prompt.sh`, `compact-restore.sh`, `pre-compaction-preserve.sh`, `session-cleanup.sh`
+**Memory and session lifecycle:** `memory-review-prompt.sh`, `compact-restore.sh`, `pre-compaction-preserve.sh`, `restore-context-lib.sh`, `session-cleanup.sh`. `restore-context-lib.sh` is a shared helper - both compaction hooks source its `build_restore_context` function rather than duplicating the logic.
 
 **Tracking and observability:** `posttool-dispatcher.sh`, `track-modified-files.sh`, `track-tasks.sh`, `hook-observability-summary.sh`, `log-instructions.sh`
 
